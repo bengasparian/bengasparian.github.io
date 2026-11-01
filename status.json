@@ -1,5 +1,5 @@
 {
- "date": "2026-10-31",
+ "date": "2026-11-01",
  "failing_since": null,
  "forecasts": {
   "QB": "m+r+s+e",
@@ -7,10 +7,10 @@
   "TE": "m+r+s+e",
   "WR": "m+r+s+e"
  },
- "last_good": "2026-10-31",
+ "last_good": "2026-11-01",
  "ok": true,
  "season": {
-  "asof": "2026-10-31",
+  "asof": "2026-11-01",
   "phase": "season",
   "schedule": true,
   "season": 2026
