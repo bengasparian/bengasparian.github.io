@@ -375,7 +375,8 @@
       "book": "bff",
       "n": "CeeDee Lamb",
       "pos": "WR",
-      "res": "pending"
+      "res": "void",
+      "act": null
      }
     ],
     "status": "pending"
