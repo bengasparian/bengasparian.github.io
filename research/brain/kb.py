@@ -169,4 +169,79 @@ KB = [
  ('fantasy_scoring', ['how many points does a passing td count in ppr', 'how many points is a passing touchdown in fantasy', 'how does fantasy scoring work', 'how many points per rushing yard',
                        'how many points is an interception in fantasy', 'how many points for a reception in ppr', 'what are the default fantasy scoring settings', 'how many points is a fumble in fantasy'],
   'Typical fantasy scoring: a <b>passing touchdown is 4 points</b> (6 in some leagues), 1 point per 25 passing yards, an interception -1 or -2 depending on the site; a <b>rushing or receiving touchdown is 6</b>, 1 point per 10 rushing or receiving yards, a lost fumble -2, a two-point conversion 2. Receptions add 1 point in <b>PPR</b>, 0.5 in half PPR and 0 in standard; that is the only difference between the three.'),
+ # ---------------- the analyst's playbook (Nov 2026): how to make the calls, for BFF Brain and BFF's AI
+ ('start_sit_how', ['how do i decide who to start', 'how to make start sit decisions', 'start sit advice', 'tips for start sit', 'how do you pick between two players',
+                    'tiebreakers for start sit', 'should i start the better matchup or the better player'],
+  'Start the player BFF projects higher unless something changed after the projection: a new injury report, a role change, or a teammate ruled out. '
+  'BFF\'s weekly projection already includes the Vegas implied team total, home field, rest, the opposing defense against his position and his injury-report status, so do not count the matchup twice. '
+  'When two players are within a point or two, break the tie by your week: if you expect to win, take the steadier one (lower bust chance); if you expect to lose, take the higher ceiling (boom chance).'),
+ ('close_call', ['what counts as a close call', 'is a one point difference a lot', 'how accurate are weekly projections', 'how much do projections miss by', 'how often is the projection right'],
+  'Weekly projections miss a lot: BFF\'s miss by about 4.5 PPR points per player on average (tested on 2023-2025 games it never saw), and the higher-ranked of two start/sit options outscores the other only about 63% of the time. '
+  'So a gap of a point or two is close to a coin flip; a gap of 5 or more is a clear call.'),
+ ('trade_how', ['how do i evaluate a trade', 'how to tell if a trade is fair', 'trade advice fantasy', 'should i accept a 2 for 1 trade', 'what is a 2 for 1 trade',
+                'how do i win a trade', 'what makes a good trade'],
+  'Judge a trade on the rest of the season, not one week: BFF\'s trade value and rest-of-season points are the starting point. Then check your lineup, because a trade only helps if the player you get would start for you. '
+  'In a 2-for-1, the side getting the best player usually wins: lineup spots are limited, the extra player often sits on the bench, and the other team has to drop someone. '
+  'Also weigh injuries, bye weeks and the fantasy playoff weeks (15-17 in most leagues).'),
+ ('waiver_how', ['waiver wire strategy', 'how do i decide who to pick up', 'who should i add after an injury', 'a starter got hurt who do i pick up', 'who replaces an injured starter on waivers', 'how much faab should i bid', 'faab bidding strategy', 'when should i use my waiver priority', 'who to add after an injury'],
+  'Chase role changes, not one big game: a back whose starter just got hurt, a receiver whose snaps and targets jumped. Steady usage keeps scoring; one long touchdown on low usage usually does not repeat. '
+  'With FAAB, spend big on players who could start for you the rest of the season and little on one-week fill-ins (kickers, defenses, streaming quarterbacks). Save a high waiver priority for an injury replacement who becomes a starter.'),
+ ('injury_timing', ['should i start a questionable player', 'what to do with a questionable player', 'when are inactives announced', 'game time decision fantasy', 'late game injury strategy'],
+  'Teams announce their inactive players about <b>90 minutes before kickoff</b>. For a questionable player in a late game, put him in your flex spot if you can, so a player from an even later game can replace him if he sits. '
+  'Doubtful players rarely play, and Out means he will not; never start either.'),
+ ('vegas_fantasy', ['how do vegas odds affect fantasy', 'what is an implied team total in fantasy', 'does game script matter', 'should i start players in high scoring games',
+                    'what does the over under mean for fantasy'],
+  'Fantasy points come mostly from yards and touchdowns, so players on teams Vegas expects to score a lot (a high <b>implied team total</b>) get more chances. '
+  'Big favorites tend to run more once they lead, which helps their running backs; teams expected to trail tend to throw more, which helps their quarterback and receivers. BFF builds the implied team total into every projection.'),
+ ('weather', ['does weather matter in fantasy', 'should i bench players in the snow', 'how does wind affect football', 'does rain affect fantasy football', 'cold weather fantasy'],
+  'Strong, steady wind is the weather that matters most: it hurts deep passing and long field goals. Rain and cold usually matter less than people expect, and domed stadiums are not affected. '
+  'BFF\'s projections account for domes but not for weather forecasts, so check the forecast for windy outdoor games.'),
+ ('usage_vs_points', ['what stats matter most in fantasy', 'are targets more important than touchdowns', 'why does usage matter', 'what predicts fantasy points', 'what is touchdown regression'],
+  'Usage predicts future fantasy points better than past points: targets, carries, snaps and red-zone touches repeat from week to week, while touchdowns swing a lot. '
+  'A player scoring far above what his usage is worth tends to cool off (sell high); one scoring below it tends to bounce back (buy low). BFF shows this as what his usage is worth a game.'),
+ ('usage_benchmarks', ['what is a good target share', 'how many targets is good', 'what is a good snap share', 'how much usage does a running back need'],
+  'Rough guide: a receiver earning about a quarter of his team\'s targets is getting elite usage, around 20% makes a solid starter, and under 15% is hard to trust. '
+  'For running backs, playing most of the snaps and catching passes matters as much as carries, especially in PPR.'),
+ ('rushing_qbs', ['why are rushing quarterbacks good in fantasy', 'do running quarterbacks score more fantasy points', 'are mobile quarterbacks better in fantasy'],
+  'Rushing counts more than passing in most scoring: 1 point per 10 rushing yards against 1 per 25 passing yards, and 6 points for a rushing touchdown against 4 for a passing one. '
+  'That is why quarterbacks who run are worth so much in fantasy.'),
+ ('streaming_k_dst', ['how do i stream defenses', 'which defense should i pick up', 'how to pick a kicker', 'streaming kickers', 'best way to choose a defense each week'],
+  'Stream defenses against offenses that allow sacks and turnovers, especially ones starting a backup quarterback, and when the opponent\'s implied team total is low. '
+  'For kickers, look for teams with a high implied team total whose drives tend to stall in field-goal range, and indoor or calm-weather games. BFF projects both every week.'),
+ ('playoff_prep', ['how to prepare for the fantasy playoffs', 'fantasy playoff schedule strategy', 'should i stash a handcuff for the playoffs', 'strength of schedule for fantasy playoffs'],
+  'From mid-season on, look ahead to weeks 15-17: a handcuff for your top running back is cheap insurance, and an easier schedule in those weeks is worth a little in a trade. '
+  'Use your league\'s trade deadline to fix your weakest starting spot.'),
+ ('bye_plan', ['how to handle bye weeks', 'too many players on bye', 'bye week strategy', 'what do i do when my players are on bye'],
+  'Check byes a week or two ahead. If several starters share a bye, add a fill-in early, before other teams do, or trade a bench player for a starter at that position. A player on bye scores 0, so never leave one in your lineup.'),
+ ('aging', ['what age do running backs decline', 'how does age affect fantasy value', 'when do wide receivers peak', 'dynasty age strategy', 'how long do quarterbacks last'],
+  'Running backs tend to decline earliest, often from their late 20s; receivers usually hold up a few years longer; quarterbacks can stay productive into their mid-30s. '
+  'In dynasty, a younger player holds value longer, so two players with the same points this year are not worth the same. BFF\'s values are built for this season (redraft).'),
+ ('dfs_basics', ['what is dfs', 'how does daily fantasy work', 'how do cash games work in dfs', 'what are cash games', 'dfs strategy', 'draftkings daily fantasy lineup tips', 'cash game vs gpp', 'what is a gpp', 'how do i build a dfs lineup', 'what is a dfs tournament'],
+  '<b>Daily fantasy (DFS)</b>: a new lineup each slate under a salary cap. In <b>cash games</b> (50/50s, head-to-heads) roughly half the field wins, so pick steady, high-floor players. '
+  'In <b>tournaments</b> (GPPs) only the top few percent win big, so you need upside: stacks (a quarterback with his receivers) and some players few others pick.'),
+ ('odds_math', ['how do american odds work', 'how do betting odds work', 'what do the plus and minus numbers mean in betting', 'what does plus 200 mean in betting', 'what does minus 150 mean', 'what does +150 mean', 'what does -150 mean', 'how do i convert odds to a probability', 'what is implied probability', 'what are fair odds',
+                'what is the break even percentage at -110'],
+  '<b>Minus odds</b> (-150): risk 150 to win 100; the implied chance is 150 ÷ (150 + 100) = 60%. <b>Plus odds</b> (+150): risk 100 to win 150; the implied chance is 100 ÷ (150 + 100) = 40%. '
+  'At -110 on both sides you must win 52.4% just to break even. <b>Fair odds</b> have no fee in them: BFF shows them next to its chances, and a bet has value only when your book pays more. For entertainment, 21+ where legal.'),
+ ('responsible_betting', ['is sports betting a good way to make money', 'how much should i bet', 'help with a gambling problem', 'betting bankroll advice', 'how do i stop gambling'],
+  'Bet only money you can afford to lose, set a budget before the week starts, and never chase losses: the fee in every price means most bettors lose over time. '
+  'If betting stops being fun, the National Problem Gambling Helpline is 1-800-MY-RESET (1-800-697-3738), call or text, any time, or chat at 1800myreset.org. For entertainment, 21+ where legal.'),
+ ('te_premium', ['what is te premium', 'tight end premium scoring', 'what is a te premium league'],
+  '<b>TE premium</b> gives tight ends extra points per catch (often 0.5 more, so 1.5 per catch in PPR), which makes the top tight ends more valuable compared with receivers.'),
+ ('keepers', ['how do keepers work', 'who should i keep', 'keeper league strategy', 'what does it cost to keep a player'],
+  'In keeper leagues each team keeps a few players, usually at the cost of a draft pick (often the round he was drafted in). Keep the player whose value beats the pick it costs by the most: '
+  'a breakout drafted late usually beats a star who costs a first-round pick.'),
+ ('lineup_lock', ['when do lineups lock', 'can i change my lineup after games start', 'when do i need to set my lineup', 'thursday night lineup lock'],
+  'On most platforms each player locks when his own game kicks off, so you can still change players in later games. Set Thursday and early Sunday players first, and check inactives about 90 minutes before each kickoff.'),
+ ('scoring_strategy', ['how does ppr change strategy', 'ppr vs standard strategy', 'are receivers better in ppr', 'who is better in standard scoring'],
+  'PPR adds a point per catch, so receivers and pass-catching running backs gain the most; in standard scoring, yards and touchdowns matter more, which favors goal-line backs. Half PPR sits in between. '
+  'BFF switches every projection to the scoring you pick.'),
+ ('trade_timing', ['when should i trade', 'trade deadline strategy fantasy', 'when to sell high', 'when to buy low'],
+  'Buy before the breakout: rising usage, an easier schedule ahead, or a teammate\'s injury. Sell right after a big game, especially one built on long or lucky touchdowns. '
+  'Check your league\'s trade deadline; fantasy deadlines are set by each league, often around weeks 10-12.'),
+ ('bff_ai', ['what ai does ask bff use', 'is ask bff chatgpt', 'how does bff ai work', 'does my question leave my device', 'how big is the ai download', 'what model does bff use', 'is the ai private',
+             'how do i turn on the ai', 'how do i download bffs ai', 'how do i remove the ai from my device', 'why cant i use the ai on my phone'],
+  '<b>BFF\'s AI</b> is an open model (Qwen3.5, Apache 2.0) that runs in your own browser with WebGPU through WebLLM: it downloads once (about 2.4 GB on a computer, 1.1 GB on a phone, 5.1 GB for the largest size) and then answers on your device, so your questions never leave it. '
+  'It writes from BFF\'s own numbers and every number in a reply is checked against BFF\'s data. Tap <b>Download BFF\'s AI</b> in Ask BFF to get it; <b>AI settings</b> (under the chat) change its size or remove it. '
+  'It needs a browser with WebGPU (Chrome or Edge on a computer, Chrome on Android, Safari 26 and later); where a device cannot run it, Ask BFF gives its quick answers instead.'),
 ]

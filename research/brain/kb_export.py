@@ -22,9 +22,13 @@ for i in range(M.shape[0]):
 out = {'v': list(voc), 'i': [round(float(x), 4) for x in idf], 'q': rows, 'a': [[id_, a] + list(u) for id_, qs, a, *u in KB]}
 json.dump(out, open(os.path.join(REPO, 'kb.json'), 'w'), separators=(',', ':'))
 # self-check: paraphrases should land on the right entry
-TESTS = [('how much is a safety worth', 'score_values'), ('explain nfl overtime', 'overtime'), ('whats a handcuff', 'handcuff'), 
+TESTS = [('how much is a safety worth', 'safety'), ('explain nfl overtime', 'overtime'), ('whats a handcuff', 'handcuff'), 
          ('how many teams get into the playoffs', 'playoffs'), ('what does target share mean', 'usage_terms'), ('when does the trade deadline happen', 'dates_2026'),
-         ('what is a pick 6', 'turnovers'), ('dynamic kickoff rules', 'kickoff'), ('how many players are on a practice squad', 'rosters')]
+         ('what is a pick 6', 'turnovers'), ('dynamic kickoff rules', 'kickoff'), ('how many players are on a practice squad', 'rosters'),
+         ('how should i decide between two players to start', 'start_sit_how'), ('is it worth taking a 2 for 1 trade', 'trade_how'), ('who should i add after a starter gets hurt', 'waiver_how'),
+         ('does wind hurt kickers', 'weather'), ('what does +200 mean in betting', 'odds_math'), ('i think i have a gambling problem', 'responsible_betting'),
+         ('does my question get sent anywhere', 'bff_ai'), ('when do running backs fall off with age', 'aging'), ('how do cash games work in dfs', 'dfs_basics'),
+         ('what is the trade deadline in fantasy', 'ir_slot'), ('what is a good target share for a wr', 'usage_benchmarks')]
 for q, want in TESTS:
     x = v.transform([norm(q)]); sims = (M @ x.T).toarray().ravel(); k = int(np.argmax(sims))
     print(('OK  ' if KB[E[k]][0] == want else 'MISS'), q, '->', KB[E[k]][0], round(float(sims[k]), 3))

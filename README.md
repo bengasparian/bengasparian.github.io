@@ -120,17 +120,20 @@ last good version, so the published site never breaks.
   player's fantasy points so far in a bright badge by his name, with the quarter and clock (and the row gets a green
   edge), then "Final" with his points; scored with your scoring, updated on every live poll (every 30 seconds on your
   own site during games) without redrawing the list.
-- **Ask BFF AI:** Ask BFF now talks like a person: any wording, follow-ups ("what about him next week?"), comparisons,
-  "why", small talk, all from BFF's numbers. An open AI model writes the replies (no Claude): on **BFF's AI server**
-  (OpenAI's open-weight gpt-oss-120b on Cloudflare's free tier, once you switch it on: see **Ask BFF AI** below), or the
-  **AI built into Chrome** (Gemini Nano, on desktop Chrome; nothing to set up), or the **on-device AI** a visitor can
-  turn on (an open Qwen3 model run in the browser). The page hands the model the facts
-  for the question (the players and teams asked about, with this week's projection and range, matchup, injuries, stats,
-  rest of season, trade value, prop lines, news and where they sit in your league; teams' schedules, results and
-  injuries; rankings, waiver targets, scores, your roster and best lineup, and the classic answer below), and **every
-  number in a reply is checked against those facts** before it shows: a made-up number gets one retry, then the
-  classic answer. When the AI is not available (not switched on, its free daily allowance used up, the claude.ai copy,
-  or "Classic answers only" in AI settings), the classic Ask BFF answers.
+- **BFF's AI (Ask BFF):** Ask BFF talks like a person: any wording, follow-ups ("what about him next week?"),
+  comparisons, "why", small talk, all from BFF's numbers. The AI runs **entirely on the visitor's device**: an open
+  model (Qwen3.5, Apache 2.0) that the browser downloads once and runs with WebGPU through WebLLM, sized to the device
+  (Standard 4B, 2.4 GB, on computers; Lite 2B, 1.1 GB, on phones; Max 9B, 5.1 GB, for strong computers; Mini 0.8B as a
+  fallback). Nothing typed into Ask BFF leaves the device, and there is nothing for the site owner to set up or pay.
+  The page hands the model the facts for the question (the players and teams asked about, with this week's projection
+  and range, matchup, injuries, stats, rest of season, trade value, prop lines, news and where they sit in your league;
+  teams' schedules, results and injuries; rankings, waiver targets, scores, your roster and best lineup; BFF's own call
+  on the question; and the closest entries of BFF's knowledge base, which now includes an analyst's playbook for
+  start/sit, trades, waivers, injuries, Vegas, weather, usage, streaming, byes, playoffs, aging, DFS, odds and keepers),
+  and **every number in a reply is checked against those facts** before it shows (a made-up number gets one retry, then
+  the quick answer); on start/sit questions the verdict must also match BFF's call. On fast devices the model thinks
+  hard questions through first (trades, close start/sit calls). Until a visitor downloads it, on devices that can't run
+  it (no WebGPU, the claude.ai copy), or with "Quick answers only" in AI settings, the classic Ask BFF answers.
 - **Classic Ask BFF, powered by BFF Brain, in Ben's voice:** BFF Brain is BFF's own question model, trained here and
   running inside the page (no outside AI and no key): a logistic-regression intent model over words, word pairs and letter groups (so typos still work),
   trained on about 16,200 football questions (`research/brain/`), that sorts a question into 28 kinds (start/sit,
@@ -575,41 +578,28 @@ allows.
   both with free tiers and an API key); BFF does not scrape sportsbooks.
 - `parlay_update.py` builds the best 2-, 3- and 5-pick parlays from tested picks only (one leg per game, no
   questionable players), locks them at the week's first kickoff, and grades them from official box scores.
-- For entertainment, 21+ where legal. Gambling problem? Call or text 1-800-GAMBLER.
+- For entertainment, 21+ where legal. Gambling problem? Call or text 1-800-MY-RESET (1-800-697-3738), the National Problem Gambling Helpline.
 
-## Ask BFF AI (optional; about 10 minutes, free)
-Ask BFF's smartest mode runs on **BFF's AI server**: a small program (`ai/worker.js`) on Cloudflare's free tier that runs
-an open AI model with Cloudflare Workers AI. No Claude, no OpenAI account, no cost: Cloudflare's free plan includes
-10,000 "Neurons" a day (reset at 00:00 UTC), roughly 50 to 90 questions a day with gpt-oss-120b. When they are used up
-the server says so and Ask BFF gives classic answers until the reset; nothing is ever charged on the free plan.
-1. Create a free account at [dash.cloudflare.com](https://dash.cloudflare.com/sign-up) and open **Workers & Pages**
-   once (that gives the account its `workers.dev` address).
-2. Copy your **Account ID**: on Workers & Pages, under **Account Details**, press the copy button next to Account ID
-   (or search the dashboard for "Copy account ID").
-3. Make an API token: your profile, **API Tokens**, **Create Token**, the **Edit Cloudflare Workers** template, then
-   create it and copy it.
-4. In your GitHub repository: **Settings**, **Secrets and variables**, **Actions**, **New repository secret**: add
-   `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` with the two values.
-5. **Actions**, **BFF AI server**, **Run workflow**. It deploys the server, checks that it answers, saves its address in
-   `ai.json` and rebuilds the page. Ask BFF's header then says "BFF AI".
-
-How it is kept safe and cheap: only your site's own pages may call the server (it reads the site address from the
-repository, plus `CNAME` if you use your own domain), the server adds BFF's rules itself (football only, facts only;
-the page can't change them), each address gets 12 requests a minute, messages are size-capped, and nothing is stored.
-To answer more questions a day, swap `MODEL` and `FALLBACK_MODEL` in `ai/wrangler.toml` (Qwen3 30B fits about four
-times as many) and run the workflow again. To switch the server off, delete `ai.json` (or the Worker in Cloudflare).
-**Chrome's built-in AI** needs no setup at all: on desktop Chrome 148 and later, Chrome has its own AI model (Gemini
-Nano, through the Prompt API). When it is already on the visitor's computer, Ask BFF uses it as soon as it opens; when
-Chrome has not downloaded it yet, AI settings offer to turn it on (Chrome downloads it once for every site, about 3-4
-GB). It runs on the visitor's computer, so nothing is sent anywhere. Order: BFF's AI server, then Chrome's built-in AI,
-then the on-device AI below, then the classic Ask BFF.
-**On-device AI** needs no setup: in Ask BFF's AI settings a visitor can turn it on; the browser downloads an open Qwen3
-model once (about 1 GB on phones and smaller computers, about 2.5 GB on bigger ones) and runs it with WebGPU (recent
-Chrome or Edge on a computer, Chrome on Android, Safari 26 and later). It is used when the server is not available.
-Tested: `tests/aiworker.mjs` (the server with a stand-in for Cloudflare: origins, limits, the free allowance, the
-fallback model, reply shapes) and `tests/aitest.py` (the page with a stand-in server and engine: the facts sent, the
-number check, lookups, follow-ups, the league, the fallbacks, escaping, the device check). The real models answer only
-on your site once it is switched on.
+## BFF's AI (nothing to set up)
+Ask BFF's AI runs on each visitor's own device, so there is no server, account, key or bill. In Ask BFF a visitor taps
+**Download BFF's AI**; the browser downloads WebLLM (from jsDelivr), the model's engine (GitHub) and its files (Hugging
+Face) once, keeps them in the browser's storage, and from then on loads it from the device when Ask BFF opens (it never
+downloads on its own). It needs WebGPU: recent Chrome or Edge on a computer, Chrome on Android, or Safari 26 and later.
+- **Sizes** (Qwen3.5, WebLLM 0.2.86's prebuilt models): Max 9B (5.1 GB; needs 16 GB of memory or an 8 GB graphics
+  card), Standard 4B (2.4 GB, the pick for computers), Lite 2B (1.1 GB, the pick for phones and devices reporting under
+  8 GB of memory) and Mini 0.8B (0.45 GB, if Lite can't run). Artificial Analysis rates Qwen3.5 4B and 9B well above the
+  Qwen3 models of the same size. A start that never finished (the page closed, or the device ran out of memory) waits for
+  a tap and offers a smaller size; switching size frees the old one's files; "Remove BFF's AI from this device" frees
+  them all.
+- **How it answers:** BFF's rules and playbook (how to make start/sit, trade, waiver and prop calls), the facts for the
+  question (see **BFF's AI** above), up to two recent exchanges, then the reply, streamed. "Think first" (AI settings):
+  Auto lets the 4B and 9B think through trades and close calls once the device has shown it is fast enough, Always is
+  slower and sharper, Never is fastest. Every number is checked against the facts and a start/sit verdict against BFF's
+  call (one retry each, then the quick answer).
+- Tested: `tests/aitest.py` (the page with a stand-in engine: the device check and sizes, the download with progress,
+  loading from the device next time, the crash guard, the facts and knowledge base it gets, thinking, the number and
+  verdict checks, lookups, follow-ups, the league, escaping, removing it, phones). The real model can't run on the test
+  machine (no GPU, no network to Hugging Face): it answers only in a visitor's browser.
 
 ## Updating an existing site to this version
 If Claude has access to your repository it pushes updates itself. To do it by hand, upload (replace) these files:
@@ -617,8 +607,9 @@ If Claude has access to your repository it pushes updates itself. To do it by ha
 `ff_feat.py`, `ff_model.py`, `ff_produce.py`, `fetch_data.py`, `assemble.py`, `check_page.py`, `ff_lines.py`,
 `parlay_update.py`, `calls_update.py`, `ff_news.py`, `news_update.py`, `live_update.py`, `proj_compare.py`, `ff_stack.py`, `site_stats.py`,
 `ff_kdst.py`, `game_build.py`, `game.json`, `sync_sleeper.py`, `health.py`, `requirements.txt`, `firestore.rules`, `.gitignore`, `.nojekyll`, `README.md`, the
-`research/` folder (the accuracy tests and Ask BFF's training; optional, never run by the workflows), the `ai/` folder
-(BFF's AI server), and the three workflow files in `.github/workflows/` (`update.yml`, `scores.yml`, `ai.yml`). `calls_backfill.py` is retired and can be deleted. Leave
+`research/` folder (the accuracy tests and Ask BFF's training; optional, never run by the workflows), and the two workflow
+files in `.github/workflows/` (`update.yml`, `scores.yml`). `calls_backfill.py`, the `ai/` folder and
+`.github/workflows/ai.yml` are retired and can be deleted. Leave
 your `*_history.json`, `lines.json`, `parlays.json`, `bet_inputs.json`, `articles.json`, `news.json`, `news_state.json`,
 `live.json`, `site_stats.json` and `proj_compare.json` alone; your workflows keep those up to date. Then run **Update Gridiron Fantasy** once (the first
 run builds the model's 13-season feature tables, about 6 extra minutes).
@@ -676,7 +667,7 @@ Optional: add the `ANTHROPIC_API_KEY` secret for Claude-written articles (see **
   [scoring categories](https://help.yahoo.com/kb/SLN6442.html) (what counts as points allowed). Spin Draft and kicker/D/ST
   history: nflverse weekly player stats, team stats and play-by-play. Real prop lines used to fit and check BFF's lines
   (read by hand, Oct 2026): a public props page and [scoresandodds.com](https://www.scoresandodds.com/nfl/props).
-- Ask BFF AI: [Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/) ([free allowance and prices](https://developers.cloudflare.com/workers-ai/platform/pricing/))
-  running OpenAI's open-weight [gpt-oss-120b](https://developers.cloudflare.com/workers-ai/models/gpt-oss-120b/) (and Qwen3 30B);
-  on the device, [WebLLM](https://github.com/mlc-ai/web-llm) 0.2.86 with Qwen3 4B or 1.7B.
+- BFF's AI: [WebLLM](https://github.com/mlc-ai/web-llm) 0.2.86 running [Qwen3.5](https://huggingface.co/mlc-ai) (9B, 4B, 2B
+  or 0.8B; Apache 2.0) in the browser; model comparison from [Artificial Analysis](https://artificialanalysis.ai/articles/qwen3-5-small-models).
+- Gambling help: the National Problem Gambling Helpline, [1-800-MY-RESET](https://ncpgambling.org/help-treatment/national-helpline-1-800-522-4700/).
 - BFF is not affiliated with the NFL, its teams, or any source listed here.

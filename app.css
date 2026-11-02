@@ -1927,3 +1927,9 @@ table.bx.btab td:nth-child(6){white-space:normal;min-width:160px;max-width:260px
  .bttd td:nth-child(2)::before,.bttd td:nth-child(3)::before{display:block;font:700 .68rem Inter,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);margin-bottom:1px}
  .bttd td:nth-child(2)::before{content:'Anytime TD'}.bttd td:nth-child(3)::before{content:'1st-half TD'}
 }
+/* BFF's AI (Nov 2026): the offer in the chat and the settings rows */
+.aisetup{margin-top:8px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--acc2) 45%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--acc2) 7%,transparent)}
+.aisetup p{margin:0 0 6px}.aisetup p:last-child{margin:0;display:flex;flex-wrap:wrap;gap:10px;align-items:center}.aisetup a{font-size:.78rem}
+.aiset{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}.aiset>span{font-weight:700;min-width:74px}
+.aiset select{width:auto;max-width:100%;flex:1 1 180px;font-size:.78rem;padding:5px 8px;min-height:32px}
+@media(max-width:560px){.aiset select{font-size:16px}}

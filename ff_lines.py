@@ -375,7 +375,7 @@ def build_lines(I, wk=None, teams=None):
             lines.append({'pid': p['id'], 'wk': FW, 't': p['t'], 'opp': r['opp'], 'k': kk, 'line': line, 'mm': round(float(mm), 2), 'po': round(float(po), 3),
                           'pick': pick, 'hold': hold, 'v': LV, 'kick': r['kick'], 'q': bool(p.get('inj') == 'Questionable'), 'src': src, 'mk': round(float(mk), 2 if k == 'ptd' else 1) if src == 'mkt' else None,
                           'gap': gr if src == 'mkt' else None, 'sa': round(float(sa), 1) if src == 'mkt' and k in ('py', 'ry', 'ryq') and sa is not None else None,
-                          'vol': round(float(vol), 1), 'eff': round(float(eff), 3), 'it': round(float(r['it']), 1), 'its': r['it_src'], 'bmp': round(float(r['bmp']), 1), 'pp': bool(r['last_part'])})
+                          'vol': round(float(vol), 1), 'eff': round(float(eff), 3), 'it': round(float(r['it']), 2), 'its': r['it_src'], 'bmp': round(float(r['bmp']), 1), 'pp': bool(r['last_part'])})
         lines += more_lines(r, FW, gb, gr)
     return lines
 
@@ -386,7 +386,7 @@ def more_lines(r, FW, gb, gr):
     mk = lambda k: market(r['site'], k)
     c = lambda i: sum(x[i] for x in G)                       # this season before this week (every game he played)
     base = {'pid': p['id'], 'wk': FW, 't': p['t'], 'opp': r['opp'], 'v': LV, 'kick': r['kick'], 'q': bool(p.get('inj') == 'Questionable'), 'src': 'mkt',
-            'gap': gr, 'it': round(float(r['it']), 1), 'its': r['it_src']}            # no 'pick' (never a pick), kept small: the page carries every line
+            'gap': gr, 'it': round(float(r['it']), 2), 'its': r['it_src']}            # no 'pick' (never a pick), kept small: the page carries every line
     out = []
     def add(k, line, mm, po, m_, x):
         yn = k in ('int', 'td', 'td1')                                     # yes/no: expected counts to 3 decimals, so the page's sums check out
@@ -449,7 +449,7 @@ def merge_history(new_lines, fw):
         if o_.get('v') != LV: continue   # a line from older rules: not a pulled line
         n_ = PULLED.get(pid); w_ = f"pulled: {n_[1]} ({n_[2]})" if n_ else 'line pulled (injury report or role change)'
         moves.append({'pid': pid, 'k': k, 'from': o_['line'], 'to': None, 'at': STAMP, 'why': w_})
-    sig = lambda L: sorted((l['pid'], l['k'], l['line'], round(l['po'], 2), l['q']) for l in L)
+    sig = lambda L: sorted((l['pid'], l['k'], l['line'], round(l['po'], 2), l['q'], round(l.get('it') or 0, 2)) for l in L)   # the team total shows with each line
     changed = (not old) or sig(new_lines) != sig(old.get('lines') or [])
     out = {'wk': fw, 'at': STAMP if changed else old.get('at', STAMP), 'odds_from': None, 'bt': BT, 'mkt': BT_MKT, 'more': BT_MORE, 'lines': new_lines, 'moves': moves[-60:],
            'pulled': [{'pid': k, 'h': v[1], 's': v[2]} for k, v in PULLED.items()]}

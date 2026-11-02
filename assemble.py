@@ -57,15 +57,6 @@ for _k, _f in (("brain", "brain.json"), ("kb", "kb.json")):
     if os.path.exists(_f):
         try: D[_k] = json.load(open(_f))
         except Exception as e: print(_f, "could not be read:", e)
-# BFF AI server (ai/worker.js on Cloudflare's free tier): the AI workflow writes its address to ai.json after deploying it
-# and checking that it answers; without the file Ask BFF uses the on-device AI (when a visitor turns it on) or the classic bot
-if os.path.exists("ai.json"):
-    try:
-        _ai = json.load(open("ai.json"))
-        if isinstance(_ai, dict) and _ai.get("ok") and isinstance(_ai.get("url"), str) and re.fullmatch(r"https://[A-Za-z0-9.-]+(/[A-Za-z0-9._~/-]*)?", _ai["url"]):
-            D["ai"] = {"url": _ai["url"].rstrip("/"), "model": str(_ai.get("model") or "")[:80], "at": str(_ai.get("at") or "")[:25]}
-    except Exception as e: print("ai.json could not be read:", e)
-print("BFF AI server:", D["ai"]["url"] if D.get("ai") else "not set up (ai.json missing)")
 print("accounts:", "on (Firebase project " + A["firebase"]["projectId"] + ")" if A.get("firebase") else "off (set BFF_FIREBASE to turn them on)")
 data = json.dumps(D, separators=(",", ":"), allow_nan=False).replace("</", "<\\/")
 css = open("app.css").read()
