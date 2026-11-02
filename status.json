@@ -1,16 +1,15 @@
 {
- "date": "2026-11-01",
+ "date": "2026-11-02",
  "failing_since": null,
  "forecasts": {
-  "QB": "m+r+s+e",
-  "RB": "m+r+s+e",
-  "TE": "m+r+s+e",
+  "RB": "m+r+s",
+  "TE": "m+r+s",
   "WR": "m+r+s+e"
  },
- "last_good": "2026-11-01",
+ "last_good": "2026-11-02",
  "ok": true,
  "season": {
-  "asof": "2026-11-01",
+  "asof": "2026-11-02",
   "phase": "season",
   "schedule": true,
   "season": 2026
