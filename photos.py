@@ -74,16 +74,17 @@ def filename(url):
 
 
 def wikidata_items(props, pfrs):
-    """{pfr id: {'img': Commons file or None, 'cat': the player's Commons category or None}} for BFF's players on Wikidata"""
-    out = {}
+    """{pfr id: {'img': Commons file or None, 'cat': the player's Commons category or None}} for BFF's players on Wikidata.
+    Two whole-list queries (every player with a picture; every player with a Commons category), read the same way the
+    ID is written on Wikidata ("GibbJa01" or "G/GibbJa01"), then kept for BFF's players"""
+    want = set(pfrs); out = {}
     for p in props:
-        for i in range(0, len(pfrs), 150):
-            vals = ' '.join('"' + x.replace('"', '').replace('\\', '') + '"' for x in pfrs[i:i + 150])
-            rows = sparql(f'SELECT ?id ?img ?cat WHERE {{ VALUES ?id {{ {vals} }} ?item wdt:{p} ?id . OPTIONAL {{ ?item wdt:P18 ?img . }} OPTIONAL {{ ?item wdt:P373 ?cat . }} }}')
-            for r in rows:
-                e = out.setdefault(r['id']['value'].strip(), {'img': None, 'cat': None})
-                if r.get('img') and not e['img']: e['img'] = filename(r['img']['value'])
-                if r.get('cat') and not e['cat']: e['cat'] = r['cat']['value'].strip()
+        for key, prop in (('img', 'P18'), ('cat', 'P373')):
+            for r in sparql(f'SELECT ?id ?v WHERE {{ ?item wdt:{p} ?id . ?item wdt:{prop} ?v . }}'):
+                pid = r['id']['value'].strip().split('/')[-1].replace('.htm', '')
+                if pid not in want: continue
+                e = out.setdefault(pid, {'img': None, 'cat': None})
+                if not e[key]: e[key] = filename(r['v']['value']) if key == 'img' else r['v']['value'].strip()
     return out
 
 
@@ -217,9 +218,11 @@ def main():
     wd = {p['id']: items.get(p.get('pfr')) or {} for p in P}
     print(f"BFF players: {len(P)}; on Wikidata: {sum(1 for e in wd.values() if e)}; with a Wikidata picture: {sum(1 for e in wd.values() if e.get('img'))};"
           f" with a Commons category: {sum(1 for e in wd.values() if e.get('cat'))}")
+    if want and not any(wd.values()):   # (Nov 3 2026: a query in the wrong ID format matched nobody)
+        raise SystemExit('Wikidata matched none of BFF\'s players; keeping the current photos')
     info = commons_info(sorted({e['img'] for e in wd.values() if e.get('img')}))
     names_ = [' '.join(norm(p['n'])) for p in P]; others = set(names_); dup = {n for n in others if names_.count(n) > 1}
-    cred = {}; kept = new = skipped = 0; reasons = {}; via = {}
+    cred = {}; kept = new = skipped = 0; reasons = {}; via = {}; staged = []   # (new files are written as .new and kept only if the run is sound)
     count = lambda k: reasons.__setitem__(k, reasons.get(k, 0) + 1)
     usable = lambda x: bool(x and x.get('thumb') and free_license(x) and str(x.get('mime') or '').startswith('image/'))
 
@@ -235,7 +238,7 @@ def main():
             raw = raw or get(x['thumb'])
             if face is None:   # (a Wikidata picture: framed around the face when exactly one shows, else top-centered)
                 fs = faces(raw); face = fs[0] if fs and len(fs) == 1 else None
-            crop_save(raw, path, face); cred[g] = entry; new += 1; via[how] = via.get(how, 0) + 1; time.sleep(.5); return True
+            crop_save(raw, path + '.new', face); staged.append(g); cred[g] = entry; new += 1; via[how] = via.get(how, 0) + 1; time.sleep(.5); return True
         except Exception as e:
             skipped += 1; print('could not save', g, x.get('page'), str(e)[:100]); return False
 
@@ -276,8 +279,13 @@ def main():
             if len(fs) == 1: done = save(g, fi[f], how, raw, fs[0]); break
             time.sleep(.3)
         if not done: count('no photo verifiably of him alone')
-    # players no longer in BFF keep their photo for 60 days
     wanted = {p['id'] for p in P}
+    before = sum(1 for g in (old.get('p') or {}) if g in wanted)
+    if before >= 50 and sum(1 for g in cred if g in wanted) < .85 * before and not DRY:   # a fault, not 15% of licenses changing in a week
+        for g in staged: os.remove(os.path.join(OUT, g + '.webp.new'))
+        raise SystemExit(f'photos would drop from {before} to {sum(1 for g in cred if g in wanted)}; keeping the current photos (nothing saved)')
+    for g in staged: os.replace(os.path.join(OUT, g + '.webp.new'), os.path.join(OUT, g + '.webp'))
+    # players no longer in BFF keep their photo for 60 days
     for g, o in (old.get('p') or {}).items():
         if g in cred or g in wanted: continue
         try: age = (NOW.date() - datetime.date.fromisoformat(o.get('seen') or '2000-01-01')).days
