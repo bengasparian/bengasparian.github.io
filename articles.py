@@ -993,7 +993,9 @@ def write_breaking(p, ev, key):
                     "BFF's projections, rankings and trade values already reflect this, or will after the next data update (every 3 hours)."]))
     dek = f"{what}. Who benefits on the {tm_name(p['t'])}, waiver moves and what to do with your lineup."
     src = ([{'s': ev['src'], 'u': ev['url']}] if ev.get('url') else []) + [{'s': 'BFF projections and depth charts (nflverse)', 'u': ''}]
-    return dict(kind='breaking', title=title, dek=dek, body=body, players=uniq([p] + tm), teams=[p['t']], wk=w, img={'k': 'player', 'pid': p['id']}, src=src), None
+    art = dict(kind='breaking', title=title, dek=dek, body=body, players=uniq([p] + tm), teams=[p['t']], wk=w, img={'k': 'player', 'pid': p['id']}, src=src)
+    if ev.get('nh'): art['nh'] = ev['nh']   # the report it came from, so a later check can still read it after it leaves the news feed
+    return art, None
 
 
 SEASON_RE = re.compile(r"\b(out for (the )?((rest|remainder) of (the )?)?(season|year)|season[- ]ending|(miss|misses|missing|sit out) (the )?((rest|remainder) of (the )?)?(season|year)(?!\s*(opener|finale|debut))|done for the (season|year))\b", re.I)
@@ -1029,20 +1031,26 @@ def breaking_events():
             m = re.search(r'\(([^)]+)\)', x); E.append(dict(p=p, kind=d['st'].lower(), why=m.group(1) if m else None, src='the official injury report', at=pdt(d.get('d')) or built))
         elif d['k'] == 'move' and re.search(r'\btrade', x, re.I): E.append(dict(p=p, kind='traded', why=None, src='official roster data (nflverse)', at=pdt(d.get('d')) or built))
         elif d['k'] == 'move' and re.search(r'releas|waiv|cut', x, re.I): E.append(dict(p=p, kind='released', why=None, src='official roster data (nflverse)', at=pdt(d.get('d')) or built))
-    INGAME = re.compile(r"\b(remainder|rest of (the )?(game|day|contest|half)|won't return|will not return|(questionable|doubtful|unlikely) to return|ruled out (of|for) (the |today's |sunday's |monday's |thursday's )?game)", re.I)
     for h in NEWS.get('items') or []:
-        if h.get('st') != 'out': continue
-        if INGAME.search(h.get('h', '')) and not re.search(r'season', h.get('h', ''), re.I): continue   # hurt during a game: not a status for the next one
-        if SPEC_RE.search(h.get('h', '')): continue   # "could miss the season": wait for the confirmation
-        # only the player the "out" is about ("Saquon Barkley set to play, DeVonta Smith ruled out": Smith)
-        who = h.get('so') if 'so' in h else (h.get('p') if len(h.get('p') or []) == 1 else [])
-        for pid in who or []:
+        if h.get('st') not in ('out', 'doubtful'): continue
+        hl = h.get('h', '')
+        if INGAME_RE.search(hl) and not re.search(r'season', hl, re.I): continue   # hurt during a game: not a status for the next one
+        if SPEC_RE.search(hl): continue   # "could miss the season": wait for the confirmation
+        nh = {k: h[k] for k in ('h', 'd', 's', 'u', 'p', 'so', 'sd', 'sk') if k in h}   # the report, kept with the story
+        # only the player the "out" is about ("Saquon Barkley set to play, DeVonta Smith ruled out": Smith); "doubtful" is
+        # its own status ("Emeka Egbuka considered doubtful": not ruled out)
+        if 'so' in h: who = [(pid, 'out') for pid in h.get('so') or []] + [(pid, 'doubtful') for pid in h.get('sd') or []]
+        else: who = [(h['p'][0], 'out')] if len(h.get('p') or []) == 1 and h.get('st') == 'out' else []
+        for pid, st_ in who:
             p = PI.get(pid)
             if rel(p) and not kicked(p):
-                k = 'season' if SEASON_RE.search(h.get('h', '')) else 'ir' if re.search(r'\b(ir|injured reserve)\b', h.get('h', ''), re.I) else 'out'
-                if k == 'out' and stale(p, pdt(h.get('d'))): continue   # about a game already played (or in progress), not his next one
-                dx = DIAG_RE.search(h.get('h', ''))
-                E.append(dict(p=p, kind=k, why=dx.group(3).strip() if dx else None, src=h.get('s') or 'news reports', url=h.get('u') or '', at=pdt(h.get('d')) or NOW))
+                k = 'doubtful' if st_ == 'doubtful' else 'season' if SEASON_RE.search(hl) else 'ir' if re.search(r'\b(ir|injured reserve)\b', hl, re.I) else 'out'
+                if k in ('out', 'doubtful'):
+                    if stale(p, pdt(h.get('d'))): continue   # about a game already played (or in progress), not his next one
+                    mw = re.search(r'\bweek (\d+)', hl, re.I)
+                    if mw and int(mw.group(1)) != p.get('nw'): continue   # "ruled out against the Dolphins in week 7": not his next game
+                dx = DIAG_RE.search(hl)
+                E.append(dict(p=p, kind=k, why=dx.group(3).strip() if dx else None, src=h.get('s') or 'news reports', url=h.get('u') or '', at=pdt(h.get('d')) or NOW, nh=nh))
     E = [e for e in E if e['at'] and NOW - e['at'] < datetime.timedelta(hours=48)]
     rank = {'season': -1, 'ir': 0, 'traded': 1, 'released': 2, 'out': 3, 'doubtful': 4, 'activated': 5}; best = {}
     for e in E:
@@ -1079,37 +1087,50 @@ def boxed(gs):
     """every game has a box score (live, or the official stats the morning after)"""
     return all(box_rows(g) for g in gs)
 SPEC_RE = re.compile(r"\b(could|may|might|if|would|possibly|potentially|considering|weighing|fears?|feared)\b", re.I)   # not confirmed yet
+INGAME_RE = re.compile(r"\b(remainder|rest of (the )?(game|day|contest|half)|won't return|will not return|(questionable|doubtful|unlikely) to return|ruled out (of|for) (the |today's |sunday's |monday's |thursday's )?game)", re.I)   # hurt during a game
 
 
 def correct_breaking():
     """a breaking story that turned out wrong becomes a correction under the same link: a player "ruled out" for a week he
     then played, "done for the season" before he played again, or (November 2026 checks) a "ruled out" that was about
-    another player in the headline or about a game already under way"""
+    another player in the headline, about a game already under way or played, about another week, a "doubtful" told as
+    "ruled out", or "out for the season" from a report that only said he could be. The report is read from the news feed,
+    or from the copy kept with the story (nh) once it has left the feed."""
     byu = {h.get('u'): h for h in NEWS.get('items') or [] if h.get('u')}; n_ = 0
     for a in ARTS.values():
         if a.get('kind') != 'breaking' or a.get('fix'): continue
-        m = re.search(r'brk-(\d{2}-\d{7})-(out|doubtful|season)\b', a.get('id') or '')
+        m = re.search(r'brk-(\d{2}-\d{7})-(out|doubtful|season)\b', a.get('key') or '') or re.search(r'brk-(\d{2}-\d{7})-(out|doubtful|season)\b', a.get('id') or '')
         p = PI.get(m.group(1)) if m else None
         if not p: continue
         kind, w, pub = m.group(2), a.get('wk'), pdt(a.get('pub'))
         played = {r[0] for r in p.get('gl') or [] if any(v for v in r[1:])}   # weeks he took the field with a stat
-        why = None
-        if kind in ('out', 'doubtful') and w in played: why = f"{p['n']} played in week {w}"
-        elif kind == 'season' and pub:
-            later = [y[0] for y in (D.get('sched') or {}).get(p['t']) or [] if len(y) > 5 and y[5] and pdt(y[5]) and pdt(y[5]) > pub and y[0] in played]
+        u = next((x.get('u') for x in a.get('src') or [] if x.get('u')), None)
+        h = byu.get(u) or (a.get('nh') if (a.get('nh') or {}).get('u') == u else None)
+        hl = (h or {}).get('h') or ''; at = pdt(h.get('d')) if h else None; src = (h or {}).get('s') or 'news'
+        why = None; verdict = 'That was wrong'
+        said_at = max([t for t in (pub, at) if t], default=None)   # a story rewritten in place for the season news: from its report
+        if kind == 'out' and w in played: why = f"{p['n']} played in week {w}"
+        elif kind == 'season' and said_at:
+            later = [y[0] for y in (D.get('sched') or {}).get(p['t']) or [] if len(y) > 5 and y[5] and pdt(y[5]) and pdt(y[5]) > said_at and y[0] in played]
             if later: why = f"{p['n']} played again in week {later[0]}"
-        if not why and kind == 'out':
-            u = next((x.get('u') for x in a.get('src') or [] if x.get('u')), None); h = byu.get(u); at = pdt(h.get('d')) if h else None
-            if h and 'so' in h and p['id'] not in h['so']: why = f"the report it was based on ({h.get('s') or 'news'}) did not say {p['n']} was out"
-            elif h and at and pub:
-                g_ = next((y for y in (D.get('sched') or {}).get(p['t']) or [] if len(y) > 5 and y[5] and pdt(y[5]) and at - datetime.timedelta(hours=8) <= pdt(y[5]) <= pub), None)
-                if g_ and g_[0] != w: why = f"the report it was based on ({h.get('s') or 'news'}) was about his week {g_[0]} game against the {tm_name(g_[1])}, not week {w}"
+        if not why and kind == 'season' and h and SPEC_RE.search(hl) and 'for the season' not in (p.get('injn') or ''):
+            ir = any(b.get('kind') == 'breaking' and str(b.get('key', '')).startswith(f"brk-{p['id']}-ir") for b in ARTS.values())
+            why = f"the report it was based on ({src}) said the injury could end his season, which is not a confirmation" + ("; he is headed to injured reserve, which means at least four games" if ir else '')
+            verdict = 'That was premature'
+        if not why and kind == 'out' and h:
+            mw = re.search(r'\bweek (\d+)', hl, re.I)
+            g_ = next((y for y in (D.get('sched') or {}).get(p['t']) or [] if at and pub and len(y) > 5 and y[5] and pdt(y[5]) and at - datetime.timedelta(hours=8) <= pdt(y[5]) <= max(pub, at)), None)
+            if 'so' in h and p['id'] not in (h.get('so') or []):
+                why = f"the report it was based on ({src}) said {p['n']} was doubtful, not ruled out" if p['id'] in (h.get('sd') or []) else f"the report it was based on ({src}) did not say {p['n']} was out"
+            elif mw and int(mw.group(1)) != w: why = f"the report it was based on ({src}) was about week {mw.group(1)}, not week {w}"
+            elif g_ and g_[0] != w: why = f"the report it was based on ({src}) was about his week {g_[0]} game against the {tm_name(g_[1])}, not week {w}"
+            elif g_ and pdt(g_[5]) <= at or INGAME_RE.search(hl): why = f"the report it was based on ({src}) was about an injury during his week {g_[0] if g_ else w} game, which was already under way"
         if not why: continue
         said = f"had been ruled out for week {w}" if kind == 'out' else f"was doubtful for week {w}" if kind == 'doubtful' else 'was out for the season'
-        a.update(title=f"Correction: {poss(p['n'])} {'status' if kind == 'season' else f'week {w} status'}", dek=f"An earlier version of this story said {p['n']} {said}. That was wrong.",
-                 body=[['p', f"An earlier version of this story said {p['n']} {said}. That was wrong: {why}."],
+        a.update(title=f"Correction: {poss(p['n'])} {'status' if kind == 'season' else f'week {w} status'}", dek=f"An earlier version of this story said {p['n']} {said}. {verdict}.",
+                 body=[['p', f"An earlier version of this story said {p['n']} {said}. {verdict}: {why}."],
                        ['p', f"For {poss(p['n'])} current status, see his player card, which follows the official injury report. BFF's breaking-news check now ties a status to the player the headline names and to the game it is about, and waits for confirmation when a report only says what could happen."]],
-                 fix=1, upd=iso(NOW), notes=[[iso(NOW), 'Corrected: the original story was wrong (see above).']] + list(a.get('notes') or [])[:4])
+                 fix=1, upd=iso(NOW), notes=[[iso(NOW), 'Corrected: the original story was wrong (see above).' if verdict == 'That was wrong' else 'Corrected: the original story went further than its source (see above).']] + list(a.get('notes') or [])[:4])
         print('corrected', a['id'], '|', why); n_ += 1
     return n_
 

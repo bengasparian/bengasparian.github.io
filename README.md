@@ -244,7 +244,12 @@ a year) is optional; AdSense works with the `github.io` address as above.
   return curve (39% the next week, 69% after two, 85% after three, about 90% later) or the injured-reserve minimum. When
   the official report does not list a player for his next game yet, a timeline reported in the news ("out at least
   three weeks", "out for the season") keeps him out until his team's game that many weeks after the story (labeled
-  "expected from news reports"); a headline that says he is playing is never read as an absence.
+  "expected from news reports"); a report that he is headed to injured reserve counts as the league's 4-game minimum,
+  and "out indefinitely" or "expected to miss an extended period" as out for his next game (then the return curve). A
+  report that only says what could happen ("could miss the rest of the season") is shown as questionable, "not
+  confirmed", and does not change his projection. These timelines are kept in `news_state.json`, because a story
+  leaves the news feed within a day or two; a later report that he is playing ends one. A headline that says he is
+  playing is never read as an absence.
 - **Who is in the player pool:** players on an NFL team (active, reserve, inactive, practice squad or exempt on the
   newest weekly roster, then the season roster, then the depth charts), plus this year's rookies picked in the top 100.
   A player on the **commissioner's exempt list** is projected 0 and shown as "not allowed to play", until a news report
@@ -347,14 +352,22 @@ recaps still in their window.
 - **Updated as news breaks:** outlooks and the injury report are rewritten when their facts change, with an "Updated:"
   note saying what changed. Recaps and breaking stories are written once.
 - **Breaking news is checked before it runs:** a status counts only for the player the headline names ("Saquon Barkley
-  set to play, DeVonta Smith ruled out" is about Smith), a "ruled out" from during a game is about that game (not the
-  next one), a report that only says what could happen waits for confirmation, news counts only if it is under 48 hours
-  old and first seen in the last 6 hours, at most 3 breaking stories a run and 12 a day.
+  set to play, DeVonta Smith ruled out" is about Smith; in "DeVonta Smith, Dontayvion Wicks ruled out" both are out),
+  "doubtful" is its own status (never written as "ruled out"), a "ruled out" from during a game is about that game (not
+  the next one), a report that names another week is about that week, a report that only says what could happen waits
+  for confirmation, news counts only if it is under 48 hours old and first seen in the last 6 hours, at most 3 breaking
+  stories a run and 12 a day.
 - **Corrections:** a breaking story that turns out wrong (a player "ruled out" for a week he then played, "done for the
   season" before he played again, or a story the checks above would now stop) is replaced by a correction under the
   same link, saying what was wrong. In November 2026 this corrected the stories written before the checks existed (the
   old tagging applied one player's status to everyone in a headline, and read in-game rulings as next week's; in a test
   on the site's own articles it found nine, among them Saquon Barkley and Puka Nacua "ruled out" for weeks they played).
+  Each story keeps a copy of the report it came from, so the check still works after the report leaves the news feed.
+  A second check on November 3, with the reports recovered from the site's history, corrected eight more: reports about
+  week 7 and 8 games written up as the next week (Tyler Huntley, Hunter Henry, Jake Ferguson and Rashid Shaheed, hurt
+  during those games, and Breece Hall twice), Emeka Egbuka's "doubtful" written as "ruled out", and Lamar Jackson "done
+  for the season" from a report that said the injury could end his season (he went to injured reserve, at least four
+  games).
 - **Injuries are named by their source:** an official listing by its name ("questionable"); BFF's own estimate between
   reports by what really happened ("missed week 6, status not set yet"), so it never reads like an official listing.
 - Articles older than 21 days are cleared. A failure here never stops scores, news or the page from saving.
@@ -429,6 +442,18 @@ point, not legal advice: have a lawyer review them if the site grows.
   cached between runs; after that each run downloads only the last five seasons. The score job downloads the season's
   stats and play-by-play only when a finished game still lacks its box score or scoring plays.
 - **Prop lines close at kickoff:** a game's lines leave the betting page and Ask BFF the moment it kicks off.
+- **When GitHub runs the schedule late:** GitHub starts scheduled workflows on a best-effort basis and can delay or
+  drop runs when it is busy. From October 31 to November 3, 2026 the 30-minute job ran only every 3½ to 10 hours and
+  the 3-hour job every 5 to 13 hours. Nothing breaks (each run catches up on everything since the last), but news, breaking
+  stories and scores arrive later. A free fix, if you want runs on time (about 5 minutes, optional):
+  1. On GitHub: **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+     Repository access: only `bff`. Permissions: **Actions: Read and write** (nothing else). Copy the token.
+  2. Make a free account at [cron-job.org](https://cron-job.org) and create a job every 30 minutes (at 4 and 34 past)
+     that sends **POST** to `https://api.github.com/repos/bengasparian/bff/actions/workflows/scores.yml/dispatches`
+     with the headers `Authorization: Bearer <your token>` and `Accept: application/vnd.github+json`, and the body
+     `{"ref":"main"}`. Optionally a second job every 3 hours (23 past) for `update.yml`.
+  3. GitHub answers **204** when it worked; the run shows under **Actions** as "workflow_dispatch". The workflows share
+     one queue, so an extra start never runs twice at once; if the token ever expires, the schedule still runs as before.
 
 ## Predicted prop lines (`ff_lines.py`)
 BFF predicts where books will post each line, from its own numbers only. These are predictions, not picks: BFF makes

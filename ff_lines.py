@@ -188,8 +188,9 @@ def news_status(I):
         last[p['id']] = k
     st = {}
     for it in sorted(N, key=lambda x: x.get('d') or ''):
-        if it.get('st') not in ('out', 'ok') or INGAME.search(it.get('h') or ''): continue
-        tag = [(pid, 'out') for pid in it.get('so') or []] + [(pid, 'ok') for pid in it.get('sk') or []]
+        if it.get('st') not in ('out', 'doubtful', 'ok') or INGAME.search(it.get('h') or ''): continue
+        # doubtful (most doubtful players sit) pulls his lines too, until a report says he is playing
+        tag = [(pid, 'out') for pid in (it.get('so') or []) + (it.get('sd') or [])] + [(pid, 'ok') for pid in it.get('sk') or []]
         if 'so' not in it and 'sk' not in it and len(it.get('p') or []) == 1: tag = [(it['p'][0], it['st'])]   # tagged before Nov 2026
         for pid, s_ in tag:
             # news from his last game or the 8 hours after its kickoff is about that game ("ruled out with an ankle injury
@@ -351,7 +352,7 @@ def merge_history(new_lines, fw):
     except Exception: pass
     key = lambda l: (l['pid'], l['k'], l.get('wk', fw))
     prev = {key(l): l for l in old.get('lines') or []}
-    moves = list(old.get('moves') or [])
+    moves = [m for m in old.get('moves') or [] if m.get('v') == LV]   # moves under older rules (before Nov 2026: reasons from other sites' projections) are dropped
     for l in new_lines:
         o = prev.get(key(l))
         if o and o.get('v') != LV: o = None   # a line from older rules (before the Oct 25 2026 refit): it reopens rather than counting as a move
@@ -361,16 +362,16 @@ def merge_history(new_lines, fw):
         l['open'], l['opened'], l['mv'] = o.get('open', o['line']), o.get('opened', old.get('at', STAMP)), list(o.get('mv') or [])
         if l['line'] != o['line']:
             w = why(o, l); l['mv'].append([STAMP, o['line'], l['line'], w])
-            moves.append({'pid': l['pid'], 'k': l['k'], 'from': o['line'], 'to': l['line'], 'at': STAMP, 'why': w})
+            moves.append({'pid': l['pid'], 'k': l['k'], 'from': o['line'], 'to': l['line'], 'at': STAMP, 'why': w, 'v': LV})
     now_keys = {key(l) for l in new_lines}
     for kk_ in [k_ for k_ in prev if k_ not in now_keys]:
         pid, k, wk_ = kk_; o_ = prev[kk_]
         if o_.get('kick') and _dt(o_['kick']) and _dt(o_['kick']) <= NOW: continue   # the game started: not a pulled line
         if o_.get('v') != LV: continue   # a line from older rules: not a pulled line
         n_ = PULLED.get(pid); w_ = f"pulled: {n_[1]} ({n_[2]})" if n_ else 'line pulled (injury report or role change)'
-        moves.append({'pid': pid, 'k': k, 'from': o_['line'], 'to': None, 'at': STAMP, 'why': w_})
+        moves.append({'pid': pid, 'k': k, 'from': o_['line'], 'to': None, 'at': STAMP, 'why': w_, 'v': LV})
     sig = lambda L: sorted((l['pid'], l['k'], l['line'], round(l['po'], 2), l['q'], round(l.get('it') or 0, 2)) for l in L)   # the team total shows with each line
-    changed = (not old) or sig(new_lines) != sig(old.get('lines') or [])
+    changed = (not old) or sig(new_lines) != sig(old.get('lines') or []) or moves[-60:] != (old.get('moves') or [])
     out = {'wk': fw, 'at': STAMP if changed else old.get('at', STAMP), 'odds_from': 'nflverse schedule', 'bt': BT, 'real': BT_BFF, 'more': BT_MORE, 'lines': new_lines, 'moves': moves[-60:],
            'pulled': [{'pid': k, 'h': v[1], 's': v[2]} for k, v in PULLED.items()]}
     return out, changed

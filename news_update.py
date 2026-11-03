@@ -26,9 +26,11 @@ SOURCES = [   # name, feed, homepage, kind, keep(link, title)
 ]
 ON = (os.environ.get('BFF_NEWS_LINKS') or 'on').strip().lower() not in ('off', '0', 'no', 'false')
 COLLEGE = re.compile(r'\b(college football|cfb|ncaa|heisman|big ten|big 12|\bsec\b|\bacc\b|cfp|recruit|bowl game|draft prospect|mock draft 20\d\d|top 25)\b', re.I)
-OUT_RE = re.compile(r"(ruled out|won't play|will not play|will miss|expected to miss|out for (the )?(season|year|week|game|\w+ weeks?)|out indefinitely|season[- ]ending|"
+OUT_RE = re.compile(r"(ruled out|(?<!n't )(?<!not )(?<!cannot )\brules? out\b|won't play|will not play|will miss|expected to miss|out for (the )?(season|year|week|game|\w+ weeks?)|out indefinitely|season[- ]ending|"
                     r"(miss|misses|missing|out for) (the )?(rest|remainder) of (the )?(season|year)|done for the (season|year)|"
-                    r"placed on (ir|injured reserve)|lands on (ir|injured reserve)|to (ir|injured reserve)\b|inactive for|doubtful (for|to play))", re.I)
+                    r"placed on (ir|injured reserve)|lands on (ir|injured reserve)|to (ir|injured reserve)\b|inactive for)", re.I)
+DOUBT_RE = re.compile(r"\bdoubtful\b(?!\s+to return)", re.I)
+QUES_RE = re.compile(r"\b(questionable|probable|game[- ]time decision)\b(?!\s+to return)", re.I)   # doubtful is not out: "Emeka Egbuka considered doubtful for week 7"
 OK_RE = re.compile(r"(cleared to play|will play|set to play|activated from|returns? to practice|full participant|no injury designation|good to go|ready to go|ready to play|expected to play|\bactive\b|will suit up)", re.I)
 CLAUSE = re.compile(r"\s*(?:[,;|]|\s[-\u2013\u2014]\s|\bbut\b|\bwhile\b|\bas\b|\bafter\b)\s*", re.I)   # headline clauses
 CONT = re.compile(r"(headed|heads|placed|lands|going|goes|expected|will|set|ruled|done|out)\b", re.I)   # a clause that carries on about the same player
@@ -82,20 +84,38 @@ def tag(it, idx, now):
     it['c'] = 'inj' if INJ_RE.search(h) else 'tx' if TX_RE.search(h) else 'bet' if BET_RE.search(h) else 'fan' if FAN_RE.search(h) else 'news'
     # the status applies to the player named in the same clause ("Saquon Barkley set to play, DeVonta Smith ruled out": only
     # Smith is out; "Puka Nacua active, Trent McDuffie inactive": nobody BFF ranks is out)
-    for k in ('st', 'so', 'sk'): it.pop(k, None)
-    so, sk = [], []
+    for k in ('st', 'so', 'sd', 'sk'): it.pop(k, None)
+    so, sd, sk = [], [], []
     if it['p']:
-        hits = [(rx, pid) for rx, pid in idx if pid in it['p']]; prev = []
+        hits = [(rx, pid) for rx, pid in idx if pid in it['p']]; prev = []; pend = []; lead = None
+        out_ = {'out': so, 'doubtful': sd, 'ok': sk}
         for part in CLAUSE.split(h):
-            ids = [pid for rx, pid in hits if rx.search(part or '')]
-            if not ids and prev and CONT.match(part or ''): ids = prev   # "Lamar Jackson needs thumb surgery, headed to injured reserve"
-            if not ids: prev = []; continue
-            if OUT_RE.search(part) and not OK_RE.search(part): so += ids; prev = []
-            elif OK_RE.search(part): sk += ids; prev = []
-            else: prev = ids
+            part = part or ''
+            ids = [pid for rx, pid in hits if rx.search(part)]
+            if not ids and prev and CONT.match(part): ids = prev   # "Lamar Jackson needs thumb surgery, headed to injured reserve"
+            s_ = ('out' if OUT_RE.search(part) and not OK_RE.search(part) else 'doubtful' if DOUBT_RE.search(part) and not OK_RE.search(part)
+                  else 'ok' if OK_RE.search(part) else 'q' if QUES_RE.search(part) else None)
+            if not s_:
+                if not ids: prev = []; pend = []; lead = None; continue
+                rest = part
+                for rx, pid in hits: rest = rx.sub(' ', rest)
+                if lead and len(re.findall(r"[A-Za-z]+", re.sub(r"\b(and|plus)\b", ' ', rest, flags=re.I))) <= 1:
+                    if lead in out_: out_[lead] += ids   # "Cardinals rule out Jeremiyah Love, Bam Knight, Kendrick Bourne"
+                    continue
+                lead = None; pend += [i for i in ids if i not in pend]; prev = ids; continue
+            # a status covers this clause's players and the names listed just before it ("DeVonta Smith, Dontayvion Wicks
+            # ruled out"; "Mike Evans, Nick Bosa among several 49ers ruled out"); "questionable" is a status BFF does not tag
+            if s_ in out_: out_[s_] += ids + [i for i in pend if i not in ids]
+            first = min((m.start() for rx, pid in hits for m in [rx.search(part)] if m), default=None)
+            sm = (OUT_RE if s_ == 'out' else DOUBT_RE if s_ == 'doubtful' else OK_RE if s_ == 'ok' else QUES_RE).search(part)
+            lead = s_ if ids and first is not None and sm and sm.start() < first else None   # the status comes before the names
+            pend = []; prev = []
     if it['p']: it['so'] = sorted(set(so))   # who the "out" is about (empty: nobody BFF ranks)
+    sd = sorted(set(sd) - set(so))   # (sd: doubtful, not ruled out)
     if so: it['st'] = 'out'
+    elif sd: it['st'] = 'doubtful'
     elif sk: it['st'] = 'ok'
+    if sd: it['sd'] = sd
     if sk: it['sk'] = sorted(set(sk))
     return it
 

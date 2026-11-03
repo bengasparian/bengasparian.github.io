@@ -248,35 +248,67 @@ _REIN=_re.compile(r"\b(reinstat\w*|removed? from (the )?(commissioner'?s )?exemp
 try: _NST=json.load(open('news_state.json')) if os.path.exists('news_state.json') else {}
 except Exception: _NST={}
 _RI={pid_:(pd.Timestamp(v_['d']),v_['s']) for pid_,v_ in (_NST.get('reinstated') or {}).items() if pid_ in EXEMPT}
+# November 2026: a report of injured reserve ("to be placed on IR", "will land on IR") is at least 4 games, the league's
+# minimum; "out indefinitely" / "expected to miss an extended period" is out for his next game (then the measured return
+# curve); "could be out for the season" is not a confirmation: noted as questionable, and never replaces a confirmed
+# report. The timelines are kept in news_state.json, because a story leaves the news feed within a day or two (Nov 3:
+# Lamar Jackson's "to be placed on IR" had no timeline BFF could read, the report before it had left the feed, and he
+# showed with no status)
+_SPEC=_re.compile(r"\b(could|may|might|if|would|possibly|potentially|considering|weighing|fears?|feared)\b",_re.I)
+_TLIR=_re.compile(r"\b(placed on|land(?:s|ing)? on|go(?:es|ing)? on|head(?:s|ed|ing)? to|to) (?:the )?(?:ir|injured reserve)\b",_re.I)
+_TLIND=_re.compile(r"\b(out indefinitely|(?:miss|misses|missing) (?:an? )?(?:extended|significant|extensive|lengthy) (?:period|time|stretch|amount)|extended absence)\b",_re.I)
 NEWS_TL=0
+_now=pd.Timestamp.now(tz='UTC'); _TL={}
+for pid_,v_ in (_NST.get('tl') or {}).items():
+    try:
+        d_=pd.Timestamp(v_['d'])
+        if (_now-d_).days<=(200 if v_['n']>=99 else 35): _TL[pid_]=(int(v_['n']),d_,v_['s'],v_.get('hi'),v_.get('k','weeks'),bool(v_.get('spec')))
+    except Exception: pass
 try:
     _nj=json.load(open('news.json')) if os.path.exists('news.json') else {}
-    _now=pd.Timestamp.now(tz='UTC'); _TL={}
     for it_ in sorted(_nj.get('items') or [],key=lambda x:str(x.get('d') or '')):
         h_=str(it_.get('h') or ''); d_=pd.to_datetime(it_.get('d'),utc=True,errors='coerce'); P_=it_.get('p') or []
         if len(P_)!=1 or pd.isna(d_) or (_now-d_).days>35: continue
         if P_[0] in EXEMPT and _REIN.search(h_): _RI[P_[0]]=(d_,it_.get('s') or 'news'); continue
-        if it_.get('st')=='ok' or P_[0] in (it_.get('sk') or []) or _TLX.search(h_): continue   # (sk: the headline says he is playing)
-        m_=_TLW.search(h_); se_=_TLS.search(h_)
+        old_=_TL.get(P_[0])
+        if old_ and d_<=old_[1]: continue   # already known (kept from an earlier run), or older than what is known
+        if it_.get('st')=='ok' or P_[0] in (it_.get('sk') or []):   # the headline says he is playing: a reported absence is over
+            _TL.pop(P_[0],None); continue
+        if _TLX.search(h_): continue
+        m_=_TLW.search(h_); se_=_TLS.search(h_); ir_=_TLIR.search(h_); ind_=_TLIND.search(h_)
         _wn=lambda g_: (int(g_) if g_.isdigit() else _NUMW[g_.lower()]) if g_ else None
-        if m_ or se_: _TL[P_[0]]=(99 if se_ else _wn(m_.group(1)),d_,it_.get('s') or 'news',None if se_ else _wn(m_.group(2)))
-    for pid_,(n_,d_,s_,hi_) in _TL.items():
+        if se_: v_=(99,None,'season')
+        elif m_: v_=(_wn(m_.group(1)),_wn(m_.group(2)),'weeks')
+        elif ir_: v_=(4,None,'ir')
+        elif ind_: v_=(1,None,'ind')
+        else: continue
+        sp_=bool(_SPEC.search(h_))
+        if sp_ and old_ and not old_[5]: continue   # a guess never replaces a confirmed report
+        _TL[P_[0]]=(v_[0],d_,it_.get('s') or 'news',v_[1],v_[2],sp_)
+    for pid_,(n_,d_,s_,hi_,kd_,sp_) in _TL.items():
         if pid_ not in cur.index or (STATUS.get(pid_) or {}).get('src')=='report': continue
         tm_=IDT.get(cur.at[pid_,'team'],cur.at[pid_,'team'])
         if tm_ not in NXW: continue
         w0_=_ret_week(tm_,(d_+pd.Timedelta(days=1)).strftime('%Y-%m-%d')); rw_=99 if n_>=99 else (w0_ or 99)+n_
+        if sp_ or kd_=='ind': rw_=min(rw_,(w0_ or 99)+1)   # a guess, or no timeline: about his next game only
         if rw_<=NXW[tm_]: continue
+        _when=f"{s_}, {d_.strftime('%b')} {d_.day}"; _span=f'{n_}-{hi_} weeks' if hi_ and hi_>n_ else f'{n_} week'+('s' if n_>1 else '')
+        if sp_:
+            STATUS[pid_]={'s':'Questionable','src':'news','d':(STATUS.get(pid_) or {}).get('d'),'n':f"Reported he could miss {'the rest of the season' if n_>=99 else 'time (' + _span + ')' if kd_=='weeks' else 'time'}; not confirmed ({_when})"}; NEWS_TL+=1; continue
+        if kd_=='ind':
+            STATUS[pid_]={'s':'Out','src':'news','d':(STATUS.get(pid_) or {}).get('d'),'n':f"Reported out indefinitely ({_when})"}; NEWS_TL+=1; continue
         # injured reserve: a reported timeline later than the 4-game minimum moves his estimated return (example: the Rams
         # said Davante Adams would miss 6-10 weeks, so not before week 13 instead of the minimum's week 11)
         if pid_ in RET: RET[pid_]=max(RET[pid_],rw_)
-        _span=f'{n_}-{hi_} weeks' if hi_ and hi_>n_ else f'{n_} week'+('s' if n_>1 else '')
-        STATUS[pid_]={'s':'Out','src':'news','d':(STATUS.get(pid_) or {}).get('d'),'rw':rw_,'n':f"Reported out {'for the season' if n_>=99 else _span} ({s_}, {d_.strftime('%b')} {d_.day})"}; NEWS_TL+=1
+        _what='for the season' if n_>=99 else 'to injured reserve (at least 4 games)' if kd_=='ir' else _span
+        STATUS[pid_]={'s':'Out','src':'news','d':(STATUS.get(pid_) or {}).get('d'),'rw':rw_,'n':f"Reported {'headed' if kd_=='ir' else 'out'} {_what} ({_when})"}; NEWS_TL+=1
     for pid_,(d_,s_) in _RI.items():   # reinstated: available again (tagged until the roster catches up)
         STATUS[pid_]={'s':'Questionable','src':'news','d':None,'n':f"Reinstated from the exempt list (reported by {s_}, {d_.strftime('%b')} {d_.day})"}; NEWS_TL+=1
     if NEWS_TL: print('injuries: timelines from the news for',NEWS_TL,'players')
 except Exception as _e: print('news timelines unavailable:',_e)
 try:
-    json.dump({'reinstated':{pid_:{'d':d_.isoformat(),'s':s_} for pid_,(d_,s_) in sorted(_RI.items())}},open('news_state.json','w'),indent=1)
+    json.dump({'reinstated':{pid_:{'d':d_.isoformat(),'s':s_} for pid_,(d_,s_) in sorted(_RI.items())},
+               'tl':{pid_:{'n':n_,'d':d_.isoformat(),'s':s_,'hi':hi_,'k':kd_,'spec':int(sp_)} for pid_,(n_,d_,s_,hi_,kd_,sp_) in sorted(_TL.items())}},open('news_state.json','w'),indent=1)
     if _RI: print('reinstated from the exempt list (kept until the roster catches up):',', '.join(sorted(str(cur.at[p_,'full_name']) if p_ in cur.index and 'full_name' in cur.columns else p_ for p_ in _RI)))
 except Exception as _e: print('news state not saved:',_e)
 print('injury status:',sum(v['s']=='Out' for v in STATUS.values()),'out,',sum(v['s']=='Doubtful' for v in STATUS.values()),'doubtful,',sum(v['s']=='Questionable' for v in STATUS.values()),'questionable,',sum(v['src']=='expected' for v in STATUS.values()),'of them expected from the report')
