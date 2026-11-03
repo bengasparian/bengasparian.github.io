@@ -54,40 +54,34 @@ Things to know before you earn from it:
   the site, but anyone can see a public repository's history. Claude can rewrite the history to remove them if you
   want (it changes every commit's ID, so do it only when nobody else has a copy).
 
-## Making money: ads and tips (optional, free)
-Both stay off until you set them. Nothing to pay.
-1. **Apply to Google AdSense** at [adsense.google.com](https://adsense.google.com) (free; approval takes days to weeks
-   and is not guaranteed: Google reviews the content and its [program policies](https://support.google.com/adsense/answer/48182)).
-   Your site is the GitHub Pages address, for example `https://YOUR-USERNAME.github.io/REPOSITORY/`. AdSense adds sites
-   by domain; `github.io` is on the [Public Suffix List](https://publicsuffix.org), which AdSense accepts for
-   subdomains ([AdSense help](https://support.google.com/adsense/answer/12170421)), so the site to add is
-   `YOUR-USERNAME.github.io`.
-2. **Your publisher ID:** AdSense shows it as `pub-` and 16 digits (Account > Settings > Account information). In
-   GitHub: **Settings > Secrets and variables > Actions > Variables > New repository variable**, name `BFF_ADS_CLIENT`,
-   value `ca-pub-` and the 16 digits. The next data run puts Google's ad code and the site-verification tag on the page
-   and writes `ads.txt`.
-3. **ads.txt at the root of your domain:** AdSense reads it only at the root (`YOUR-USERNAME.github.io/ads.txt`;
-   [AdSense help](https://support.google.com/adsense/answer/12171612)), and a project site lives one folder down. So create
-   one more free public repository named exactly `YOUR-USERNAME.github.io`, add a file `ads.txt` with the single line
-   `google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0` (your own 16 digits), and turn on Pages for it
-   (Settings > Pages > branch `main`, `/ (root)`). With a custom domain pointed at this repository instead, BFF's own
-   `ads.txt` is already at the root and this step is not needed.
-4. **Consent in Europe:** Google requires a certified consent message for visitors in the EEA, the UK and Switzerland
-   ([Google's requirements](https://support.google.com/admanager/answer/13554116)). In AdSense: **Privacy & messaging >
-   European regulations > Create message**, pick your site, and give the privacy policy link
-   `https://YOUR-USERNAME.github.io/REPOSITORY/#privacy` (it opens BFF's Privacy Policy, which has the advertising
-   disclosures AdSense asks for). BFF shows no consent banner of its own.
-5. **Where ads go:** with only `BFF_ADS_CLIENT`, ads show where Google's Auto ads put them once you turn Auto ads on in
-   AdSense. To use BFF's own ad spaces instead (on Home
-   and Learn, never next to the betting page), create a display ad unit in AdSense (**Ads > By ad unit > Display ads**),
-   copy its `data-ad-slot` number into a repository variable `BFF_ADS_SLOT`, and leave Auto ads off in AdSense. Ad
-   spaces stay empty (and take no room) until then.
-6. **Tips:** set `BFF_TIP_URL` to a `https://` link to your tip page (Ko-fi, Buy Me a Coffee, GitHub Sponsors, PayPal.me
-   or similar) and a **Support BFF** button appears in the footer.
-7. Run **Update Gridiron Fantasy** once (Actions tab > Run workflow) after setting any of these.
+## Making money: ads and tips (set up November 3, 2026)
+BFF lives at **https://bengasparian.github.io** (the repository was renamed from `bff` so `ads.txt` sits at the root,
+where AdSense reads it; old `/bff/` links forward to the new address, keeping the `#section`).
 
-The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe ads and tips. A custom domain (about $10-15
-a year) is optional; AdSense works with the `github.io` address as above.
+- **Google AdSense account:** publisher ID `pub-8517438249188973`, site `bengasparian.github.io` verified (AdSense code
+  snippet) and **submitted for review** on November 3, 2026. Google reviews the content against its
+  [program policies](https://support.google.com/adsense/answer/48182); it takes days to weeks and approval is not
+  guaranteed. Ads start on their own once it is approved.
+- **On the site, automatically:** `ads.json` in the repository holds the publisher ID (it is public anyway: it is in
+  every page that shows ads; a repository variable `BFF_ADS_CLIENT` would override it). Each data run puts Google's ad
+  code and the `google-adsense-account` tag in the page and writes `ads.txt` at the site root.
+- **Ads never take over the screen:** in AdSense (Ads > By site > bengasparian.github.io) Auto ads is on with **only
+  in-page banner ads**, at the lowest number per page; anchor (sticky top/bottom, which would cover BFF's menu), side
+  rail and full-screen vignette ads are off, and Auto optimize is off (its experiments could turn them back on). To
+  change this, edit the site there; nothing on the site needs to change.
+- **Consent in Europe:** a Google consent message for the EEA, the UK and Switzerland is published (Privacy &
+  messaging > European regulations), with a "Do not consent" button, BFF's logo and the privacy policy link
+  `https://bengasparian.github.io/privacy/` (it opens BFF's Privacy Policy, which has the advertising disclosures).
+- **Left for the account owner only** (Google requires it): the payment profile (name and address, AdSense > Home >
+  "Tell us about you"), then, once earnings reach the thresholds Google sets, identity verification, the PIN Google
+  mails to that address, tax information and a bank account (AdSense > Payments).
+- **BFF's own ad spaces (optional):** to use fixed ad spaces instead (on Home and Learn, never next to the betting
+  page), create a display ad unit in AdSense (**Ads > By ad unit > Display ads**), put its `data-ad-slot` number in
+  `ads.json` as `"slot"` (or a repository variable `BFF_ADS_SLOT`), and turn Auto ads off.
+- **Tips (optional):** a `"tip"` link in `ads.json` (or `BFF_TIP_URL`), a `https://` link to a tip page (Ko-fi, Buy
+  Me a Coffee, GitHub Sponsors, PayPal.me or similar), shows a **Support BFF** button in the footer.
+
+The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe ads and tips.
 
 ## What's on the site
 - **Home:** the player rankings screen with the week built in: the week header (dates, games), the week's games strip,
@@ -388,24 +382,27 @@ recaps still in their window.
 - **Street art at night:** night mode is the default (the theme button offers day mode or your device's setting): a
   brick wall, two club spotlights, a faded BFF tag, spray-paint underlines, neon glow and marker-style tags. All of it
   stops for anyone who asks their device for less motion, and the heavy parts stay off on phones and low-power devices.
-- **Player photos** (`photos.py`, weekly): Wikidata links each player's Pro Football Reference ID to a picture on
-  Wikimedia Commons and to his own Commons category. The photo is, in order: his Wikidata picture; else a photo from his
-  own category; else a Commons photo found by his full name. A category or search photo is used only when it is
-  verifiably him alone: his name in the file name (no "and", "with" or "vs", nobody else's name, nothing before it that
-  makes someone else the subject, no painting, grave or card), a search result also with the same suffix ("Michael
-  Carter II" is not Michael Carter) and filed under his team, draft team or college football team (never just a
-  category named like him, which can be a namesake's; never when two BFF players share the name), and exactly one face
-  found in it (OpenCV face detection, confirmed by an eye in the face). The first search run, on November 3, 2026, took
-  a few namesakes (a 19th-century painter, an Air Force sergeant, a hockey goalie) before these rules; two of them
-  replaced the right photos of Aaron Jones and Michael Wilson on the live site for about 13 minutes, until the next run
-  put the right ones back. A run that would lose more than 15% of the photos, or that Wikidata answers with no players,
-  now stops and keeps them all. Only pictures whose license is public domain, CC0, CC BY or
-  CC BY-SA are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped). Each is
-  cropped to a 3:4 portrait around the face, saved small in `photos/`, and credited (author, license with its link,
-  "cropped and resized", and CC BY-SA kept as CC BY-SA) on the player's card and under Sources → Photo credits.
-  Players without a free photo get their jersey in team colors with their number; BFF does not draw faces made to look
-  like real players (a likeness raises the same rights questions as a photo, and a guessed likeness can be wrong).
-  Photos only show on your own site (the claude.ai copy shows jerseys).
+- **Player photos** (`photos.py`, weekly): every verified photo of a player on Wikimedia Commons is considered: his
+  Wikidata picture (Wikidata links his Pro Football Reference ID, or his exact name and birth date, to his item), the
+  photos in his own Commons category, and photos found by his full name. A category or search photo counts only when it
+  is verifiably him alone: his name in the file name (no "and", "with" or "vs", nobody else's name, nothing before it
+  that makes someone else the subject, no painting, grave or card), a search result also with the same suffix
+  ("Michael Carter II" is not Michael Carter) and filed under his team, draft team or college football team (never just
+  a category named like him, which can be a namesake's; never when two BFF players share the name). Of those, BFF uses
+  **the most recent photo** (the date it was taken, else uploaded) **where exactly one face shows clearly** (YuNet, a
+  neural face detector from OpenCV Zoo, MIT license, in `models/`), cropped head and shoulders around the face so it
+  shows even in small avatars; if no photo shows his face clearly, his Wikidata picture is used as it is. Face checks
+  are remembered in `photos/checks.json`, so each file is downloaded once. Only public domain, CC0, CC BY and CC BY-SA
+  pictures are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped). Each is saved
+  small in `photos/` and credited (author, license with its link, "cropped and resized", and CC BY-SA kept as CC BY-SA)
+  on the player's card and under Sources → Photo credits. A player with no free photo of himself (about a third,
+  mostly young and backup players) gets his jersey in team colors with his number; BFF does not draw faces made to
+  look like real players (a likeness raises the same rights questions as a photo, and a guessed likeness can be wrong).
+  The first search run, on November 3, 2026, took a few namesakes (a 19th-century painter, an Air Force sergeant, a
+  hockey goalie) before these rules; two of them replaced the right photos of Aaron Jones and Michael Wilson on the
+  live site for about 13 minutes, until the next run put the right ones back. A run that would lose more than 15% of
+  the photos, or that Wikidata answers with no players, stops and keeps them all. Photos only show on your own site
+  (the claude.ai copy shows jerseys).
 - **Team badges:** BFF draws its own shield for each team from its abbreviation and colors, used wherever a logo would go.
 - **Readable text on every picture:** text on artwork sits on a dark scrim sized to the text block, so white text keeps
   at least 4.5:1 contrast, and text on team colors switches to dark ink where white would be hard to read.
@@ -459,9 +456,9 @@ point, not legal advice: have a lawyer review them if the site grows.
   the 3-hour job every 5 to 13 hours. Nothing breaks (each run catches up on everything since the last), but news, breaking
   stories and scores arrive later. A free fix, if you want runs on time (about 5 minutes, optional):
   1. On GitHub: **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
-     Repository access: only `bff`. Permissions: **Actions: Read and write** (nothing else). Copy the token.
+     Repository access: only `bengasparian.github.io`. Permissions: **Actions: Read and write** (nothing else). Copy the token.
   2. Make a free account at [cron-job.org](https://cron-job.org) and create a job every 30 minutes (at 4 and 34 past)
-     that sends **POST** to `https://api.github.com/repos/bengasparian/bff/actions/workflows/scores.yml/dispatches`
+     that sends **POST** to `https://api.github.com/repos/bengasparian/bengasparian.github.io/actions/workflows/scores.yml/dispatches`
      with the headers `Authorization: Bearer <your token>` and `Accept: application/vnd.github+json`, and the body
      `{"ref":"main"}`. Optionally a second job every 3 hours (23 past) for `update.yml`.
   3. GitHub answers **204** when it worked; the run shows under **Actions** as "workflow_dispatch". The workflows share
@@ -541,7 +538,8 @@ once, and **Player photos** once.
 
 ## One-time setup (about 10 minutes)
 1. Create a free account at github.com and sign in.
-2. Click **New repository**, give it a name (for example `bff`), choose **Public**, and create it.
+2. Click **New repository**, name it `YOUR-USERNAME.github.io` (so the site is at the root, where AdSense reads
+   `ads.txt`; any other name puts it one folder down), choose **Public**, and create it.
 3. Click **uploading an existing file** and drag in everything from this folder **except** the hidden `.github`
    folder and `.nojekyll` file. Click **Commit changes**. Then **Add file > Create new file**, name it `.nojekyll`,
    leave it empty, and commit (it tells GitHub to publish the files as they are).
@@ -549,7 +547,7 @@ once, and **Player photos** once.
    contents of `update.yml` from this kit, and commit. Repeat for `scores.yml` and `photos.yml`.
 5. **Settings > Actions > General > Workflow permissions:** choose **Read and write permissions**, then **Save**.
 6. **Settings > Pages:** set the branch to `main` and `/ (root)`, then **Save**. Your site will be at
-   `https://YOUR-USERNAME.github.io/REPOSITORY/`.
+   `https://YOUR-USERNAME.github.io/` (the live BFF: `https://bengasparian.github.io/`).
 7. Test it: **Actions** tab > **Update Gridiron Fantasy** > **Run workflow** (about 5 to 10 minutes the first time).
    Then run **Scores, news and lines** and **Player photos** once each.
 8. Optional: **Accounts** and **Making money** (above).
