@@ -1028,7 +1028,7 @@ function renderOffseason(){const s=D.asof.season;['wkbar'].forEach(i=>{const e=g
 function newScores(x,pb){const old=pbpOf(x.id);if(!old||!pb.sp||!old.sp||pb.sp.length<=old.sp.length)return;const s=pb.sp[pb.sp.length-1],me=mine(),mineG=me&&me.players.some(id=>PI[id]&&(PI[id].t===x.home||PI[id].t===x.away));
  if((GP&&GP.id===String(x.id))||mineG)try{toast(`${s.tm||''} ${s.ty||'score'}: ${String(s.t).slice(0,90)} (${x.away} ${s.as??x.as}, ${x.home} ${s.hs??x.hs})`,'info')}catch(e){}}
 async function pollLive(){if(!CAN_LIVE||!/^https?:/.test(location.protocol))return;try{
- const r=await fetch('live.json',{cache:'no-store'});if(r.ok){const j=await r.json();if(j&&Array.isArray(j.games)&&j.games.length&&j.at!==LIVE.at){
+ const r=await fetch('live.json',{cache:'no-store'});if(r.ok){const j=await r.json();if(j&&Array.isArray(j.games)&&j.games.length&&j.at!==LIVE.at&&j.season===(LIVE.season||D.asof.season)){
   (j.games||[]).forEach(x=>{const pb=(j.pbp||{})[x.id];if(pb)newScores(x,pb)});Object.assign(LIVE,j);ANIM=false;try{renderLive()}catch(e){console.warn('BFF live render',e)}try{liveBadgesPaint()}catch(e){console.warn('BFF live badges',e)}ANIM=true}}
  }catch(e){console.warn('BFF scores update',e)}finally{setTimeout(pollLive,(LIVE.games||[]).some(x=>x&&x.started)?300000:900000)}}
 // ---------- NEWS
