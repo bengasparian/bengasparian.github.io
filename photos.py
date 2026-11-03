@@ -77,17 +77,24 @@ def filename(url):
 
 
 def wikidata_items(props, pfrs):
-    """{pfr id: {'img': Commons file or None, 'cat': the player's Commons category or None}} for BFF's players on Wikidata.
-    Two whole-list queries (every player with a picture; every player with a Commons category), read the same way the
+    """{pfr id: {'img': Commons file or None, 'cat': the player's Commons category or None, 'wp': his English Wikipedia
+    article or None}} for BFF's players on Wikidata. Whole-list queries (every player with a picture; with a Commons
+    category; with an English Wikipedia article), read the same way the
     ID is written on Wikidata ("GibbJa01" or "G/GibbJa01"), then kept for BFF's players"""
     want = set(pfrs); out = {}
     for p in props:
-        for key, prop in (('img', 'P18'), ('cat', 'P373')):
-            for r in sparql(f'SELECT ?id ?v WHERE {{ ?item wdt:{p} ?id . ?item wdt:{prop} ?v . }}'):
+        for key, prop in (('img', 'wdt:P18'), ('cat', 'wdt:P373'), ('wp', None)):
+            q = (f'SELECT ?id ?v WHERE {{ ?item wdt:{p} ?id . ?item {prop} ?v . }}' if prop else
+                 f'SELECT ?id ?v WHERE {{ ?item wdt:{p} ?id . ?v schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }}')
+            try: rows = sparql(q)
+            except Exception as ex:
+                if key != 'wp': raise
+                print('Wikipedia articles from Wikidata unavailable:', str(ex)[:100]); rows = []
+            for r in rows:
                 pid = r['id']['value'].strip().split('/')[-1].replace('.htm', '')
                 if pid not in want: continue
-                e = out.setdefault(pid, {'img': None, 'cat': None})
-                if not e[key]: e[key] = filename(r['v']['value']) if key == 'img' else r['v']['value'].strip()
+                e = out.setdefault(pid, {'img': None, 'cat': None, 'wp': None})
+                if not e.get(key): e[key] = filename(r['v']['value']) if key in ('img', 'wp') else r['v']['value'].strip()
     return out
 
 
@@ -104,19 +111,42 @@ def wikidata_by_birth(players):
     for i in range(0, len(ds), 60):
         vals = ' '.join(f'"{d}T00:00:00Z"^^xsd:dateTime' for d in ds[i:i + 60])
         try:
-            rows = sparql(f'SELECT ?item ?dob ?label ?img ?cat WHERE {{ VALUES ?dob {{ {vals} }} ?item wdt:P569 ?dob ; wdt:P106 wd:Q19204627 ; rdfs:label ?label . '
-                          f'FILTER(LANG(?label) = "en") OPTIONAL {{ ?item wdt:P18 ?img . }} OPTIONAL {{ ?item wdt:P373 ?cat . }} }}')
+            rows = sparql(f'SELECT ?item ?dob ?label ?img ?cat ?wp WHERE {{ VALUES ?dob {{ {vals} }} ?item wdt:P569 ?dob ; wdt:P106 wd:Q19204627 ; rdfs:label ?label . '
+                          f'FILTER(LANG(?label) = "en") OPTIONAL {{ ?item wdt:P18 ?img . }} OPTIONAL {{ ?item wdt:P373 ?cat . }} '
+                          f'OPTIONAL {{ ?wp schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }} }}')
         except Exception as e:
             print('Wikidata birth-date lookup failed:', str(e)[:100]); continue
         for r in rows:
             d = r['dob']['value'][:10]; lab = norm(r['label']['value'])
             for p in byd.get(d, []):
                 if norm(p['n']) == lab:
-                    e = hits.setdefault(p['id'], {'items': set(), 'img': None, 'cat': None}); e['items'].add(r['item']['value'])
+                    e = hits.setdefault(p['id'], {'items': set(), 'img': None, 'cat': None, 'wp': None}); e['items'].add(r['item']['value'])
                     if r.get('img') and not e['img']: e['img'] = filename(r['img']['value'])
                     if r.get('cat') and not e['cat']: e['cat'] = r['cat']['value'].strip()
+                    if r.get('wp') and not e['wp']: e['wp'] = filename(r['wp']['value'])
         time.sleep(1)
-    return {g: {'img': e['img'], 'cat': e['cat']} for g, e in hits.items() if len(e['items']) == 1 and (e['img'] or e['cat'])}
+    return {g: {'img': e['img'], 'cat': e['cat'], 'wp': e['wp']} for g, e in hits.items() if len(e['items']) == 1 and (e['img'] or e['cat'] or e['wp'])}
+
+
+WIKI = 'https://en.wikipedia.org/w/api.php'
+
+
+def wikipedia_images(titles):
+    """{article title: the free picture its infobox shows (on Commons)} for English Wikipedia articles (50 per request).
+    Nov 3 2026: Jahmyr Gibbs's article showed "Gibbs in 2026" while his Wikidata item had no picture yet."""
+    out = {}
+    titles = sorted({t for t in titles if t})
+    for i in range(0, len(titles), 50):
+        q = {'action': 'query', 'format': 'json', 'prop': 'pageimages', 'piprop': 'name', 'pilicense': 'free', 'redirects': 1, 'titles': '|'.join(titles[i:i + 50]), 'maxlag': 5}
+        try: d = json.loads(get(WIKI + '?' + urllib.parse.urlencode(q)))
+        except Exception as e: print('Wikipedia pictures unavailable:', str(e)[:100]); continue
+        back = {}
+        for k in ('normalized', 'redirects'):
+            for n in (d.get('query') or {}).get(k) or []: back[n['to']] = back.get(n['from'], n['from'])
+        for pg in ((d.get('query') or {}).get('pages') or {}).values():
+            if pg.get('pageimage'): out[back.get(pg.get('title'), pg.get('title'))] = pg['pageimage'].replace('_', ' ')
+        time.sleep(.5)
+    return out
 
 
 def norm(s):
@@ -328,7 +358,11 @@ def main():
           f" with a Commons category: {sum(1 for e in wd.values() if e.get('cat'))}")
     if want and not items:   # (Nov 3 2026: a query in the wrong ID format matched nobody)
         raise SystemExit('Wikidata matched none of BFF\'s players; keeping the current photos')
-    info = commons_info(sorted({e['img'] for e in wd.values() if e.get('img')}))
+    wpi = wikipedia_images([e.get('wp') for e in wd.values()])
+    for e in wd.values():
+        if e.get('wp') and wpi.get(e['wp']): e['wpimg'] = wpi[e['wp']]
+    print('pictures from English Wikipedia articles:', sum(1 for e in wd.values() if e.get('wpimg')))
+    info = commons_info(sorted({e['img'] for e in wd.values() if e.get('img')} | {e['wpimg'] for e in wd.values() if e.get('wpimg')}))
     names_ = [' '.join(norm(p['n'])) for p in P]; others = set(names_); dup = {n for n in others if names_.count(n) > 1}
     cred = {}; kept = new = skipped = 0; reasons = {}; via = {}; staged = []   # (new files are written as .new and kept only if the run is sound)
     count = lambda k: reasons.__setitem__(k, reasons.get(k, 0) + 1)
@@ -369,13 +403,14 @@ def main():
         nm = re.sub(r'\s+(jr|sr|ii|iii|iv|v)\.?$', '', p['n'], flags=re.I); me = ' '.join(norm(p['n']))
         # every verified photo of him: his Wikidata picture, his own Commons category, a search by his full name
         cands = [(e['img'], 'wikidata')] if e.get('img') else []
+        if e.get('wpimg') and e['wpimg'] != e.get('img'): cands.append((e['wpimg'], 'wikipedia'))   # (his article's picture: chosen for him by its editors)
         try:
             if e.get('cat'): cands += [(f, 'category') for f in commons_category_files(e['cat']) if f != e.get('img')]
             if me not in dup:   # (two BFF players with one name: a search cannot tell them apart)
                 cands += [(f, 'search') for f in commons_search(nm) if f not in {c for c, _ in cands}]
         except Exception as ex:
             count('Commons lookup failed'); print('Commons lookup failed for', p['n'], str(ex)[:100])
-        cands = [(f, how) for f, how in cands if how == 'wikidata' or (not MULTI.search(re.sub(r'\.[a-z]{3,4}$', '', f, flags=re.I)) and has_name(f, p['n'], full=how != 'category'))][:40]
+        cands = [(f, how) for f, how in cands if how in ('wikidata', 'wikipedia') or (not MULTI.search(re.sub(r'\.[a-z]{3,4}$', '', f, flags=re.I)) and has_name(f, p['n'], full=how != 'category'))][:40]
         fc = {}
         try:
             extra = [f for f, _ in cands if f not in info]
@@ -385,14 +420,14 @@ def main():
         except Exception as ex:
             count('Commons lookup failed'); print('Commons lookup failed for', p['n'], str(ex)[:100])
         bio = p.get('bio') or {}; ctx = [TEAM_FULL.get(p.get('t')), TEAM_FULL.get(bio.get('dc')), bio.get('col')]
-        ok_ = [(f, how) for f, how in cands if usable(info.get(f)) and (how == 'wikidata' or (verified(f, p['n'], fc.get(f) or [], ctx, how == 'category')
+        ok_ = [(f, how) for f, how in cands if usable(info.get(f)) and (how in ('wikidata', 'wikipedia') or (verified(f, p['n'], fc.get(f) or [], ctx, how == 'category')
                and not any(o_ != me and ' ' + o_ + ' ' in ' ' + ' '.join(norm(f)) + ' ' for o_ in others)))]
         if not ok_:
             x = info.get(e.get('img')) if e.get('img') else None
             count(f"Wikidata picture not free ({(x or {}).get('lic') or 'no license'})" if x else 'no photo on Commons' if not cands else 'no photo verifiably of him alone'); continue
         # the most recent photo (the date it was taken, else uploaded) where his face shows clearly, alone
         when = lambda f: info[f].get('taken') or str(info[f].get('ts') or '')[:10]
-        ok_.sort(key=lambda c: (when(c[0]), c[1] == 'wikidata'), reverse=True)
+        ok_.sort(key=lambda c: (when(c[0]), c[1] in ('wikidata', 'wikipedia')), reverse=True)
         pick = None; tries = 0; raws = {}
         for f, how in ok_:
             c = chk.get(f)
@@ -405,9 +440,9 @@ def main():
             if raw: raws[f] = raw
             if n_ == 1 and good_face(box): pick = (f, how, box); break
         if not pick:   # his face shows clearly in none of them: his Wikidata picture as it is (top-centered), else no photo
-            wf = next((c for c in ok_ if c[1] == 'wikidata'), None)
+            wf = next((c for c in ok_ if c[1] in ('wikidata', 'wikipedia')), None)
             if not wf: count('no photo with his face clearly visible'); continue
-            pick = (wf[0], 'wikidata', None)
+            pick = (wf[0], wf[1], None)
         f, how, box = pick
         save(g, info[f], how, raws.get(f), box)
     if not DRY:

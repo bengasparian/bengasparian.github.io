@@ -393,7 +393,8 @@ recaps still in their window.
   stops for anyone who asks their device for less motion, and the heavy parts stay off on phones and low-power devices.
 - **Player photos** (`photos.py`, weekly): every verified photo of a player on Wikimedia Commons is considered: his
   Wikidata picture (Wikidata links his Pro Football Reference ID, or his exact name and birth date, to his item), the
-  photos in his own Commons category, and photos found by his full name. A category or search photo counts only when it
+  picture in his English Wikipedia article (linked from that item; free licenses only), the photos in his own Commons
+  category, and photos found by his full name. A category or search photo counts only when it
   is verifiably him alone: his name in the file name (no "and", "with" or "vs", nobody else's name, nothing before it
   that makes someone else the subject, no painting, grave or card), a search result also with the same suffix
   ("Michael Carter II" is not Michael Carter) and filed under his team, draft team or college football team (never just
