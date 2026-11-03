@@ -2,20 +2,25 @@
 """Player photos for BFF from Wikimedia Commons, only where the photographer released them under a free license.
 
 How it works (run weekly by .github/workflows/photos.yml; nothing to set up):
-  1. Wikidata links NFL players to their Pro Football Reference ID and to a picture on Wikimedia Commons (the property
-     that holds Pro Football Reference IDs is looked up by its link pattern, so a renumbering cannot break this).
-  2. For the players BFF shows (ff_data.json), each picture's license is read from Commons. Only public domain, CC0,
-     CC BY and CC BY-SA pictures are used; anything else (no license found, non-free, "no derivatives", "non-commercial")
-     is skipped, and that player keeps his jersey icon.
-  3. The picture is cropped to a 3:4 portrait (top-centered, where the head usually is) and saved small as
-     photos/<player id>.webp. photos/credits.json keeps, for every photo, its author, license, license link and the
-     Commons page, which the site shows on the player's card and under Sources -> Photo credits. CC BY-SA photos stay
-     under CC BY-SA after cropping (the credit says so).
+  1. Wikidata links NFL players to their Pro Football Reference ID, to a picture on Wikimedia Commons and to the
+     player's own Commons category (the property that holds Pro Football Reference IDs is looked up by its link pattern,
+     so a renumbering cannot break this).
+  2. For the players BFF shows, the picture comes from, in order: the player's Wikidata picture; else a photo in his own
+     Commons category; else a Commons photo found by his full name. A photo from his category or from a search is used
+     only when it is verifiably him and him alone: the file name has his name (and no "and", "with" or "vs"), a search
+     result is also filed under his team, his draft team or his college's football team, and exactly one face shows
+     clearly in it (OpenCV face detection; a photo it cannot check is not used).
+  3. Only public domain, CC0, CC BY and CC BY-SA pictures are used; anything else (no license found, non-free, "no
+     derivatives", "non-commercial") is skipped, and that player keeps his jersey icon.
+  4. The picture is cropped to a 3:4 portrait around the face (or top-centered when no single face is found) and saved
+     small as photos/<player id>.webp. photos/credits.json keeps, for every photo, its author, license, license link,
+     the Commons page and how it was found, which the site shows on the player's card and under Sources -> Photo
+     credits. CC BY-SA photos stay under CC BY-SA after cropping (the credit says so).
 Pictures already saved are kept until their source changes. A player who drops out of BFF keeps his photo for 60 days.
 
 Set the repository variable BFF_PLAYER_PHOTOS to off to stop using player photos (the next run removes them).
 
-  python photos.py              (needs network access to wikidata.org and wikimedia.org; Pillow)
+  python photos.py              (needs network access to wikidata.org and wikimedia.org; Pillow, opencv-python-headless 4)
   python photos.py --dry-run    (lists what it would do, writes nothing)
 """
 import io, json, os, re, sys, time, html, datetime, urllib.parse, urllib.request
@@ -30,6 +35,15 @@ ON = (os.environ.get('BFF_PLAYER_PHOTOS') or 'on').strip().lower() not in ('off'
 NOW = datetime.datetime.now(datetime.timezone.utc)
 FREE = re.compile(r'^(cc0|public domain|pd\b|pd-|cc[- ]by(-sa)?[- ]\d(\.\d)?)', re.I)   # license short names Commons uses
 NOTFREE = re.compile(r'(\bnc\b|non-?commercial|\bnd\b|no ?deriv|fair use|non-?free|copyrighted)', re.I)
+MULTI = re.compile(r"(\b(and|with|vs|versus|feat)\b|&|\+)", re.I)   # a file named for more than one person
+TEAM_FULL = {'ARI': 'Arizona Cardinals', 'ATL': 'Atlanta Falcons', 'BAL': 'Baltimore Ravens', 'BUF': 'Buffalo Bills', 'CAR': 'Carolina Panthers',
+             'CHI': 'Chicago Bears', 'CIN': 'Cincinnati Bengals', 'CLE': 'Cleveland Browns', 'DAL': 'Dallas Cowboys', 'DEN': 'Denver Broncos',
+             'DET': 'Detroit Lions', 'GB': 'Green Bay Packers', 'HOU': 'Houston Texans', 'IND': 'Indianapolis Colts', 'JAX': 'Jacksonville Jaguars',
+             'KC': 'Kansas City Chiefs', 'LA': 'Los Angeles Rams', 'LAR': 'Los Angeles Rams', 'LAC': 'Los Angeles Chargers', 'LV': 'Las Vegas Raiders',
+             'MIA': 'Miami Dolphins', 'MIN': 'Minnesota Vikings', 'NE': 'New England Patriots', 'NO': 'New Orleans Saints', 'NYG': 'New York Giants',
+             'NYJ': 'New York Jets', 'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers', 'SEA': 'Seattle Seahawks', 'SF': 'San Francisco 49ers',
+             'TB': 'Tampa Bay Buccaneers', 'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders'}
+MAX_TRIES = 5   # photos downloaded to check, per player
 
 
 def get(url, data=None, timeout=60, tries=3):
@@ -55,16 +69,84 @@ def pfr_property():
     return props
 
 
-def wikidata_images(props):
-    """{pfr id: Commons file name} for every player item with a Pro Football Reference ID and an image"""
+def filename(url):
+    return urllib.parse.unquote(url.rsplit('/', 1)[-1]).replace('_', ' ')
+
+
+def wikidata_items(props, pfrs):
+    """{pfr id: {'img': Commons file or None, 'cat': the player's Commons category or None}} for BFF's players on Wikidata"""
     out = {}
     for p in props:
-        rows = sparql(f'SELECT ?id ?img WHERE {{ ?item wdt:{p} ?id . ?item wdt:P18 ?img . }}')
-        for r in rows:
-            pid = r['id']['value'].strip().split('/')[-1].replace('.htm', '')
-            fn = urllib.parse.unquote(r['img']['value'].rsplit('/', 1)[-1]).replace('_', ' ')
-            out.setdefault(pid, fn)
+        for i in range(0, len(pfrs), 150):
+            vals = ' '.join('"' + x.replace('"', '').replace('\\', '') + '"' for x in pfrs[i:i + 150])
+            rows = sparql(f'SELECT ?id ?img ?cat WHERE {{ VALUES ?id {{ {vals} }} ?item wdt:{p} ?id . OPTIONAL {{ ?item wdt:P18 ?img . }} OPTIONAL {{ ?item wdt:P373 ?cat . }} }}')
+            for r in rows:
+                e = out.setdefault(r['id']['value'].strip(), {'img': None, 'cat': None})
+                if r.get('img') and not e['img']: e['img'] = filename(r['img']['value'])
+                if r.get('cat') and not e['cat']: e['cat'] = r['cat']['value'].strip()
     return out
+
+
+def norm(s):
+    """a name for matching: no accents, apostrophes, periods or suffixes ("De'Von Achane" = "DeVon Achane")"""
+    import unicodedata
+    s = unicodedata.normalize('NFKD', str(s or '')).encode('ascii', 'ignore').decode().lower()
+    s = re.sub(r"['’`.]", '', s); s = re.sub(r'[^a-z0-9]+', ' ', s)
+    return re.sub(r'\b(jr|sr|ii|iii|iv|v)\b', ' ', s).split()
+
+
+def has_name(title, name, full=True):
+    t, n = ' ' + ' '.join(norm(re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I))) + ' ', norm(name)
+    return bool(n) and (' ' + ' '.join(n) + ' ' in t if full else ' ' + n[-1] + ' ' in t)
+
+
+def commons_category_files(cat, limit=100):
+    q = {'action': 'query', 'format': 'json', 'list': 'categorymembers', 'cmtitle': 'Category:' + cat, 'cmtype': 'file', 'cmlimit': limit, 'maxlag': 5}
+    d = json.loads(get(COMMONS + '?' + urllib.parse.urlencode(q))); time.sleep(.5)
+    return [m['title'].replace('File:', '', 1) for m in (d.get('query') or {}).get('categorymembers') or []]
+
+
+def commons_search(name, limit=20):
+    q = {'action': 'query', 'format': 'json', 'list': 'search', 'srnamespace': 6, 'srlimit': limit, 'srsearch': f'intitle:"{name}" filetype:bitmap', 'maxlag': 5}
+    d = json.loads(get(COMMONS + '?' + urllib.parse.urlencode(q))); time.sleep(.5)
+    return [m['title'].replace('File:', '', 1) for m in (d.get('query') or {}).get('search') or []]
+
+
+def file_categories(files):
+    """the visible categories of each Commons file (50 per request)"""
+    out = {}
+    for i in range(0, len(files), 50):
+        q = {'action': 'query', 'format': 'json', 'prop': 'categories', 'clshow': '!hidden', 'cllimit': 'max', 'titles': '|'.join('File:' + f for f in files[i:i + 50]), 'maxlag': 5}
+        d = json.loads(get(COMMONS + '?' + urllib.parse.urlencode(q)))
+        norm_ = {n['to']: n['from'] for n in (d.get('query') or {}).get('normalized') or []}
+        for pg in ((d.get('query') or {}).get('pages') or {}).values():
+            t = pg.get('title', ''); out[norm_.get(t, t).replace('File:', '', 1)] = [c['title'].replace('Category:', '', 1) for c in pg.get('categories') or []]
+        time.sleep(.5)
+    return out
+
+
+def faces(raw):
+    """face boxes (x, y, w, h) clear enough to count (OpenCV's frontal-face detector), or None if it cannot run"""
+    try:
+        import cv2, numpy as np
+        from PIL import Image, ImageOps
+        im = np.array(ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert('L'))
+        c = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))
+        if c.empty(): return None
+        m = max(24, int(min(im.shape) * .06))   # at least 6% of the picture's short side
+        return [tuple(int(v) for v in f) for f in c.detectMultiScale(im, scaleFactor=1.1, minNeighbors=6, minSize=(m, m))]
+    except Exception:
+        return None
+
+
+def verified(title, name, cats, ctx, own_cat):
+    """a Commons file is this player alone: his name in the file name, nobody else's, and (from a search) filed under his
+    own category, his team, his draft team or his college's football team"""
+    if MULTI.search(re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I)): return False
+    if not has_name(title, name, full=not own_cat): return False
+    if own_cat: return True
+    cl = [c.lower() for c in cats]
+    return any(c == ' '.join(norm(name)) or norm(c) == norm(name) for c in cl) or any(x and x.lower() in c and ('football' in c or x in TEAM_FULL.values()) for x in ctx for c in cl)
 
 
 def plain(s):
@@ -98,11 +180,16 @@ def free_license(x):
     return bool(lic) and not x.get('nonfree') and bool(FREE.match(lic)) and not NOTFREE.search(lic)
 
 
-def crop_save(raw, path):
+def crop_save(raw, path, face=None):
     from PIL import Image, ImageOps
     im = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert('RGB')
     w, h = im.size
-    if w / h > 3 / 4:                     # wider than 3:4: keep the middle
+    if face:                              # around the face: about 3.6 face-heights tall, the face in the upper third
+        fx, fy, fw, fh = face
+        ch = min(h, int(fh * 3.6)); cw = int(round(ch * 3 / 4))
+        if cw > w: cw = w; ch = int(round(cw * 4 / 3))
+        x0 = min(max(0, int(fx + fw / 2 - cw / 2)), w - cw); y0 = min(max(0, int(fy - fh * .9)), h - ch); box = (x0, y0, x0 + cw, y0 + ch)
+    elif w / h > 3 / 4:                   # wider than 3:4: keep the middle
         cw = int(round(h * 3 / 4)); x0 = (w - cw) // 2; box = (x0, 0, x0 + cw, h)
     else:                                 # taller: keep the top part (heads are near the top), a little below the edge
         ch = int(round(w * 4 / 3)); y0 = min(int(h * .06), h - ch); box = (0, y0, w, y0 + ch)
@@ -123,31 +210,74 @@ def main():
     else:   # the weekly job reads the players from the published page (ff_data.json is not saved in the repository)
         h = open('index.html', encoding='utf-8').read(); m = re.search(r'const D=(\{.*?\});\n', h, re.S)
         D = json.loads(m.group(1).replace('<\\/', '</'))
-    P = [p for p in D['players'] if p.get('pfr')]
-    want = {p['pfr']: p['id'] for p in P}
+    P = [p for p in D['players'] if p.get('id') and p.get('n')]
+    want = {p['pfr']: p['id'] for p in P if p.get('pfr')}
     props = pfr_property(); print('Wikidata property for Pro Football Reference IDs:', ', '.join(props))
-    img = wikidata_images(props); print('players on Wikidata with a picture:', len(img))
-    hit = {g: img[r] for r, g in want.items() if r in img}
-    print(f'BFF players with a Wikidata picture: {len(hit)} of {len(want)}')
-    info = commons_info(sorted(set(hit.values())))
-    cred = {}; kept = new = skipped = 0; reasons = {}
-    for g, fn in sorted(hit.items()):
-        x = info.get(fn)
-        if not x or not x.get('thumb'): reasons['no file info'] = reasons.get('no file info', 0) + 1; continue
-        if not free_license(x): reasons[x.get('lic') or 'no license'] = reasons.get(x.get('lic') or 'no license', 0) + 1; continue
-        if not str(x.get('mime') or '').startswith('image/'): continue
+    items = wikidata_items(props, sorted(want))
+    wd = {p['id']: items.get(p.get('pfr')) or {} for p in P}
+    print(f"BFF players: {len(P)}; on Wikidata: {sum(1 for e in wd.values() if e)}; with a Wikidata picture: {sum(1 for e in wd.values() if e.get('img'))};"
+          f" with a Commons category: {sum(1 for e in wd.values() if e.get('cat'))}")
+    info = commons_info(sorted({e['img'] for e in wd.values() if e.get('img')}))
+    names_ = [' '.join(norm(p['n'])) for p in P]; others = set(names_); dup = {n for n in others if names_.count(n) > 1}
+    cred = {}; kept = new = skipped = 0; reasons = {}; via = {}
+    count = lambda k: reasons.__setitem__(k, reasons.get(k, 0) + 1)
+    usable = lambda x: bool(x and x.get('thumb') and free_license(x) and str(x.get('mime') or '').startswith('image/'))
+
+    def save(g, x, how, raw=None, face=None):
+        nonlocal kept, new, skipped
         path = os.path.join(OUT, g + '.webp'); o = (old.get('p') or {}).get(g)
-        same = o and o.get('src') == x['page'] and o.get('ts') == x['ts'] and os.path.exists(path)
         entry = {'f': g + '.webp', 'a': x['artist'] or 'Unknown author', 'lic': x['lic'], 'lu': x['lu'], 'src': x['page'], 'ts': x['ts'],
-                 'm': 'cropped and resized' + (', CC BY-SA' if 'sa' in x['lic'].lower() else ''), 'seen': NOW.date().isoformat()}
-        if same: cred[g] = entry; kept += 1; continue
-        if DRY: print('would save', g, fn, x['lic']); continue
+                 'm': 'cropped and resized' + (', CC BY-SA' if 'sa' in x['lic'].lower() else ''), 'via': how, 'seen': NOW.date().isoformat()}
+        if o and o.get('src') == x['page'] and o.get('ts') == x['ts'] and os.path.exists(path):
+            cred[g] = entry; kept += 1; via[how] = via.get(how, 0) + 1; return True
+        if DRY: print('would save', g, how, x['page'], x['lic']); via[how] = via.get(how, 0) + 1; return True
         try:
-            crop_save(get(x['thumb']), path); cred[g] = entry; new += 1; time.sleep(.5)
+            raw = raw or get(x['thumb'])
+            if face is None:   # (a Wikidata picture: framed around the face when exactly one shows, else top-centered)
+                fs = faces(raw); face = fs[0] if fs and len(fs) == 1 else None
+            crop_save(raw, path, face); cred[g] = entry; new += 1; via[how] = via.get(how, 0) + 1; time.sleep(.5); return True
         except Exception as e:
-            skipped += 1; print('could not save', g, fn, str(e)[:100])
+            skipped += 1; print('could not save', g, x.get('page'), str(e)[:100]); return False
+
+    for p in sorted(P, key=lambda p: p['id']):
+        g = p['id']; e = wd.get(g) or {}
+        if e.get('img'):
+            x = info.get(e['img'])
+            if usable(x): save(g, x, 'wikidata'); continue
+            count(f"Wikidata picture not free ({(x or {}).get('lic') or 'no license'})")
+        # no free Wikidata picture: a photo of him alone from his own Commons category, else from a search by his name
+        try:
+            cands = [(f, 'category') for f in (commons_category_files(e['cat']) if e.get('cat') else [])]
+            nm = re.sub(r'\s+(jr|sr|ii|iii|iv|v)\.?$', '', p['n'], flags=re.I)
+            me = ' '.join(norm(p['n']))
+            if me not in dup:   # (two BFF players with one name: a search cannot tell them apart)
+                cands += [(f, 'search') for f in commons_search(nm) if f not in {c for c, _ in cands}]
+            # the file name first (no lookups): his name, one person
+            cands = [(f, how) for f, how in cands if not MULTI.search(re.sub(r'\.[a-z]{3,4}$', '', f, flags=re.I)) and has_name(f, p['n'], full=how != 'category')][:25]
+            if not cands: count('no photo on Commons'); continue
+            fi = commons_info([f for f, _ in cands]); fc = file_categories([f for f, _ in cands])
+        except Exception as ex:
+            count('Commons lookup failed'); print('Commons lookup failed for', p['n'], str(ex)[:100]); continue
+        bio = p.get('bio') or {}; ctx = [TEAM_FULL.get(p.get('t')), TEAM_FULL.get(bio.get('dc')), bio.get('col')]
+        ok_ = [(f, how) for f, how in cands if usable(fi.get(f)) and verified(f, p['n'], fc.get(f) or [], ctx, how == 'category')
+               and not any(o_ != me and ' ' + o_ + ' ' in ' ' + ' '.join(norm(f)) + ' ' for o_ in others)]
+        if not ok_: count('no photo verifiably of him alone'); continue
+        o = (old.get('p') or {}).get(g)
+        ok_.sort(key=lambda c: str(fi[c[0]].get('ts') or ''), reverse=True)   # newest first, then: the photo he has now, his own category
+        ok_.sort(key=lambda c: (not (o and o.get('src') == fi[c[0]]['page']), c[1] != 'category'))
+        if o and o.get('src') == fi[ok_[0][0]]['page'] and o.get('ts') == fi[ok_[0][0]]['ts'] and os.path.exists(os.path.join(OUT, g + '.webp')):
+            save(g, fi[ok_[0][0]], ok_[0][1]); continue   # checked when it was saved; unchanged since
+        done = False
+        for f, how in ok_[:MAX_TRIES]:
+            try: raw = get(fi[f]['thumb'])
+            except Exception: continue
+            fs = faces(raw)
+            if fs is None: count('face check unavailable (opencv-python-headless 4 not installed)'); break
+            if len(fs) == 1: done = save(g, fi[f], how, raw, fs[0]); break
+            time.sleep(.3)
+        if not done: count('no photo verifiably of him alone')
     # players no longer in BFF keep their photo for 60 days
-    wanted = set(want.values())   # (want maps Pro Football Reference IDs to BFF's player IDs)
+    wanted = {p['id'] for p in P}
     for g, o in (old.get('p') or {}).items():
         if g in cred or g in wanted: continue
         try: age = (NOW.date() - datetime.date.fromisoformat(o.get('seen') or '2000-01-01')).days
@@ -158,8 +288,8 @@ def main():
     for g, o in (old.get('p') or {}).items():
         if g not in cred and not DRY and os.path.exists(os.path.join(OUT, o['f'])): os.remove(os.path.join(OUT, o['f']))
     if not DRY: json.dump({'at': NOW.date().isoformat(), 'p': dict(sorted(cred.items()))}, open(CRED, 'w'), indent=0)
-    print(f'photos: {len(cred)} in use ({new} new, {kept} unchanged, {skipped} failed); skipped for license: '
-          + ', '.join(f'{k} {v}' for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])[:8]))
+    print(f'photos: {len(cred)} in use ({new} new, {kept} unchanged, {skipped} failed); found by: '
+          + ', '.join(f'{k} {v}' for k, v in sorted(via.items())) + '; no photo: ' + ', '.join(f'{k} {v}' for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])[:8]))
 
 
 if __name__ == '__main__':

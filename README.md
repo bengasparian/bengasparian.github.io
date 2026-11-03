@@ -389,10 +389,16 @@ recaps still in their window.
   brick wall, two club spotlights, a faded BFF tag, spray-paint underlines, neon glow and marker-style tags. All of it
   stops for anyone who asks their device for less motion, and the heavy parts stay off on phones and low-power devices.
 - **Player photos** (`photos.py`, weekly): Wikidata links each player's Pro Football Reference ID to a picture on
-  Wikimedia Commons; only pictures whose license is public domain, CC0, CC BY or CC BY-SA are used (anything with "no
-  derivatives", "non-commercial", fair use or no license is skipped). Each is cropped to a 3:4 portrait, saved small in
-  `photos/`, and credited (author, license with its link, "cropped and resized", and CC BY-SA kept as CC BY-SA) on the
-  player's card and under Sources → Photo credits. Players without a free photo get their jersey in team colors.
+  Wikimedia Commons and to his own Commons category. The photo is, in order: his Wikidata picture; else a photo from his
+  own category; else a Commons photo found by his full name. A category or search photo is used only when it is
+  verifiably him alone: his name in the file name (no "and", "with" or "vs", nobody else's name), a search result also
+  filed under his team, draft team or college football team (and never when two BFF players share the name), and
+  exactly one face found in it (OpenCV face detection). Only pictures whose license is public domain, CC0, CC BY or
+  CC BY-SA are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped). Each is
+  cropped to a 3:4 portrait around the face, saved small in `photos/`, and credited (author, license with its link,
+  "cropped and resized", and CC BY-SA kept as CC BY-SA) on the player's card and under Sources → Photo credits.
+  Players without a free photo get their jersey in team colors with their number; BFF does not draw faces made to look
+  like real players (a likeness raises the same rights questions as a photo, and a guessed likeness can be wrong).
   Photos only show on your own site (the claude.ai copy shows jerseys).
 - **Team badges:** BFF draws its own shield for each team from its abbreviation and colors, used wherever a logo would go.
 - **Readable text on every picture:** text on artwork sits on a dark scrim sized to the text block, so white text keeps
