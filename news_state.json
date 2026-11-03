@@ -1,3 +1,21 @@
 {
- "reinstated": {}
+ "reinstated": {},
+ "tl": {
+  "00-0033307": {
+   "n": 99,
+   "d": "2026-11-02T23:02:26+00:00",
+   "s": "Pro Football Talk",
+   "hi": null,
+   "k": "season",
+   "spec": 0
+  },
+  "00-0035993": {
+   "n": 1,
+   "d": "2026-11-02T14:39:38+00:00",
+   "s": "RotoBaller",
+   "hi": null,
+   "k": "ind",
+   "spec": 0
+  }
+ }
 }
