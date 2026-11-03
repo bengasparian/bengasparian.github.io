@@ -1,11 +1,6 @@
 {
  "date": "2026-11-03",
  "failing_since": null,
- "forecasts": {
-  "RB": "m+r+s",
-  "TE": "m+r+s",
-  "WR": "m+r+s+e"
- },
  "last_good": "2026-11-03",
  "ok": true,
  "season": {
