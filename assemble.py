@@ -1,6 +1,6 @@
 """Combine the template, styles, and data into index.html (the published page).
 
-Ads and tips (optional, both off until set): a repository variable BFF_ADS_CLIENT holding your Google AdSense publisher ID
+Ads and tips (optional, both off until set): a repository variable BFF_ADS_CLIENT (or "client" in ads.json) holding your Google AdSense publisher ID
 (ca-pub- and 16 digits) turns on AdSense (Auto ads: Google places the ads) and writes ads.txt; BFF_ADS_SLOT (an AdSense
 display ad unit's slot number) also fills BFF's own ad spaces; BFF_TIP_URL (a https link to your tip page, for example
 Ko-fi, Buy Me a Coffee or GitHub Sponsors) shows a "Support BFF" button.
@@ -35,8 +35,13 @@ def accounts():
 
 
 def ads():
-    """ads and tips from repository variables: {'client': 'ca-pub-...', 'slot': '...', 'tip': 'https://...'} (empty when off)"""
+    """ads and tips from repository variables, else from ads.json in the repository ({"client": "ca-pub-...", "slot": "...",
+    "tip": "https://..."}; nothing in it is secret: the publisher ID is in every page that shows ads): empty when off"""
     out = {}
+    try: F = json.load(open("ads.json")) if os.path.exists("ads.json") else {}
+    except Exception as e: F = {}; print("ads.json unreadable:", e)
+    for k, v in (("BFF_ADS_CLIENT", "client"), ("BFF_ADS_SLOT", "slot"), ("BFF_TIP_URL", "tip")):
+        if not (os.environ.get(k) or "").strip() and str(F.get(v) or "").strip(): os.environ[k] = str(F[v]).strip()
     cl = (os.environ.get("BFF_ADS_CLIENT") or "").strip()
     if cl:
         if re.fullmatch(r"ca-pub-\d{16}", cl): out["client"] = cl
