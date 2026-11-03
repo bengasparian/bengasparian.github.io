@@ -391,9 +391,13 @@ recaps still in their window.
 - **Player photos** (`photos.py`, weekly): Wikidata links each player's Pro Football Reference ID to a picture on
   Wikimedia Commons and to his own Commons category. The photo is, in order: his Wikidata picture; else a photo from his
   own category; else a Commons photo found by his full name. A category or search photo is used only when it is
-  verifiably him alone: his name in the file name (no "and", "with" or "vs", nobody else's name), a search result also
-  filed under his team, draft team or college football team (and never when two BFF players share the name), and
-  exactly one face found in it (OpenCV face detection). Only pictures whose license is public domain, CC0, CC BY or
+  verifiably him alone: his name in the file name (no "and", "with" or "vs", nobody else's name, nothing before it that
+  makes someone else the subject, no painting, grave or card), a search result also with the same suffix ("Michael
+  Carter II" is not Michael Carter) and filed under his team, draft team or college football team (never just a
+  category named like him, which can be a namesake's; never when two BFF players share the name), and exactly one face
+  found in it (OpenCV face detection). The first search run, on November 3, 2026, took a few namesakes (a 19th-century
+  painter, an Air Force sergeant, a hockey goalie) before these rules; they were removed before reaching the site. A
+  run that would lose more than 15% of the photos, or that Wikidata answers with no players, stops and keeps them all. Only pictures whose license is public domain, CC0, CC BY or
   CC BY-SA are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped). Each is
   cropped to a 3:4 portrait around the face, saved small in `photos/`, and credited (author, license with its link,
   "cropped and resized", and CC BY-SA kept as CC BY-SA) on the player's card and under Sources → Photo credits.

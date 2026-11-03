@@ -44,6 +44,7 @@ TEAM_FULL = {'ARI': 'Arizona Cardinals', 'ATL': 'Atlanta Falcons', 'BAL': 'Balti
              'NYJ': 'New York Jets', 'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers', 'SEA': 'Seattle Seahawks', 'SF': 'San Francisco 49ers',
              'TB': 'Tampa Bay Buccaneers', 'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders'}
 MAX_TRIES = 5   # photos downloaded to check, per player
+CROPV = 2   # how photos are cropped (2: around a face confirmed by an eye, else top-centered); a new version re-crops every photo once
 
 
 def get(url, data=None, timeout=60, tries=3):
@@ -127,15 +128,21 @@ def file_categories(files):
 
 
 def faces(raw):
-    """face boxes (x, y, w, h) clear enough to count (OpenCV's frontal-face detector), or None if it cannot run"""
+    """faces (x, y, w, h) that are clearly faces: OpenCV's frontal-face detector, at least 8% of the picture's short side,
+    with an eye found in the upper part of the box (Nov 3 2026: without the eye check, a leg, a glove or a patch of grass
+    could count as a face). None if the detector cannot run."""
     try:
         import cv2, numpy as np
         from PIL import Image, ImageOps
         im = np.array(ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert('L'))
-        c = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))
-        if c.empty(): return None
-        m = max(24, int(min(im.shape) * .06))   # at least 6% of the picture's short side
-        return [tuple(int(v) for v in f) for f in c.detectMultiScale(im, scaleFactor=1.1, minNeighbors=6, minSize=(m, m))]
+        fc = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))
+        ec = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, 'haarcascade_eye.xml'))
+        if fc.empty() or ec.empty(): return None
+        m = max(24, int(min(im.shape) * .08)); out = []
+        for (x, y, w, h) in fc.detectMultiScale(im, scaleFactor=1.1, minNeighbors=6, minSize=(m, m)):
+            e = max(6, int(w) // 10)
+            if len(ec.detectMultiScale(im[y:y + int(h * .6), x:x + w], scaleFactor=1.1, minNeighbors=4, minSize=(e, e))): out.append((int(x), int(y), int(w), int(h)))
+        return out
     except Exception:
         return None
 
@@ -271,8 +278,8 @@ def main():
         nonlocal kept, new, skipped
         path = os.path.join(OUT, g + '.webp'); o = (old.get('p') or {}).get(g)
         entry = {'f': g + '.webp', 'a': x['artist'] or 'Unknown author', 'lic': x['lic'], 'lu': x['lu'], 'src': x['page'], 'ts': x['ts'],
-                 'm': 'cropped and resized' + (', CC BY-SA' if 'sa' in x['lic'].lower() else ''), 'via': how, 'seen': NOW.date().isoformat()}
-        if o and o.get('src') == x['page'] and o.get('ts') == x['ts'] and os.path.exists(path):
+                 'm': 'cropped and resized' + (', CC BY-SA' if 'sa' in x['lic'].lower() else ''), 'via': how, 'cv': CROPV, 'seen': NOW.date().isoformat()}
+        if o and o.get('src') == x['page'] and o.get('ts') == x['ts'] and o.get('cv') == CROPV and os.path.exists(path):
             cred[g] = entry; kept += 1; via[how] = via.get(how, 0) + 1; return True
         if DRY: print('would save', g, how, x['page'], x['lic']); via[how] = via.get(how, 0) + 1; return True
         try:
@@ -281,7 +288,9 @@ def main():
                 fs = faces(raw); face = fs[0] if fs and len(fs) == 1 else None
             crop_save(raw, path + '.new', face); staged.append(g); cred[g] = entry; new += 1; via[how] = via.get(how, 0) + 1; time.sleep(.5); return True
         except Exception as e:
-            skipped += 1; print('could not save', g, x.get('page'), str(e)[:100]); return False
+            skipped += 1; print('could not save', g, x.get('page'), str(e)[:100])
+            if o and o.get('src') == x['page'] and os.path.exists(path): cred[g] = o; return True   # a failed download keeps the photo he had
+            return False
 
     for p in sorted(P, key=lambda p: p['id']):
         g = p['id']; e = wd.get(g) or {}
@@ -309,7 +318,7 @@ def main():
         o = (old.get('p') or {}).get(g)
         ok_.sort(key=lambda c: str(fi[c[0]].get('ts') or ''), reverse=True)   # newest first, then: the photo he has now, his own category
         ok_.sort(key=lambda c: (not (o and o.get('src') == fi[c[0]]['page']), c[1] != 'category'))
-        if o and o.get('src') == fi[ok_[0][0]]['page'] and o.get('ts') == fi[ok_[0][0]]['ts'] and os.path.exists(os.path.join(OUT, g + '.webp')):
+        if o and o.get('src') == fi[ok_[0][0]]['page'] and o.get('ts') == fi[ok_[0][0]]['ts'] and o.get('cv') == CROPV and os.path.exists(os.path.join(OUT, g + '.webp')):
             save(g, fi[ok_[0][0]], ok_[0][1]); continue   # checked when it was saved; unchanged since
         done = False
         for f, how in ok_[:MAX_TRIES]:
