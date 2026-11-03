@@ -475,6 +475,19 @@ function renderSOS(){const pos=((document.querySelector('#spos button.on')||{}).
 // ---------- LIVE
 const EMAP={WSH:'WAS',LAR:'LA'};const CAN_LIVE=HOSTED;
 const LIVE=Object.assign({src:'snapshot',games:[],box:{},pbp:{},prev:[]},D.live||{});let OPENG=null;
+// live scores during games (since Nov 2026): BALLDONTLIE's NFL API (free tier, commercial use allowed by its terms; not
+// official league data), checked once a minute by the live job and kept on the repository's `live` branch (D.liveNow).
+// They show only for games the official data has not finished; the official final score and box score replace them.
+let LIVENOW=null;
+function applyLiveNow(){if(!LIVENOW||!Array.isArray(LIVENOW.games))return 0;const M={};LIVENOW.games.forEach(y=>{if(y&&y.id)M[y.id]=y});let n=0;
+ (LIVE.games||[]).forEach(x=>{const y=M[x.id];if(!y||x.state==='post'||y.hs==null||y.as==null)return;
+  if(y.state==='in_progress'){x.state='in';x.q=y.q;x.clock='';x.hs=y.hs;x.as=y.as;if(y.ls)x.ls=y.ls;x.unoff=1;n++}
+  else if(y.state==='final'){x.state='post';x.q=y.ls&&y.ls[0].length>4?5:4;x.detail=x.q>4?'Final/OT':'Final';x.hs=y.hs;x.as=y.as;if(y.ls)x.ls=y.ls;x.unoff=1;n++}});return n}
+async function pollLiveNow(){if(!D.liveNow||!CAN_LIVE||!/^https?:/.test(location.protocol))return;let next=600000;
+ try{const now=Date.now(),near=(LIVE.games||[]).some(x=>x&&x.state!=='post'&&x.kick&&Date.parse(x.kick)-now<75*6e4&&now-Date.parse(x.kick)<5*36e5);
+  if(near){next=60000;const r=await fetch(D.liveNow+'?t='+Math.floor(now/6e4),{cache:'no-store'});
+   if(r.ok){const j=await r.json();if(j&&Array.isArray(j.games)&&Math.abs(now-Date.parse(j.at))<20*6e4){LIVENOW=j;if(applyLiveNow()){ANIM=false;try{renderLive()}catch(e){console.warn('BFF live render',e)}try{liveBadgesPaint()}catch(e){console.warn('BFF live badges',e)}ANIM=true}}}}
+ }catch(e){console.warn('BFF live scores',e)}finally{setTimeout(pollLiveNow,next)}}
 // ---------- GAME PICTURES: BFF shows no other site's photos; game cards and covers use BFF's own team-color art
 function gamePhoto(x){return null}
 const photoImg=(ph,cls)=>'';
@@ -1013,7 +1026,7 @@ function renderGamePage0(){if(!GP)return;const x=gpFind(GP.id);if(!x){hideGame()
   body=`<p class="m">How each offense matches up with the defense it faces, from points each defense allows to each position (rank 1 = toughest).</p><div class="grid2">${gr(A,H)}${gr(H,A)}</div>`}
  g('gmbody').innerHTML=hero+nav+`<div class="gpsec">${body}</div>`}
 function renderLive(){return keepScroll(g('live'),()=>g('live').hidden?renderLive0():keepAnchor('#games .game',renderLive0))}
-function renderLive0(){if(NOSCHED){renderOffseason();return}fillWeekSel();if(curLW()!==liveDataWeek()){ANI=0;renderLiveWeek();try{renderTicker()}catch(e){}return}ANI=0;g('livesrc').innerHTML=`Final scores and box scores after each game, from official stats${LIVE.at?' · updated '+new Date(LIVE.at).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}):''}`;
+function renderLive0(){if(NOSCHED){renderOffseason();return}fillWeekSel();if(curLW()!==liveDataWeek()){ANI=0;renderLiveWeek();try{renderTicker()}catch(e){}return}ANI=0;g('livesrc').innerHTML=`${(LIVE.games||[]).some(x=>x.unoff)?'Live scores during games from BALLDONTLIE (unofficial) · ':''}Final scores and box scores after each game, from official stats${LIVE.at?' · updated '+new Date(LIVE.at).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}):''}`;
  const G=LIVE.games.slice().sort((a,b)=>({in:0,pre:1,post:2}[a.state]-{in:0,pre:1,post:2}[b.state])||String(a.kick).localeCompare(String(b.kick)));
  g('games').innerHTML=G.map(gameCard).join('')||'<div class="empty">No games found for this week.</div>';
  if(OPENG){const cards=[...g('games').querySelectorAll('.game')],i=cards.findIndex(c=>c.dataset.g===String(OPENG));
@@ -1029,7 +1042,7 @@ function newScores(x,pb){const old=pbpOf(x.id);if(!old||!pb.sp||!old.sp||pb.sp.l
  if((GP&&GP.id===String(x.id))||mineG)try{toast(`${s.tm||''} ${s.ty||'score'}: ${String(s.t).slice(0,90)} (${x.away} ${s.as??x.as}, ${x.home} ${s.hs??x.hs})`,'info')}catch(e){}}
 async function pollLive(){if(!CAN_LIVE||!/^https?:/.test(location.protocol))return;try{
  const r=await fetch('live.json',{cache:'no-store'});if(r.ok){const j=await r.json();if(j&&Array.isArray(j.games)&&j.games.length&&j.at!==LIVE.at&&j.season===(LIVE.season||D.asof.season)){
-  (j.games||[]).forEach(x=>{const pb=(j.pbp||{})[x.id];if(pb)newScores(x,pb)});Object.assign(LIVE,j);ANIM=false;try{renderLive()}catch(e){console.warn('BFF live render',e)}try{liveBadgesPaint()}catch(e){console.warn('BFF live badges',e)}ANIM=true}}
+  (j.games||[]).forEach(x=>{const pb=(j.pbp||{})[x.id];if(pb)newScores(x,pb)});Object.assign(LIVE,j);applyLiveNow();ANIM=false;try{renderLive()}catch(e){console.warn('BFF live render',e)}try{liveBadgesPaint()}catch(e){console.warn('BFF live badges',e)}ANIM=true}}
  }catch(e){console.warn('BFF scores update',e)}finally{setTimeout(pollLive,(LIVE.games||[]).some(x=>x&&x.started)?300000:900000)}}
 // ---------- NEWS
 // headlines: the headline, its publisher, the link and the time only (no pictures or story text from other sites)
@@ -3302,5 +3315,5 @@ addEventListener('resize',()=>requestAnimationFrame(moveInd));if(document.fonts&
   if(/^[1-9]$/.test(e.key)){const b=document.querySelectorAll('nav.tabs button[data-t]')[+e.key-1];if(b)b.click();return}
   if(e.key==='?'){toast('<b>Shortcuts</b>: <kbd>/</kbd> search · <kbd>1</kbd>–<kbd>9</kbd> tabs · <kbd>Esc</kbd> close','info')}});
  const f=g('footfresh');if(f)f.innerHTML=`<b>Data</b><br>Stats through week ${D.asof.last_week} · built ${esc(D.asof.built)}<br>${CAN_LIVE?'Scores and news update automatically':'Snapshot copy: live data loads on your own site'}`;})();
-try{accStart()}catch(e){console.warn('BFF account',e)}try{adsInit()}catch(e){console.warn('BFF ads',e)}fillTeams();renderLearn();tipify(g('help'));newsroomInit();renderAll();mdInitSetup();ROUTING=true;showTab('players');ROUTING=false;favCount();g('botform').onsubmit=e=>{e.preventDefault();botSend(g('botin').value)};route();addEventListener('popstate',route);requestAnimationFrame(moveInd);pollLive();pollNews();setTimeout(pollBets,4000);
+try{accStart()}catch(e){console.warn('BFF account',e)}try{adsInit()}catch(e){console.warn('BFF ads',e)}fillTeams();renderLearn();tipify(g('help'));newsroomInit();renderAll();mdInitSetup();ROUTING=true;showTab('players');ROUTING=false;favCount();g('botform').onsubmit=e=>{e.preventDefault();botSend(g('botin').value)};route();addEventListener('popstate',route);requestAnimationFrame(moveInd);pollLive();pollLiveNow();pollNews();setTimeout(pollBets,4000);
 </script>__SDGAME__</body></html>

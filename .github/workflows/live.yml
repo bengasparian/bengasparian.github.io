@@ -1,0 +1,44 @@
+name: Live scores during games
+
+# While an NFL game is under way (or kicks off within 75 minutes), checks the score once a minute with the BALLDONTLIE
+# NFL API (free tier; its terms allow commercial use) and pushes live_now.json to the `live` branch, which the page
+# reads during games. Needs the repository secret BFF_BDL_KEY (a free key from app.balldontlie.io); without it the run
+# ends at once and the site keeps its after-game scores. It also starts itself from the scores job before kickoffs, and
+# starts its own next run when a game day runs longer than one 6-hour GitHub job.
+on:
+  schedule:
+    - cron: "17,47 16-23 * * 0"   # Sundays 16:17-23:47 UTC (games from 9:30 AM Eastern)
+    - cron: "17,47 0-4 * * 1"     # Sunday night games (UTC Monday)
+    - cron: "17,47 0-3 * * 2"     # Monday night games (UTC Tuesday)
+    - cron: "17,47 0-3 * * 5"     # Thursday night games (UTC Friday)
+    - cron: "17,47 17-23 * * 6"   # Saturday games late in the season
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # push live_now.json to the live branch
+  actions: write    # start the next run when games go on past 6 hours
+
+concurrency:
+  group: bff-live   # one live job at a time; separate from the data jobs, so it never holds them up
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          sparse-checkout: |
+            live_now.py
+            index.html
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Live scores while games are on
+        env:
+          BFF_BDL_KEY: ${{ secrets.BFF_BDL_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python live_now.py

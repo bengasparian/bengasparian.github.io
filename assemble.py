@@ -63,6 +63,10 @@ A = accounts()
 if A: D["auth"] = A
 AD = ads()
 if AD: D["ads"] = AD
+# live scores during games (live_now.py on the `live` branch), when the BALLDONTLIE key is set (BFF_LIVE=true from the workflow)
+if os.environ.get("GITHUB_REPOSITORY") and (os.environ.get("BFF_LIVE") or "").strip().lower() == "true":
+    D["liveNow"] = f"https://raw.githubusercontent.com/{os.environ['GITHUB_REPOSITORY']}/live/live_now.json"
+print("live scores during games:", "on (" + D["liveNow"] + ")" if D.get("liveNow") else "off (set the secret BFF_BDL_KEY to turn them on)")
 # AdSense: the script in the page head (Auto ads and site verification) and ads.txt at the site's root
 head = ""
 if AD.get("client"):

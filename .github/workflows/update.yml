@@ -76,6 +76,7 @@ jobs:
           BFF_TERMS_STATE: ${{ vars.BFF_TERMS_STATE }}
           BFF_CONTACT: ${{ vars.BFF_CONTACT }}
           BFF_ADS_CLIENT: ${{ vars.BFF_ADS_CLIENT }}
+          BFF_LIVE: ${{ secrets.BFF_BDL_KEY != '' }}
           BFF_ADS_SLOT: ${{ vars.BFF_ADS_SLOT }}
           BFF_TIP_URL: ${{ vars.BFF_TIP_URL }}
         run: python assemble.py
@@ -89,6 +90,7 @@ jobs:
           BFF_TERMS_STATE: ${{ vars.BFF_TERMS_STATE }}
           BFF_CONTACT: ${{ vars.BFF_CONTACT }}
           BFF_ADS_CLIENT: ${{ vars.BFF_ADS_CLIENT }}
+          BFF_LIVE: ${{ secrets.BFF_BDL_KEY != '' }}
           BFF_ADS_SLOT: ${{ vars.BFF_ADS_SLOT }}
           BFF_TIP_URL: ${{ vars.BFF_TIP_URL }}
         run: python assemble.py

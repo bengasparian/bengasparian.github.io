@@ -124,8 +124,17 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   time, venue and Vegas line; after it, the final score, the box score (passing, rushing, receiving, kicking, team
   totals), the scoring plays and everyone's fantasy points. These come from nflverse's official stats and play-by-play
   (`live_update.py` into `live.json`, every 30 minutes), usually a few hours after the game, with the full play-by-play
-  by the next morning. **There is no live in-game feed** (the free, licensed sources publish after the game), and the
-  page says so. Tap a game for its game center (outlook, win chances from the spread, injuries, expected starting
+  by the next morning. **Live scores during games** come from the
+  [BALLDONTLIE NFL API](https://nfl.balldontlie.io) (free tier; its [terms](https://www.balldontlie.io/terms) allow
+  commercial use, fantasy sports included, without attribution, as long as the data is not called official league
+  data): `live.yml` checks once a minute while a game is under way and keeps `live_now.json` on the repository's `live`
+  branch, which the page reads every minute during games and labels "live (unofficial)"; the official final score, box
+  score and scoring plays replace it after the game. It needs a free key from
+  [app.balldontlie.io](https://app.balldontlie.io/signup) saved as the repository secret `BFF_BDL_KEY` (Settings >
+  Secrets and variables > Actions > New repository secret); without it the page says final scores come after each
+  game. The live job starts from its own schedule on game days and from the scores job before kickoffs, and starts its
+  next run when a game day lasts longer than one 6-hour GitHub job; like every GitHub schedule it can start late when
+  GitHub is busy. Tap a game for its game center (outlook, win chances from the spread, injuries, expected starting
   quarterbacks, top performers, box score). Past and future weeks too.
 - **News:** a sports-site layout with a top story, lead stories and rails. Outside stories are **headline links only**
   (CBS Sports, Pro Football Talk, RotoBaller, PFF, Sharp Football Analysis): the publisher's headline, linked to its own
