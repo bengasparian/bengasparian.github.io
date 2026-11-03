@@ -44,7 +44,7 @@ TEAM_FULL = {'ARI': 'Arizona Cardinals', 'ATL': 'Atlanta Falcons', 'BAL': 'Balti
              'NYJ': 'New York Jets', 'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers', 'SEA': 'Seattle Seahawks', 'SF': 'San Francisco 49ers',
              'TB': 'Tampa Bay Buccaneers', 'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders'}
 MAX_TRIES = 6   # new photos downloaded to check, per player and run (checked photos are remembered in photos/checks.json)
-CROPV = 3   # how photos are cropped (3: head and shoulders around the face, else top-centered); a new version re-crops every photo once
+CROPV = 4   # how photos are cropped (4: head and shoulders around a large, central face, from a 1000-px copy; else top-centered); a new version re-crops every photo once
 MODEL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'face_detection_yunet_2023mar.onnx')   # YuNet (MIT, OpenCV Zoo)
 CHECKS = os.path.join(OUT, 'checks.json')
 
@@ -256,7 +256,7 @@ def commons_info(files):
     info = {}
     for i in range(0, len(files), 50):
         chunk = files[i:i + 50]
-        q = {'action': 'query', 'format': 'json', 'prop': 'imageinfo', 'iiprop': 'url|extmetadata|mime|size', 'iiurlwidth': 600,
+        q = {'action': 'query', 'format': 'json', 'prop': 'imageinfo', 'iiprop': 'url|extmetadata|mime|size', 'iiurlwidth': 1000,
              'titles': '|'.join('File:' + f for f in chunk), 'maxlag': 5}
         d = json.loads(get(COMMONS + '?' + urllib.parse.urlencode(q)))
         norm = {n['to']: n['from'] for n in (d.get('query') or {}).get('normalized') or []}
@@ -276,6 +276,15 @@ def commons_info(files):
 def free_license(x):
     lic = x.get('lic') or ''
     return bool(lic) and not x.get('nonfree') and bool(FREE.match(lic)) and not NOTFREE.search(lic)
+
+
+def good_face(box):
+    """a face big and central enough to be the photo's subject and to show sharply: at least 8% of the picture's width,
+    its center in the middle 70% (Nov 3 2026: smaller ones were blurry, or a bystander, like a referee beside a player
+    in a helmet)"""
+    if not box: return False
+    x, y, w, h = box
+    return w >= .08 and .15 <= x + w / 2 <= .85
 
 
 def crop_save(raw, path, face=None):
@@ -394,7 +403,7 @@ def main():
             except Exception as ex: print('could not check', f, str(ex)[:80]); continue
             if n_ is None: count('face check unavailable (opencv-python-headless 4 not installed)'); break
             if raw: raws[f] = raw
-            if n_ == 1: pick = (f, how, box); break
+            if n_ == 1 and good_face(box): pick = (f, how, box); break
         if not pick:   # his face shows clearly in none of them: his Wikidata picture as it is (top-centered), else no photo
             wf = next((c for c in ok_ if c[1] == 'wikidata'), None)
             if not wf: count('no photo with his face clearly visible'); continue
