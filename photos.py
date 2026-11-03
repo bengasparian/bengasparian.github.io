@@ -140,14 +140,55 @@ def faces(raw):
         return None
 
 
+SUFFIX = {'jr', 'sr', 'ii', 'iii', 'iv', 'v'}
+SUBJ = re.compile(r"\b(sgt|sergeant|spc|specialist|pfc|pvt|private|cpl|corporal|lt|lieutenant|capt|captain|maj|major|col|colonel|gen|general|"
+                  r"adm|admiral|airman|seaman|petty|officer|chief|tech|staff|soldier|sailor|cadet|president|secretary|governor|senator|mayor|"
+                  r"coach|signed|signs|donates|donated|meets|visits|presents|holds|gives|by|of|for|to|at|and|with)\b", re.I)
+NOTPHOTO = re.compile(r"(\(\s*\d{4}\s*[-\u2013]\s*\d{4}\s*\)|\b(painting|portrait of|statue|grave|tomb|memorial|signature|autograph|trading card|logo)\b)", re.I)
+
+
+def words(s):
+    """lowercase words of a name or file name, suffixes kept ("Michael Carter II" -> michael carter ii)"""
+    import unicodedata
+    s = unicodedata.normalize('NFKD', str(s or '')).encode('ascii', 'ignore').decode().lower()
+    return re.sub(r'[^a-z0-9]+', ' ', re.sub(r"['\u2019`.]", '', s)).split()
+
+
+def name_in(title, name):
+    """(words before, words after) the player's name in a file name, or None. A different suffix is another man
+    ("Michael Carter II" is not Michael Carter); "Deebo Samuel" matches Deebo Samuel Sr."""
+    t = words(re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I)); n = words(name)
+    base = [w for w in n if w not in SUFFIX]; suf = [w for w in n if w in SUFFIX]
+    for i in range(len(t) - len(base) + 1):
+        if base and t[i:i + len(base)] == base:
+            j = i + len(base); nxt = t[j] if j < len(t) else None
+            if nxt in SUFFIX:
+                if nxt not in suf: continue
+                j += 1
+            return t[:i], t[j:]
+    return None
+
+
 def verified(title, name, cats, ctx, own_cat):
-    """a Commons file is this player alone: his name in the file name, nobody else's, and (from a search) filed under his
-    own category, his team, his draft team or his college's football team"""
-    if MULTI.search(re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I)): return False
-    if not has_name(title, name, full=not own_cat): return False
-    if own_cat: return True
+    """a Commons file is this player alone. Always: one person in the file name (no "and", "with", "vs"), not a painting,
+    grave or card, and nothing before his name that makes someone else the subject ("Sgt. ... donates a football signed
+    by ... Aaron Jones", "Tech Sgt Michael Wilson"). From his own Commons category (linked from his Wikidata item): his
+    last name in the file name. From a search: his full name (same suffix), and the file is filed under his team, his
+    draft team or his college's football team (a category named like him can be a namesake's: a painter, a hockey
+    goalie, a basketball player)"""
+    stem = re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I)
+    if MULTI.search(stem) or NOTPHOTO.search(stem): return False
+    if own_cat:
+        if not has_name(title, name, full=False): return False
+        last = words(re.sub(r'\s+(jr|sr|ii|iii|iv|v)\.?$', '', name, flags=re.I))[-1:]
+        t = words(stem); k = t.index(last[0]) if last and last[0] in t else 0
+        return len(t[:k]) <= 9 and not SUBJ.search(' '.join(t[:k]))
+    at = name_in(title, name)
+    if not at: return False
+    before, _ = at
+    if len(before) > 8 or SUBJ.search(' '.join(before)): return False
     cl = [c.lower() for c in cats]
-    return any(c == ' '.join(norm(name)) or norm(c) == norm(name) for c in cl) or any(x and x.lower() in c and ('football' in c or x in TEAM_FULL.values()) for x in ctx for c in cl)
+    return any(x and x.lower() in c and ('football' in c or x in TEAM_FULL.values()) for x in ctx for c in cl)
 
 
 def plain(s):
