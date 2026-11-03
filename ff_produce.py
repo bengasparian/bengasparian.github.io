@@ -84,7 +84,7 @@ P26=pd.read_parquet(_pf,columns=['week','posteam','play_type','qb_kneel','qb_spi
 TV=P26.groupby(['posteam','week']).agg(pl=('epa','size'),pr=('play_type',lambda x:(x=='pass').mean())).groupby('posteam').mean()
 RMAP={'QB':'QB','RB':'RB','HB':'RB','WR':'WR','LWR':'WR','RWR':'WR','SWR':'WR','TE':'TE'}   # fullbacks (FB) are not ranked as running backs
 dc2=dc[dc.pos_abb.isin(RMAP)].copy(); dc2['pg']=dc2.pos_abb.map(RMAP); role=dc2.sort_values('pos_rank').drop_duplicates('gsis_id').set_index('gsis_id')
-# pool: anyone with fantasy activity this season at QB/RB/WR/TE, plus depth-chart starters/backups (and, below, injured stars and the consensus top 300)
+# pool: anyone with fantasy activity this season at QB/RB/WR/TE, plus depth-chart starters/backups (and, below, injured stars, this year's early-round rookies and returning starters)
 pool={x for x in set(S26.player_id)|set(dc2[dc2.pos_rank<=(3)].gsis_id) if isinstance(x,str) and x}
 info=st.sort_values(['season','week']).groupby('player_id').tail(1).set_index('player_id')
 idx=ids.dropna(subset=['gsis_id']).drop_duplicates('gsis_id').set_index('gsis_id')
@@ -116,63 +116,24 @@ def bio_of(pid):
         if pd.notna(x_.get('draft_round')): b['dr']=int(x_['draft_round'])
         if 'dp' not in b and pd.notna(x_.get('draft_ovr')): b['dp']=int(x_['draft_ovr'])
     return b or None
-try: dv=pd.read_csv('values.csv'); dvm=dv.set_index('fp_id').value_1qb.to_dict()   # dynasty market value: only used to keep injured stars in the player pool
-except Exception as _e: print('dynasty values unavailable:',_e); dvm={}
-# ---- FantasyPros rest-of-season expert consensus (PPR; mirrored daily by DynastyProcess): overall rank, position rank, and how widely each player is rostered.
-# This is the redraft market check for trade values and the draft board (backtested 2023-25: see README).
-ECR={}; ECR_DATE=None; TODAY=datetime.date.fromisoformat(os.environ['BFF_AS_OF']) if os.environ.get('BFF_AS_OF') else datetime.date.today()
-try:
-    _E=pd.read_csv('db_fpecr_latest.csv',dtype={'id':str},low_memory=False)
-    _ro=_E[_E.page_type=='redraft-overall'].sort_values('ecr'); _rp=_E[_E.page_type.isin(['redraft-qb','redraft-rb','redraft-wr','redraft-te'])]
-    for _k,_x in enumerate(_ro.itertuples()):
-        ECR.setdefault(str(_x.id),{})['o']=_k+1
-        if _x.player_owned_avg==_x.player_owned_avg: ECR[str(_x.id)]['own']=round(float(_x.player_owned_avg))
-    for _pg,_G in _rp.groupby('page_type'):
-        for _k,_x in enumerate(_G.sort_values('ecr').itertuples()):
-            ECR.setdefault(str(_x.id),{})['p']=_k+1
-            if 'own' not in ECR[str(_x.id)] and _x.player_owned_avg==_x.player_owned_avg: ECR[str(_x.id)]['own']=round(float(_x.player_owned_avg))
-    ECR_DATE=str(_ro.scrape_date.max()) if len(_ro) else None
-    print('consensus rankings:',len(_ro),'overall,',len(_rp),'by position, as of',ECR_DATE)
-    if ECR_DATE and (TODAY-datetime.date.fromisoformat(ECR_DATE[:10])).days>14:
-        print('consensus rankings are more than two weeks old; not using them'); ECR={}; ECR_DATE=None
-except Exception as _e: print('consensus rankings unavailable (trade values fall back to projections only):',_e)
-# ---- FantasyPros WEEKLY expert consensus for the coming week (PPR ranks by position). Blended into next week's projection:
-# 2023-25 backtest, 46 weeks, 13,120 player-games, every season predicted by models trained only on earlier seasons:
-# rank accuracy (mean weekly Spearman by position) model alone 0.594, experts alone 0.631, blend at 85% experts 0.632;
-# average miss model alone 4.63, blend 4.49 points. The weight chosen leaving one season out each time was 0.85-1.0
-# (the old 65% ranked a little worse than the experts alone: 0.630).
-WK={}; WK_W=0.6   # the experts' share in the weekly mix (chosen on 2021-22, tested on 2023-26)
-try:
-    _W=pd.read_csv('fp_latest_weekly.csv',low_memory=False); _W=_W[_W.page.isin(['qb','ppr-rb','ppr-wr','ppr-te'])]
-    if not len(SC[(SC.season==SEASON)&SC.pts.isna()]): raise ValueError('no schedule yet')
-    _gd=pd.to_datetime(gm[(gm.season==SEASON)&(gm.week==int(SC[(SC.season==SEASON)&SC.pts.isna()].week.min()))].gameday)
-    _kd=pd.to_datetime(_W.player_game_kickoff_ts,unit='s',utc=True).dt.tz_convert('America/New_York').dt.tz_localize(None).dt.normalize()
-    _W=_W[(_kd>=_gd.min()-pd.Timedelta(days=1))&(_kd<=_gd.max()+pd.Timedelta(days=1))]   # only rankings for this week's games
-    for _x in _W.itertuples(): WK[str(int(_x.fantasypros_id))]=int(_x.rank)
-    print('weekly consensus:',len(WK),'players ranked for this week')
-except Exception as _e: print('weekly consensus unavailable (next-week projections use the model only):',_e)
-def wk_of(pid):
-    if pid not in idx.index or 'fantasypros_id' not in idx.columns: return None
-    f=idx.loc[pid,'fantasypros_id']
-    return None if f is None or f!=f else WK.get(str(int(f)))
-def ecr_of(pid):
-    if pid not in idx.index or 'fantasypros_id' not in idx.columns: return {}
-    f=idx.loc[pid,'fantasypros_id']
-    if f is None or f!=f: return {}
-    return ECR.get(str(int(f)),{})
-# also keep injured and reserve players who still matter (market value or real production), e.g. on IR or PUP with no snaps this season
+TODAY=datetime.date.fromisoformat(os.environ['BFF_AS_OF']) if os.environ.get('BFF_AS_OF') else datetime.date.today()
+# also keep injured and reserve players who still matter (real production), e.g. on IR or PUP with no snaps this season
 _pp1=st[st.season==SEASON-1].groupby('player_id').fantasy_points_ppr.agg(['mean','size']); _pp2=st[st.season==SEASON-2].groupby('player_id').fantasy_points_ppr.agg(['mean','size'])
-_fpid=idx['fantasypros_id'].to_dict() if 'fantasypros_id' in idx.columns else {}
 def _relevant(pid):
-    v=dvm.get(_fpid.get(pid)) if pid in _fpid else None
-    if v is not None and v==v and v>=150: return True
     if pid in _pp1.index and _pp1.loc[pid,'size']>=4 and _pp1.loc[pid,'mean']>=7: return True
     return bool(pid in _pp2.index and _pp2.loc[pid,'size']>=6 and _pp2.loc[pid,'mean']>=9)
 _extra={pid for pid,r_ in cur.iterrows() if r_.get('position') in POS and r_.get('status') in ('RES','ACT','INA') and pid not in pool and _relevant(pid)}
 pool|=_extra
-# the consensus top 300 too (in the offseason that brings in rookies and players who changed teams)
-_fp2g={str(int(f)):g for g,f in idx['fantasypros_id'].items() if f==f} if 'fantasypros_id' in idx.columns else {}
-_ecrp={_fp2g[k] for k,v in ECR.items() if v.get('o',999)<=300 and k in _fp2g}-pool; pool|=_ecrp
+# this year's rookies drafted in the first 100 picks (in the offseason, before depth charts list them) and last season's
+# fantasy starters on this season's roster (players who changed teams)
+_rosp=set()
+_R0=local_or(f'roster_{SEASON}.parquet')
+if _R0 is not None and len(_R0) and 'gsis_id' in _R0.columns:
+    for _x in _R0.dropna(subset=['gsis_id']).drop_duplicates('gsis_id',keep='last').itertuples():
+        if getattr(_x,'position',None) not in POS: continue
+        _dn=getattr(_x,'draft_number',None); _ey=getattr(_x,'entry_year',None)
+        if (_ey==SEASON and _dn==_dn and _dn is not None and float(_dn)<=100) or _relevant(_x.gsis_id): _rosp.add(_x.gsis_id)
+_rosp-=pool; pool|=_rosp
 # players on no NFL roster now (released, retired, never signed) have no games to project: in season, a player counts
 # only if the latest weekly roster has him with a team (active, reserve, inactive, practice squad or exempt list), or, when
 # that week does not list him, the season roster does; the depth chart decides only for players neither roster has.
@@ -187,7 +148,7 @@ if PHASE=='season' and 'week' in wr.columns and len(wr) and int(wr.week.max())>0
         else: ok_=pid_ in set(dc2.gsis_id)
         if not ok_: FREE.add(pid_)
     pool-=FREE
-print(f'player pool: {len(pool)} ({len(_extra)} injured or reserve players added back, {len(_ecrp)} from the consensus top 300, {len(FREE)} on no NFL roster left out)')
+print(f'player pool: {len(pool)} ({len(_extra)} injured or reserve players added back, {len(_rosp)} rookies or returning starters from the season roster, {len(FREE)} on no NFL roster left out)')
 SC26=SC[SC.season==SEASON]; SCHED_KNOWN=len(SC26)>0
 if not SCHED_KNOWN:   # offseason before the schedule is out: 17 games against opponents still to be announced
     _tm=sorted(SC[SC.season==SEASON-1].team.unique())
@@ -207,7 +168,7 @@ def team_of(pid):
     if pid in cur.index and cur.loc[pid,'status'] in ('ACT','RES','INA','DEV','EXE'): return cur.loc[pid,'team'],cur.loc[pid,'status']
     if pid in role.index: return role.loc[pid,'team'],'ACT'
     if pid in info.index and (info.loc[pid,'season']==SEASON or pid not in idx.index): return info.loc[pid,'team'],None
-    if pid in idx.index and isinstance(idx.loc[pid,'team'],str) and idx.loc[pid,'team'] not in ('FA','FA*'): return IDT.get(idx.loc[pid,'team'],idx.loc[pid,'team']),None
+    if pid in idx.index and isinstance(idx.loc[pid,'team'],str) and idx.loc[pid,'status'] in ('ACT','RES','INA','DEV','EXE','PUP','RSR','RSN','SUS'): return IDT.get(idx.loc[pid,'team'],idx.loc[pid,'team']),None
     return (info.loc[pid,'team'] if pid in info.index else None),None
 players=[]; prev_pg=prev; GDAY=dict(zip(gm.game_id,gm.gameday)); AVL={}; NOUSE={'RB':1.2,'WR':1.1,'TE':0.6}; NOU={}
 # per-game stat mix for custom scoring: this season's games plus three games' worth of last season (or of his position's
@@ -244,36 +205,15 @@ NXW={t_:int(G_[G_.pts.isna()].week.min()) for t_,G_ in SC26.groupby('team') if G
 KD={}
 for _g in gm[gm.season==SEASON].itertuples():
     for _t in (_g.home_team,_g.away_team): KD[(_t,int(_g.week))]=str(_g.gameday)
-E2G={str(int(e)):g_ for g_,e in idx['espn_id'].items() if e==e} if 'espn_id' in idx.columns else {}
-_nm=lambda s:' '.join(str(s or '').lower().replace('.','').replace("'",'').replace('-',' ').split())
-N2G={(r_.team,_nm(r_.full_name)):g_ for g_,r_ in cur.iterrows() if isinstance(r_.full_name,str)}
-def _espn_status(s):
-    s=str(s or '').lower()
-    if 'reserve' in s or 'physically unable' in s or s=='pup' or 'non-football' in s: return 'IR'
-    return 'Out' if s.startswith('out') or 'suspen' in s else 'Doubtful' if s.startswith('doubt') else 'Questionable' if s.startswith('quest') else None
 def _ret_week(tm_,d_):
     if not d_: return None
     W_=[w_ for (t_,w_),gd in KD.items() if t_==tm_ and gd>=str(d_)[:10]]
     return min(W_) if W_ else 99
-STATUS={}; ESPN_T=set()
-try:   # 1. ESPN's injury list for each team's next game (live.json; only games that have not started, in that team's next week)
-    _lv=json.load(open('live.json')) if os.path.exists('live.json') else {}
-    _gm={str(g_.get('id')):g_ for g_ in _lv.get('games') or []}
-    for gid_,blk in (_lv.get('inj') or {}).items():
-        g_=_gm.get(str(gid_)) or {}
-        if g_.get('state')!='pre': continue
-        for tm_,L_ in (blk.get('t') or {}).items():
-            if NXW.get(tm_)!=(blk.get('w') or _lv.get('week')) or tm_ not in (g_.get('home'),g_.get('away')): continue
-            ESPN_T.add(tm_)
-            for e_ in L_:
-                pid_=E2G.get(str(e_[0])) or N2G.get((tm_,_nm(e_[1]))); s_=_espn_status(e_[3])
-                if pid_ and s_ and s_!='IR': STATUS[pid_]={'s':s_,'src':'ESPN','d':e_[4] or None,'rw':_ret_week(tm_,e_[5]) if s_ in ('Out','Doubtful') and len(e_)>5 else None}
-    if ESPN_T: print('injuries: ESPN game lists for',len(ESPN_T),'teams')
-except Exception as _e: print('ESPN injuries unavailable (using the official report):',_e)
-# 2. the official report for teams ESPN did not cover (and what it implies before Friday's game statuses)
+STATUS={}
+# 1. the official injury report (and what it implies before Friday's game statuses)
 for tm_,G_ in (injfull.groupby('team') if len(injfull) else []):
     tm_=IDT.get(tm_,tm_)
-    if tm_ in ESPN_T or tm_ not in NXW: continue
+    if tm_ not in NXW: continue
     wr_=int(G_.week.max()); nx_=NXW[tm_]; cw_=G_[G_.week==wr_]
     _pv=G_[(G_.week==wr_-1)&G_.report_status.isin(['Out','Doubtful'])]; prevO={a_:(b_ if isinstance(b_,str) else None) for a_,b_ in zip(_pv.gsis_id,_pv.report_primary_injury)}
     if wr_==nx_:
@@ -291,11 +231,11 @@ for tm_,G_ in (injfull.groupby('team') if len(injfull) else []):
         for x_ in cw_[_miss].itertuples():
             q_=x_.report_status=='Questionable'
             STATUS[x_.gsis_id]={'s':'Questionable','src':'expected','k':nx_-wr_,'cv':'q' if q_ else None,'d':x_.report_primary_injury if isinstance(x_.report_primary_injury,str) else None,'n':(f'Questionable for week {wr_} and did not play' if q_ else f'Missed week {wr_}')+f'; no injury report for week {nx_} yet'}
-# 2b. the commissioner's exempt list (not allowed to play, like a suspension): out until the roster or the news says otherwise
+# 2. the commissioner's exempt list (not allowed to play, like a suspension): out until the roster or the news says otherwise
 EXEMPT={pid_ for pid_,x_ in cur.iterrows() if x_.get('status')=='EXE' and x_.get('position') in POS}
 for pid_ in EXEMPT: STATUS[pid_]={'s':'Out','src':'roster','d':None,'n':"On the commissioner's exempt list (not allowed to play)"}
 # 3. timelines reported in the news ("out at least three weeks", "out for the season") for a player whose next game has
-#    no ESPN or official status yet: out until his team's week (next game after the story) + N weeks
+#    no official status yet: out until his team's week (next game after the story) + N weeks
 import re as _re
 _NUMW={'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10}
 _TLW=_re.compile(r"\b(?:out|miss|sidelined|shelved)\b(?:\s+(?:for|at least|a minimum of|minimum of|roughly|about|approximately|around|another|an additional)){0,2}\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)(?:\s*(?:-|–|to|or)\s*(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten))?\s+(?:more\s+)?weeks?\b",_re.I)
@@ -316,12 +256,12 @@ try:
         h_=str(it_.get('h') or ''); d_=pd.to_datetime(it_.get('d'),utc=True,errors='coerce'); P_=it_.get('p') or []
         if len(P_)!=1 or pd.isna(d_) or (_now-d_).days>35: continue
         if P_[0] in EXEMPT and _REIN.search(h_): _RI[P_[0]]=(d_,it_.get('s') or 'news'); continue
-        if it_.get('st')=='ok' or _TLX.search(h_): continue
+        if it_.get('st')=='ok' or P_[0] in (it_.get('sk') or []) or _TLX.search(h_): continue   # (sk: the headline says he is playing)
         m_=_TLW.search(h_); se_=_TLS.search(h_)
         _wn=lambda g_: (int(g_) if g_.isdigit() else _NUMW[g_.lower()]) if g_ else None
         if m_ or se_: _TL[P_[0]]=(99 if se_ else _wn(m_.group(1)),d_,it_.get('s') or 'news',None if se_ else _wn(m_.group(2)))
     for pid_,(n_,d_,s_,hi_) in _TL.items():
-        if pid_ not in cur.index or (STATUS.get(pid_) or {}).get('src') in ('ESPN','report'): continue
+        if pid_ not in cur.index or (STATUS.get(pid_) or {}).get('src')=='report': continue
         tm_=IDT.get(cur.at[pid_,'team'],cur.at[pid_,'team'])
         if tm_ not in NXW: continue
         w0_=_ret_week(tm_,(d_+pd.Timedelta(days=1)).strftime('%Y-%m-%d')); rw_=99 if n_>=99 else (w0_ or 99)+n_
@@ -425,20 +365,6 @@ for pos in POS:
 # (2023-25 value backtest: better than adding a separate rest-of-season model, which the old version used)
 for pid_,X in PRED.items():
     m_=X['wk']<=17; X['L']=float(np.mean(X['P'][m_])) if m_.any() else float(np.mean(X['P'])); X['PR']=X['P']
-# how far his rest-of-season level moved with games played after the consensus was taken (the page adds half of that
-# change in value to the consensus)
-if ECR_DATE:
-    _WE=int(gm[(gm.season==SEASON)&(pd.to_datetime(gm.gameday)>=pd.Timestamp(ECR_DATE[:10]))].week.min()) if ((gm.season==SEASON)&(pd.to_datetime(gm.gameday)>=pd.Timestamp(ECR_DATE[:10]))).any() else NEXT
-    if _WE<NEXT:
-        _chg={pid_:_PL[pid_] for pid_ in PRED if ((S26.player_id==pid_)&(S26.week>=_WE)).any()}
-        if _chg:
-            UE=C5.upcoming(SEASON,_WE,_chg,{pid_:_GM[pid_] for pid_ in _chg})
-            for pos in POS:
-                u=UE[UE.pos==pos]
-                if not len(u): continue
-                PE=MODEL.next(pos,u)
-                for pid_,ix in u.groupby('player_id',sort=False).indices.items():
-                    m_=u.week.values[ix]<=17; pb_=float(np.mean(PE[ix][m_])) if m_.any() else float(np.mean(PE[ix])); PRED[pid_]['dc']=r(PRED[pid_]['L']-pb_,2)
 print('projected',len(PRED),'players,',len(U5),'games',flush=True)
 for pid in pool:
     if pid not in PRED: continue
@@ -447,11 +373,11 @@ for pid in pool:
     pv=prev_pg.get((pid,SEASON),np.nan)
     if (pv is None or pv!=pv) and pid in _pp2.index and _pp2.loc[pid,'size']>=6: pv=0.9*float(_pp2.loc[pid,'mean'])   # missed last season: use the season before
     G_=_GM[pid]; wk_rows=[(g_[0],g_[2],g_[3],g_[4],{'dvp':float(X['dvp'][i_]) if X['dvp'][i_]==X['dvp'][i_] else None,'bump':float(X['bump'][i_])}) for i_,g_ in enumerate(G_)]
-    P=X['P']; PR=X['PR']; Pr=np.array([X['L']]); dc_=X.get('dc'); Pm,Pv,Pt=X['Pm'],X['Pv'],X['Pt']; base={'efp':X['efp']}
+    P=X['P']; PR=X['PR']; Pr=np.array([X['L']]); Pm,Pv,Pt=X['Pm'],X['Pv'],X['Pt']; base={'efp':X['efp']}
     S_=STATUS.get(pid,{}); out=S_.get('s'); ir=status=='RES'
     nxt=wk_rows[0]; proj_next=float(P[0]); nw_=int(nxt[0])
     def _avail(w_):
-        # chance he plays week w_: out now -> the measured return curve (or ESPN's estimated return); missed his last game
+        # chance he plays week w_: out now -> the measured return curve (or a reported return week); missed his last game
         # with no new report -> the same curve from that game
         if out in ('Out','Doubtful'):
             k_=w_-nw_; rw_=S_.get('rw')
@@ -477,7 +403,9 @@ for pid in pool:
     # starters keep the model's number; quarterbacks follow the starter rule below.
     if pos in NOUSE and not len(rows) and not ir and status!='EXE' and not (rl is not None and rl['team']==tm and int(rl['pos_rank'])<=(3 if pos=='WR' else 1)):
         _h=wr[(wr.gsis_id==pid)&(wr.week>=1)]
-        if not (_h.status=='RES').any() and ((_h.team==tm)&_h.status.isin(['ACT','INA','DEV'])).sum()>=3: NOU[pid]=NOUSE[pos]
+        # (a practice-squad player with no stats this season counts at once: he plays only if elevated, e.g. a former starter
+        # signed to the practice squad two weeks ago)
+        if not (_h.status=='RES').any() and (((_h.team==tm)&_h.status.isin(['ACT','INA','DEV'])).sum()>=3 or status=='DEV'): NOU[pid]=NOUSE[pos]
     players.append({'id':pid,'n':name,'p':pos,'t':tm,'bio':bio_of(pid),'age':r(idx.loc[pid,'age'],1) if pid in idx.index and 'age' in idx.columns else None,
       'role':f"{rl['pg']}{int(rl['pos_rank'])}" if rl is not None and rl['team']==tm else None,'inj':('IR' if ir else out),'ret':ret_,'bmp':[[int(w[0]),r(w[4]['bump'],2)] for w in wk_rows[:2]],'rsv':(RSV.get(pid,'IR') if ir else None),
       'num':int(cur.loc[pid,'jersey_number']) if pid in cur.index and pd.notna(cur.loc[pid,'jersey_number']) else None,'g':int(len(rows)),'fp':r(rows.fp.sum(),1),'fpg':r(rows.fp.mean(),1) if len(rows) else None,'xfpg':r(rows.xfp.mean(),1) if len(rows) else None,
@@ -487,12 +415,9 @@ for pid in pool:
       'rpg':r(rec_pg,2),'mx':mix_of(pid,pos),'prev':r(pv,1),'dy':int(idx.loc[pid,'draft_year']) if pid in idx.index and pd.notna(idx.loc[pid,'draft_year']) else None,
       'gl':GL.get(pid,[]),
       'wk':[[int(x.week),r(x.fp,1),r(x.xfp,1),r(x.offense_pct,2),int(x.targets),int(x.carries),x.opponent_team] for x in rows.itertuples()],
-      'proj':r(proj_next,1),'nw':int(nxt[0]),'opp':nxt[1],'home':int(nxt[2]) if nxt[2]==nxt[2] else 0,'it':r(nxt[3],1),'rl':r(Pr[0],1),'frm':r(base.get('efp'),1),'dc':dc_,
+      'proj':r(proj_next,1),'nw':int(nxt[0]),'opp':nxt[1],'home':int(nxt[2]) if nxt[2]==nxt[2] else 0,'it':r(nxt[3],1),'rl':r(Pr[0],1),'frm':r(base.get('efp'),1),
       'dvp':r(nxt[4]['dvp'],3) if nxt[4]['dvp'] is not None else None,'xl':X.get('xl'),'adjm':r(P[0]-Pm,1),'adjv':r(P[0]-Pv,1),'adjt':(0.0 if (out in ('Out','Doubtful') or ir) else r(P[0]-Pt,1)),'injd':S_.get('d'),'injn':None if ir and S_.get('src')=='expected' else S_.get('n'),'injs':None if ir and S_.get('src')=='expected' else S_.get('src'),'pj0':r(float(P[0]),1) if (out in ('Out','Doubtful') or S_.get('k')) and not ir else None,'tmo':[n for n in (SIT.get(tm,{}).get('next',{}).get('names') or []) if n!=name][:4],'qbo':(lambda q:q if q and q!=name else None)(SIT.get(tm,{}).get('next',{}).get('qbname')),'prac':PRAC.get(pid),'tpl':r(TV.pl.get(tm,np.nan),1),'tpr':r(TV.pr.get(tm,np.nan),3),'ros':ros,'bye':(byes.get(tm) or [None])[0],
-      'sid':str(int(idx.loc[pid,'sleeper_id'])) if pid in idx.index and pd.notna(idx.loc[pid,'sleeper_id']) else None,
-      'eid':str(int(idx.loc[pid,'espn_id'])) if pid in idx.index and pd.notna(idx.loc[pid,'espn_id']) else None,
-      'yid':str(int(idx.loc[pid,'yahoo_id'])) if pid in idx.index and pd.notna(idx.loc[pid,'yahoo_id']) else None,
-      'ecr':ecr_of(pid).get('o'),'ecp':ecr_of(pid).get('p'),'own':ecr_of(pid).get('own'),'wkr':wk_of(pid) if int(nxt[0])==NEXT else None})
+      'pfr':idx.loc[pid,'pfr_id'] if pid in idx.index and isinstance(idx.loc[pid,'pfr_id'],str) else None})
 # ---- quarterbacks: only the expected starter is projected (a backup rarely takes a snap). Starter of record = the best
 # quarterback on the depth chart who is not on injured reserve; expected starter = the best one not Out/Doubtful/IR. A
 # fill-in keeps next week and, later, the chance the starter is still out; every other quarterback is projected for 0.
@@ -628,53 +553,8 @@ for p in players:
         _l2=S26[(S26.player_id==p['id'])].sort_values('week').offense_pct.dropna().tail(2)
         if len(_l2)==2 and float(_l2.mean())<.75*p['snap']: p['rdn']=r(float(_l2.mean()),3)
 print('fill-ins (projection scaled for the weeks their starter plays):',', '.join(NFILL) if NFILL else 'none','| snaps falling:',sum(1 for p in players if p.get('rdn')))
-# ---- ESPN's and Sleeper's public projections for the coming week (PPR points), fetched now. If a site does not answer, the
-# numbers proj_compare.py last saved for this week are used. They join the weekly stack below and show on the player card.
-OTH={}
-def _other_sites():
-    if PHASE!='season' or not NEXT: return
-    got={'e':{},'s':{}}
-    if not os.environ.get('BFF_NO_SITES'):
-        try:
-            import proj_compare as _pcm
-            for k_,fn_ in (('e',_pcm.espn),('s',_pcm.sleeper)):
-                try: got[k_]=fn_(SEASON,NEXT)
-                except Exception as e_: print(f'other sites: {"ESPN" if k_=="e" else "Sleeper"} did not answer ({e_})')
-        except Exception as e_: print('other sites: fetch unavailable',e_)
-    try:
-        _pc=json.load(open('proj_compare.json')) if os.path.exists('proj_compare.json') else {}
-        saved=_pc.get('weeks',{}).get(str(NEXT),{}) if _pc.get('season')==SEASON else {}
-    except Exception: saved={}
-    n_={'e':[0,0],'s':[0,0]}
-    for p in players:
-        if p['nw']!=NEXT or p['p'] not in POS: continue
-        d_={}
-        for k_,idk in (('e','eid'),('s','sid')):
-            v_=got[k_].get(p.get(idk)) if p.get(idk) else None
-            if v_ is not None: n_[k_][0]+=1
-            elif k_ in saved.get(p['id'],{}): v_=saved[p['id']][k_]; n_[k_][1]+=1
-            if v_ is not None and v_>=.05: d_[k_]=float(v_)   # a projection that rounds to 0.0 counts as none (zeros are missing)
-        if d_: OTH[p['id']]=d_; p['pe']=r(d_['e'],1) if 'e' in d_ else None; p['ps']=r(d_['s'],1) if 's' in d_ else None
-    print(f"other sites, week {NEXT}: ESPN {n_['e'][0]} fetched + {n_['e'][1]} saved, Sleeper {n_['s'][0]} fetched + {n_['s'][1]} saved")
-_other_sites()
-# next week's projection: a stack of four forecasts (ff_stack.py). Within each position, among the players the FantasyPros
-# experts ranked, every source becomes a z-score (spreads above that group's average): BFF's model 30%, the experts' weekly
-# rank 10%, Sleeper's projection 30%, ESPN's 30% (re-weighted over the sources that project a player). The k-th strongest
-# player gets the k-th highest of the players' average points across BFF, Sleeper and ESPN. Weights chosen on 2020-22; on
-# 2023-25 and 2026, which they never saw, the stack ranked players better than ESPN, Sleeper and the FantasyPros consensus and
-# missed by fewer points than ESPN and Sleeper (research/bt_sites.py). A site used here must project at least half of the
-# group; with neither site, the tested mix of 40% model and 60% experts is used (research/README.md).
-from ff_stack import stack as _stack
-NSTK={}
-for _pos in POS:
-    _R=[p for p in players if p['p']==_pos and p['nw']==NEXT and (p['proj'] or 0)>0 and p.get('wkr')]
-    if len(_R)<5: continue
-    _fin,NSTK[_pos]=_stack([p['proj'] for p in _R],[p['wkr'] for p in _R],[OTH.get(p['id'],{}).get('s') for p in _R],[OTH.get(p['id'],{}).get('e') for p in _R],fallback=WK_W)
-    for p,_v in zip(_R,_fin):
-        _b=r(float(_v),1); p['adjc']=r(_b-p['proj'],1); p['proj']=_b
-        if p['ros'] and p['ros'][0][0]==NEXT: p['ros'][0][2]=_b
-print('weekly stack:',NSTK)
-for p in players:   # the no-usage cap (above), after the consensus blend so it holds
+# next week's projection is BFF's own model (no other site's projections or rankings are used; see research/README.md)
+for p in players:   # the no-usage cap (above)
     c_=NOU.get(p['id'])
     if c_ is None: continue
     p['nou']=1; p['proj']=min(p['proj'] or 0,c_); p['rl']=min(p.get('rl') or 0,c_)
@@ -694,28 +574,7 @@ from zoneinfo import ZoneInfo
 def _i(v):
     try: return 0 if v is None or (isinstance(v,float) and np.isnan(v)) else int(v)
     except Exception: return 0
-def box_from_stats(rows):
-    """Official-style box score for a finished game, built from nflverse player stats."""
-    players=[];cats={};ts={}
-    for t,R in rows.groupby('team'):
-        P_=[x for x in R.itertuples() if (_i(x.attempts) or _i(x.carries) or _i(x.targets))]
-        for x in P_:
-            players.append({'n':x.player_display_name,'t':t,'p':x.position,'pc':_i(x.completions),'pa':_i(x.attempts),'py':_i(x.passing_yards),'ptd':_i(x.passing_tds),'int':_i(x.passing_interceptions),
-              'ra':_i(x.carries),'ry':_i(x.rushing_yards),'rtd':_i(x.rushing_tds),'rec':_i(x.receptions),'tg':_i(x.targets),'ty':_i(x.receiving_yards),'rectd':_i(x.receiving_tds),
-              'fl':_i(getattr(x,'rushing_fumbles_lost',0))+_i(getattr(x,'receiving_fumbles_lost',0))+_i(getattr(x,'sack_fumbles_lost',0))})
-        C=[]
-        pa=[x for x in P_ if _i(x.attempts)]
-        if pa: C.append({'n':'passing','t':f'{t} Passing','l':['C/ATT','YDS','TD','INT','SACKS'],'r':[[x.player_display_name,f"{_i(x.completions)}/{_i(x.attempts)}",str(_i(x.passing_yards)),str(_i(x.passing_tds)),str(_i(x.passing_interceptions)),f"{_i(getattr(x,'sacks_suffered',0))}-{_i(getattr(x,'sack_yards_lost',0))}"] for x in pa],'tot':[]})
-        ru=sorted([x for x in P_ if _i(x.carries)],key=lambda x:-_i(x.rushing_yards))
-        if ru: C.append({'n':'rushing','t':f'{t} Rushing','l':['CAR','YDS','AVG','TD'],'r':[[x.player_display_name,str(_i(x.carries)),str(_i(x.rushing_yards)),f"{_i(x.rushing_yards)/max(1,_i(x.carries)):.1f}",str(_i(x.rushing_tds))] for x in ru],'tot':[]})
-        rc=sorted([x for x in P_ if _i(x.targets)],key=lambda x:-_i(x.receiving_yards))
-        if rc: C.append({'n':'receiving','t':f'{t} Receiving','l':['REC','TGTS','YDS','AVG','TD'],'r':[[x.player_display_name,str(_i(x.receptions)),str(_i(x.targets)),str(_i(x.receiving_yards)),f"{_i(x.receiving_yards)/max(1,_i(x.receptions)):.1f}",str(_i(x.receiving_tds))] for x in rc],'tot':[]})
-        fu=[p for p in players if p['t']==t and p['fl']]
-        if fu: C.append({'n':'fumbles','t':f'{t} Fumbles lost','l':['LOST'],'r':[[p['n'],str(p['fl'])] for p in fu],'tot':[]})
-        cats[t]=C
-        py=sum(_i(x.passing_yards) for x in pa); ry=sum(_i(x.rushing_yards) for x in ru); to=sum(_i(x.passing_interceptions) for x in pa)+sum(p['fl'] for p in players if p['t']==t)
-        ts[t]=[['Passing yards',str(py)],['Rushing yards',str(ry)],['Total yards',str(py+ry)],['Turnovers',str(to)]]
-    return {'players':players,'cats':cats,'ts':ts}
+from live_update import box_from_stats   # the same box score the score job writes (kicking and D/ST numbers included)
 GW=gm[(gm.season==SEASON)&(gm.week==NEXT)].sort_values(['gameday','gametime']); LGAMES=[]; LBOX={}
 for g in GW.itertuples():
     kick=datetime.datetime.strptime(f"{g.gameday} {g.gametime}","%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo('America/New_York')).isoformat() if isinstance(g.gametime,str) else None
@@ -750,40 +609,21 @@ for wk,pr in sorted(HS.items(),key=lambda x:int(x[0])):
     if len(rows)<30: continue
     dfa=pd.DataFrame(rows,columns=['p','a','pos']); rk=[spearmanr(x.p,x.a).correlation for _,x in dfa.groupby('pos') if len(x)>=10]
     ACC.append({'wk':int(wk),'n':len(dfa),'mae':r(float((dfa.p-dfa.a).abs().mean()),2),'rank':r(float(np.nanmean(rk)),3) if rk else None})
-# ---- head to head with ESPN's and Sleeper's public projections (saved before each game by proj_compare.py, frozen at
-# kickoff): every source graded on the same players, weeks whose games are all final
-CMP=None
+# the page's scores: the score job's live.json (scores, box scores and scoring plays, every 30 minutes), else built here
+LIVE=None
 try:
-    _PC=json.load(open('proj_compare.json')) if os.path.exists('proj_compare.json') else {}
-    if _PC.get('season')==SEASON:
-        _fin={int(w_) for w_,G_ in SC26.groupby('week') if G_.pts.notna().all()}; _rows=[]
-        for wk_,M_ in _PC.get('weeks',{}).items():
-            if int(wk_) not in _fin: continue
-            act=S26[S26.week==int(wk_)].set_index('player_id').fp
-            for pid_,v_ in M_.items():
-                if pid_ in act.index and v_.get('b') is not None and v_.get('e') is not None and v_.get('s') is not None:
-                    _rows.append((int(wk_),v_.get('p'),float(act[pid_]),float(v_['b']),float(v_['o']) if v_.get('o') is not None else np.nan,float(v_['e']),float(v_['s']),float(v_['r']) if v_.get('r') else np.nan))
-        if len(_rows)>=100:
-            _C=pd.DataFrame(_rows,columns=['wk','pos','a','b','o','e','s','r'])
-            def _rk(col,neg=False):
-                v_=[spearmanr(-x[col] if neg else x[col],x.a).correlation for _,x in _C[_C[col].notna()].groupby(['wk','pos']) if len(x)>=10]
-                return r(float(np.nanmean(v_)),3) if v_ else None
-            CMP={'weeks':sorted(int(w_) for w_ in _C.wk.unique()),'n':int(len(_C)),
-                 'src':{k_:{'mae':r(float((_C[c_]-_C.a).abs().mean()),2) if k_!='fp' else None,'rank':_rk(c_,k_=='fp')} for k_,c_ in (('bff','b'),('bff_model','o'),('espn','e'),('sleeper','s'),('fp','r'))}}
-            print('head to head (weeks',CMP['weeks'],'):',CMP['src'])
-except Exception as e_: print('head-to-head grading skipped:',e_)
-LIVE={'week':NEXT,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='minutes'),'src':'official stats','games':LGAMES,'box':LBOX}
+    _lj=json.load(open('live.json')) if os.path.exists('live.json') else None
+    if isinstance(_lj,dict) and _lj.get('season')==SEASON and _lj.get('games'): LIVE=_lj
+except Exception as e: print('live.json unreadable, building the scores here:',e)
+if LIVE is None: LIVE={'week':NEXT,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='minutes'),'src':'nflverse schedule and official stats','season':SEASON,'games':LGAMES,'box':LBOX}
 _KX={}
 for _x in gm[gm.season==SEASON].itertuples():
     _k=datetime.datetime.strptime(f"{_x.gameday} {_x.gametime}","%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo('America/New_York')).isoformat() if isinstance(_x.gametime,str) else (str(_x.gameday) if isinstance(_x.gameday,str) else None)
     _sp=None if pd.isna(_x.spread_line) else float(_x.spread_line); _to=None if pd.isna(_x.total_line) else float(_x.total_line)
     _KX[(int(_x.week),_x.home_team)]=(_k,None if _sp is None else -_sp,_to); _KX[(int(_x.week),_x.away_team)]=(_k,_sp,_to)
 SCHED={t:[[int(g.week),g.opp,int(g.home) if g.home==g.home else 0,r(g.it,1),None if pd.isna(g.pts) else int(g.pts)]+list(_KX.get((int(g.week),t),(None,None,None))) for g in SC26[SC26.team==t].sort_values('week').itertuples()] for t in SC26.team.unique()}
-# stadium ids learned by the live job (for real stadium photos on every game, any week)
-try: VENUES=json.load(open('live.json')).get('venues') or {}
-except Exception: VENUES={}
-OUT={'asof':{'season':SEASON,'phase':PHASE,'sched':bool(SCHED_KNOWN),'last_week':LAST,'next_week':NEXT,'built':datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d'),'depth':str(dc.dt.max())[:10],'ecr':ECR_DATE,'stk':NSTK},
-     'players':players,'cmp':CMP,'live':LIVE,'news':NEWS,'headlines':HEAD,'ph':HS.get(str(NEXT),{}),'acc':ACC,'trendsval':json.load(open('trends_val.json')) if os.path.exists('trends_val.json') else None,'dvp':DVP,'lgpos':{p:r(lg26.get(p,np.nan),1) for p in POS},'sched':SCHED,'byes':byes,'venues':VENUES,'model':{'test':res,'range':RNG,'qs':QS,'posavg':{k:r(v,1) for k,v in POSAVG.items()},'train':[min(TRAIN),max(TRAIN)],'test_season':TEST,'hist':[min(HIST5),max(HIST5)],'ew_h':EW_H,'v':5,'rows':int(len(DH))}}
+OUT={'asof':{'season':SEASON,'phase':PHASE,'sched':bool(SCHED_KNOWN),'last_week':LAST,'next_week':NEXT,'built':datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d'),'depth':str(dc.dt.max())[:10]},
+     'players':players,'live':LIVE,'news':NEWS,'headlines':HEAD,'ph':HS.get(str(NEXT),{}),'acc':ACC,'trendsval':json.load(open('trends_val.json')) if os.path.exists('trends_val.json') else None,'dvp':DVP,'lgpos':{p:r(lg26.get(p,np.nan),1) for p in POS},'sched':SCHED,'byes':byes,'model':{'test':res,'range':RNG,'qs':QS,'posavg':{k:r(v,1) for k,v in POSAVG.items()},'train':[min(TRAIN),max(TRAIN)],'test_season':TEST,'hist':[min(HIST5),max(HIST5)],'ew_h':EW_H,'v':5,'rows':int(len(DH))}}
 def clean(o):
     if isinstance(o,float) and (o!=o or abs(o)==float('inf')): return None
     if isinstance(o,(np.floating,)): return clean(float(o))

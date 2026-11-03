@@ -14,7 +14,7 @@ prediction (research/h_weekly_v5.parquet). Fit on 2020-22, checked on 2023-25.
 python research/bt_fillin.py   (writes research/results_fillin.json)"""
 import os, json, numpy as np, pandas as pd
 BT = os.path.dirname(os.path.abspath(__file__)); RUN = os.path.dirname(BT); os.chdir(RUN)
-ids = pd.read_csv('db_playerids.csv', usecols=['pfr_id', 'gsis_id'], low_memory=False).dropna().drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
+ids = pd.read_csv('player_ids.csv', usecols=['pfr_id', 'gsis_id'], low_memory=False).dropna().drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
 H = pd.read_parquet(os.path.join(BT, 'h_weekly_v5.parquet'))
 H = H[H.season.between(2020, 2025)].set_index(['player_id', 'season', 'week'])
 SH = {'RB': .55, 'WR': .70, 'TE': .70}

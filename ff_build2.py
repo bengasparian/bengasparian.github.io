@@ -73,14 +73,14 @@ X['xfp'] = X.xr + X.xc; X['rzo'] = X.rzt + X.rzc
 st = st.merge(X[['season', 'week', 'player_id', 'xfp', 'rzo']], on=['season', 'week', 'player_id'], how='left'); st[['xfp', 'rzo']] = st[['xfp', 'rzo']].fillna(0)
 print('xFP model: avg PPR per target by depth/field position learned from', len(tr(tg)), 'targets and', len(tr(ru)), 'carries', flush=True)
 # ---------- snap share (PFR ids -> gsis)
-ids = pd.read_csv('db_playerids.csv', low_memory=False); pfr2g = ids.dropna(subset=['pfr_id', 'gsis_id']).drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
+ids = pd.read_csv('player_ids.csv', low_memory=False); pfr2g = ids.dropna(subset=['pfr_id', 'gsis_id']).drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
 sn = pd.concat([pd.read_parquet(f'snap_counts_{y}.parquet') for y in YEARS if os.path.exists(f'snap_counts_{y}.parquet')]); sn = sn[sn.game_type == 'REG']; sn['player_id'] = sn.pfr_player_id.map(pfr2g)
 st = st.merge(sn[['season', 'week', 'player_id', 'offense_pct']].dropna(subset=['player_id']).drop_duplicates(['season', 'week', 'player_id']), on=['season', 'week', 'player_id'], how='left')
 tc = st.groupby(['season', 'week', 'team']).carries.sum().rename('team_car').reset_index(); st = st.merge(tc, on=['season', 'week', 'team'])
 st['car_share'] = np.where(st.team_car > 0, st.carries / st.team_car, np.nan)
 # ---------- schedule and Vegas implied team totals (nflverse games file; fetch_data.py saves it as games.csv)
 if os.path.exists('games.csv'): gm = pd.read_csv('games.csv')
-else: gm = pd.read_csv(io.BytesIO(urllib.request.urlopen('https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv', timeout=120).read()))
+else: gm = pd.read_csv(io.BytesIO(urllib.request.urlopen('https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv', timeout=120).read()))
 gm = gm[gm.season.between(SEASON - 5, SEASON) & (gm.game_type == 'REG')]
 rows = []
 for g in gm.itertuples():

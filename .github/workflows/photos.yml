@@ -1,0 +1,50 @@
+name: Player photos (Wikimedia Commons, free licenses only)
+
+# Once a week: finds freely licensed photos of the players BFF shows (Wikidata + Wikimedia Commons), saves small cropped
+# copies in photos/ with each one's author and license (photos/credits.json). The next data update puts them on the site.
+# Set the repository variable BFF_PLAYER_PHOTOS to off to stop using player photos.
+on:
+  schedule:
+    - cron: "41 9 * * 2"   # Tuesdays 09:41 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bff-site-data
+  cancel-in-progress: false
+
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install the image library
+        run: pip install pillow
+      - name: Find and save freely licensed player photos
+        id: photos
+        env:
+          BFF_PLAYER_PHOTOS: ${{ vars.BFF_PLAYER_PHOTOS }}
+        run: |
+          python photos.py
+          python check_page.py --json
+      - name: Save
+        run: |
+          git config user.name "gridiron-fantasy-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A photos
+          if git diff --cached --quiet; then echo "No photo changes"; exit 0; fi
+          git commit -m "Player photos $(date -u +%F)"
+          for i in 1 2 3; do
+            if git pull --rebase --autostash && git push; then exit 0; fi
+            sleep $((i*15))
+          done
+          exit 1

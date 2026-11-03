@@ -75,7 +75,7 @@ def load(years, xfp_years, rates=None):
                    ru.groupby(['season', 'week', 'rusher_player_id']).agg(xc=('x', 'sum'), rzc=('rz', 'sum'), glc=('gl', 'sum')).rename_axis(['season', 'week', 'player_id'])], axis=1).fillna(0).reset_index()
     X['xfp'] = X.xr + X.xc; X['rzo'] = X.rzt + X.rzc
     st = st.merge(X[['season', 'week', 'player_id', 'xfp', 'rzo', 'glc']], on=['season', 'week', 'player_id'], how='left'); st[['xfp', 'rzo', 'glc']] = st[['xfp', 'rzo', 'glc']].fillna(0)
-    ids = pd.read_csv('db_playerids.csv', low_memory=False); pfr2g = ids.dropna(subset=['pfr_id', 'gsis_id']).drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
+    ids = pd.read_csv('player_ids.csv', low_memory=False); pfr2g = ids.dropna(subset=['pfr_id', 'gsis_id']).drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
     sn = pd.concat([pd.read_parquet(f'snap_counts_{y}.parquet') for y in years if os.path.exists(f'snap_counts_{y}.parquet')]); sn = sn[sn.game_type == 'REG']; sn['player_id'] = sn.pfr_player_id.map(pfr2g)
     st = st.merge(sn[['season', 'week', 'player_id', 'offense_pct']].dropna(subset=['player_id']).drop_duplicates(['season', 'week', 'player_id']), on=['season', 'week', 'player_id'], how='left')
     tc = st.groupby(['season', 'week', 'team']).carries.sum().rename('team_car').reset_index(); st = st.merge(tc, on=['season', 'week', 'team'])

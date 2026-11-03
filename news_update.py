@@ -1,37 +1,37 @@
 #!/usr/bin/env python3
-"""NFL and fantasy news from many sources -> news.json. Run every 10 minutes by the scores workflow.
+"""NFL headlines from publishers' public RSS feeds -> news.json. Run every 30 minutes by the scores workflow.
 
-Every item keeps its source, a link to the original article, and its publish time, so the page can credit and link it.
-Only a headline, a short teaser (at most 160 characters) and the link to the story's own feed picture are stored;
-readers follow the link for the full story.
-Sources were checked by hand before being added; any source that fails is skipped and its last good items are kept,
-so one broken feed never stops the update. Items older than 7 days drop off.
+Headline links only: each item keeps the headline, the source's name, the link to the original story and its publish time,
+so the page can credit it and send readers there. No pictures and no story text are stored or shown (the feed's summary
+is read only to tag which players a story is about, and then dropped). Any source that fails is skipped and its last
+good items are kept, so one broken feed never stops the update. Items older than 7 days drop off.
 
-Also collected: Sleeper's public "trending adds" (players fantasy managers are adding most in the last 24 hours).
 Each item is tagged with the players it names, a category (injury, transaction, fantasy, betting, news), and, for
 clear statements such as "ruled out" or "expected to miss time", a status the prop lines use to pull a line.
+
+Set the repository variable BFF_NEWS_LINKS to off to stop collecting outside headlines altogether (the site then shows
+BFF's own articles and the official injury report only).
 """
-import json, re, html, datetime, urllib.request, email.utils
+import json, os, re, html, datetime, urllib.request, email.utils
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 
 UA = {'User-Agent': 'BFF-fantasy-football/1.0 (+https://github.com)'}
 SOURCES = [   # name, feed, homepage, kind, keep(link, title)
-    ('ESPN', 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=50', 'https://www.espn.com/nfl/', 'espn', None),
     ('CBS Sports', 'https://www.cbssports.com/rss/headlines/nfl/', 'https://www.cbssports.com/nfl/', 'rss', lambda u, t: '/nfl/' in u),
-    ('Yahoo Sports', 'https://sports.yahoo.com/nfl/rss.xml', 'https://sports.yahoo.com/nfl/', 'rss', None),
     ('Pro Football Talk', 'https://www.nbcsports.com/profootballtalk.rss', 'https://www.nbcsports.com/nfl/profootballtalk', 'rss', None),
-    ('RotoWire', 'https://www.rotowire.com/rss/news.php?sport=NFL', 'https://www.rotowire.com/football/', 'rss', None),
     ('RotoBaller', 'https://www.rotoballer.com/category/nfl/feed', 'https://www.rotoballer.com/nfl', 'rss', None),
     ('PFF', 'https://www.pff.com/feed', 'https://www.pff.com/nfl', 'rss', None),
     ('Sharp Football Analysis', 'https://www.sharpfootballanalysis.com/feed/', 'https://www.sharpfootballanalysis.com/', 'rss', None),
 ]
-TRENDING = 'https://api.sleeper.app/v1/players/nfl/trending/add?lookback_hours=24&limit=25'
+ON = (os.environ.get('BFF_NEWS_LINKS') or 'on').strip().lower() not in ('off', '0', 'no', 'false')
 COLLEGE = re.compile(r'\b(college football|cfb|ncaa|heisman|big ten|big 12|\bsec\b|\bacc\b|cfp|recruit|bowl game|draft prospect|mock draft 20\d\d|top 25)\b', re.I)
 OUT_RE = re.compile(r"(ruled out|won't play|will not play|will miss|expected to miss|out for (the )?(season|year|week|game|\w+ weeks?)|out indefinitely|season[- ]ending|"
                     r"(miss|misses|missing|out for) (the )?(rest|remainder) of (the )?(season|year)|done for the (season|year)|"
                     r"placed on (ir|injured reserve)|lands on (ir|injured reserve)|to (ir|injured reserve)\b|inactive for|doubtful (for|to play))", re.I)
-OK_RE = re.compile(r"(cleared to play|will play|activated from|returns? to practice|full participant|no injury designation|good to go|expected to play)", re.I)
+OK_RE = re.compile(r"(cleared to play|will play|set to play|activated from|returns? to practice|full participant|no injury designation|good to go|ready to go|ready to play|expected to play|\bactive\b|will suit up)", re.I)
+CLAUSE = re.compile(r"\s*(?:[,;|]|\s[-\u2013\u2014]\s|\bbut\b|\bwhile\b|\bas\b|\bafter\b)\s*", re.I)   # headline clauses
+CONT = re.compile(r"(headed|heads|placed|lands|going|goes|expected|will|set|ruled|done|out)\b", re.I)   # a clause that carries on about the same player
 INJ_RE = re.compile(r'(injur|hamstring|ankle|knee|concussion|questionable|doubtful|ruled out|\bIR\b|out for|miss time|limited|did not practice|MRI|surgery|sprain|strain|torn)', re.I)
 TX_RE = re.compile(r'\b(sign(s|ed|ing)?|release[sd]?|waive[sd]?|trade[sd]?|acquire[sd]?|claim(s|ed)?|practice squad|re-sign|extension|contract|cut[s]?)\b', re.I)
 FAN_RE = re.compile(r'(fantasy|waiver|start[/ ]sit|sleeper|rankings|\bPPR\b|DFS|dynasty|pickups?|buy low|sell high|breakout)', re.I)
@@ -52,68 +52,51 @@ def when(s):
         try: return datetime.datetime.fromisoformat(s.replace('Z', '+00:00')).astimezone(datetime.timezone.utc).isoformat(timespec='seconds')
         except Exception: return None
 
-MRSS = '{http://search.yahoo.com/mrss/}'
-IMG_RE = re.compile(r'<img[^>]+src=["\'](https://[^"\']+)["\']', re.I)
-def image_of(it):
-    """the story's own picture from the feed (media:content, media:thumbnail, an image enclosure, or the first image in
-    the summary); publishers put these in their feeds for display next to the headline. https only, no tracking pixels"""
-    c = []
-    for tag in ('content', 'thumbnail'):
-        for m in it.iter(MRSS + tag):
-            if (m.get('medium') in (None, 'image')) and not str(m.get('type') or 'image').startswith(('video', 'audio')): c.append(m.get('url'))
-    for e in it.findall('enclosure'):
-        if str(e.get('type') or '').startswith('image'): c.append(e.get('url'))
-    for txt in (it.findtext('description') or '', it.findtext('{http://purl.org/rss/1.0/modules/content/}encoded') or ''):
-        m = IMG_RE.search(txt)
-        if m: c.append(html.unescape(m.group(1)))
-    for x in c:
-        if x and x.startswith('https://') and not re.search(r'pixel|tracking|feedburner|1x1|spacer', x, re.I): return x
-    return None
 def rss(name, url, keep):
     root = ET.fromstring(get(url)); out = []
     for it in root.iter('item'):
         t = clean(it.findtext('title')); u = (it.findtext('link') or '').strip()
         if not t or not u.startswith('http'): continue
         if keep and not keep(u, t): continue
-        x = {'h': t, 'u': u, 'd': when(it.findtext('pubDate') or ''), 'x': clean(it.findtext('description'), 160), 's': name}
-        im = image_of(it)
-        if im: x['img'] = im
-        out.append(x)
+        out.append({'h': t, 'u': u, 'd': when(it.findtext('pubDate') or ''), 's': name, '_x': clean(it.findtext('description'), 300)})   # _x: for tagging only, never stored
     return out
-def espn(name, url, keep):
-    j = json.loads(get(url)); out = []
-    for a in j.get('articles') or []:
-        h = clean(a.get('headline')); u = (((a.get('links') or {}).get('web') or {}).get('href'))
-        if not h or not u: continue
-        ath = [str(c.get('athleteId') or (c.get('athlete') or {}).get('id')) for c in a.get('categories') or [] if c.get('type') == 'athlete' and (c.get('athleteId') or (c.get('athlete') or {}).get('id'))]
-        x = {'h': h, 'u': u, 'd': when(a.get('published') or a.get('lastModified') or ''), 'x': clean(a.get('description'), 160), 's': name, 'a': ath, 'prem': bool(a.get('premium'))}
-        im = next((i.get('url') for i in a.get('images') or [] if str(i.get('url') or '').startswith('https://')), None)
-        if im: x['img'] = im
-        out.append(x)
-    return out
-
 def player_index():
     """Names to match in headlines (from the data job's inputs); only full names, so 'Wilson' alone never matches."""
     try: P = json.load(open('bet_inputs.json'))['players']
     except Exception:
         try: P = json.load(open('ff_data.json'))['players']
-        except Exception: return [], {}
+        except Exception: return []
     idx = []
     for p in P:
         n = re.sub(r'\s+(jr|sr|ii|iii|iv|v)\.?$', '', (p.get('n') or '').strip(), flags=re.I)   # 'Deebo Samuel Sr.' also matches 'Deebo Samuel'
         if len(n.split()) < 2: continue
         pat = re.escape(n).replace(r'\.', r'\.?').replace("\\'", "['’]?")
         idx.append((re.compile(r'(?<![\w])' + pat + r"(?:\s+(?:Jr|Sr|II|III|IV|V)\.?)?(?![\w])", re.I), p['id']))
-    sid = {str(p['sid']): p['id'] for p in P if p.get('sid')}
-    return idx, sid
+    return idx
 
 def tag(it, idx, now):
-    txt = it['h'] + ' ' + (it.get('x') or '')
+    txt = it['h'] + ' ' + (it.pop('_x', None) or '')
+    for k in ('x', 'img', 'a', 'prem'): it.pop(k, None)   # items saved before Nov 2026 carried a teaser and a picture
     it['p'] = sorted({pid for rx, pid in idx if rx.search(it['h'])} or {pid for rx, pid in idx if rx.search(txt)})[:4]
     h = it['h']
     it['c'] = 'inj' if INJ_RE.search(h) else 'tx' if TX_RE.search(h) else 'bet' if BET_RE.search(h) else 'fan' if FAN_RE.search(h) else 'news'
-    if it['p'] and OUT_RE.search(h): it['st'] = 'out'
-    elif it['p'] and OK_RE.search(h): it['st'] = 'ok'
+    # the status applies to the player named in the same clause ("Saquon Barkley set to play, DeVonta Smith ruled out": only
+    # Smith is out; "Puka Nacua active, Trent McDuffie inactive": nobody BFF ranks is out)
+    for k in ('st', 'so', 'sk'): it.pop(k, None)
+    so, sk = [], []
+    if it['p']:
+        hits = [(rx, pid) for rx, pid in idx if pid in it['p']]; prev = []
+        for part in CLAUSE.split(h):
+            ids = [pid for rx, pid in hits if rx.search(part or '')]
+            if not ids and prev and CONT.match(part or ''): ids = prev   # "Lamar Jackson needs thumb surgery, headed to injured reserve"
+            if not ids: prev = []; continue
+            if OUT_RE.search(part) and not OK_RE.search(part): so += ids; prev = []
+            elif OK_RE.search(part): sk += ids; prev = []
+            else: prev = ids
+    if it['p']: it['so'] = sorted(set(so))   # who the "out" is about (empty: nobody BFF ranks)
+    if so: it['st'] = 'out'
+    elif sk: it['st'] = 'ok'
+    if sk: it['sk'] = sorted(set(sk))
     return it
 
 def build_news(write=True):
@@ -121,12 +104,15 @@ def build_news(write=True):
     old = {}
     try: old = json.load(open('news.json'))
     except Exception: pass
-    idx, sid = player_index()
+    idx = player_index()
+    if not ON:   # outside headlines turned off: an empty list
+        out = {'at': stamp, 'src': [], 'items': [], 'off': True}
+        changed = bool(old.get('items')) or not old.get('off')
+        if write and changed: json.dump(out, open('news.json', 'w'), separators=(',', ':'))
+        return out, changed
     def run(src):
         name, url, home, kind, keep = src
-        try:
-            items = (espn if kind == 'espn' else rss)(name, url, keep)
-            return name, items, None
+        try: return name, rss(name, url, keep), None
         except Exception as e: return name, None, str(e)[:120]
     with ThreadPoolExecutor(max_workers=6) as ex: results = list(ex.map(run, SOURCES))
     seen_first = {it['u']: it.get('d') for it in old.get('items') or []}
@@ -146,14 +132,10 @@ def build_news(write=True):
         if it['u'] in urls or k in keys or (it.get('d') or '') < cutoff: continue
         urls.add(it['u']); keys.add(k); merged.append(tag(it, idx, now))
     merged = merged[:400]
-    trend = old.get('trend') or []
-    try:
-        T = json.loads(get(TRENDING)); trend = [{'pid': sid[str(x['player_id'])], 'n': int(x['count'])} for x in T if str(x.get('player_id')) in sid][:20]
-        status.append({'s': 'Sleeper (trending adds)', 'home': 'https://sleeper.com', 'ok': True, 'n': len(trend), 'err': None})
-    except Exception as e:
-        status.append({'s': 'Sleeper (trending adds)', 'home': 'https://sleeper.com', 'ok': False, 'n': 0, 'err': str(e)[:120]})
-    out = {'at': stamp, 'src': status, 'items': merged, 'trend': trend}
-    changed = (merged != old.get('items')) or (trend != old.get('trend'))
+    keep_src = {x[0] for x in SOURCES}
+    merged = [it for it in merged if it.get('s') in keep_src]        # sources no longer used (Nov 2026) drop out at once
+    out = {'at': stamp, 'src': status, 'items': merged}
+    changed = (merged != old.get('items')) or bool(old.get('trend'))
     if write and changed: json.dump(out, open('news.json', 'w'), separators=(',', ':'))
     return out, changed
 

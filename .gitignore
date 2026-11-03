@@ -9,3 +9,4 @@ __pycache__/
 db_fpecr_latest.csv
 fp_latest_weekly.csv
 research/*.pkl
+player_ids.csv

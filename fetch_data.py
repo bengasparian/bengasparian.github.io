@@ -1,5 +1,5 @@
-"""Download the public data the pipeline needs (nflverse, DynastyProcess, FantasyPros consensus) into this folder,
-and work out which season it is (season.json), so nothing has to be changed by hand from one season to the next.
+"""Download the public data the pipeline needs (nflverse: CC BY 4.0) into this folder, and work out which season it is
+(season.json), so nothing has to be changed by hand from one season to the next.
 
   season in progress  -> that season, phase "season"
   schedule out, no game played yet -> that season, phase "preseason"
@@ -7,8 +7,8 @@ and work out which season it is (season.json), so nothing has to be changed by h
 
 The model learns from the 13 completed seasons before the current one (their features are cached after the first
 build, so later runs download only the last five). Files for the current season are optional:
-they do not exist until its first game. The consensus rankings are optional too: without them the site uses its own
-projections only.
+they do not exist until its first game. BFF uses no other site's projections or rankings: every number on the site comes
+from this data and BFF's own model.
 
   python fetch_data.py                 download everything and write season.json
   python fetch_data.py --season-only   only work out the season from the saved schedule (no downloads)
@@ -16,13 +16,12 @@ projections only.
 
 Files of completed seasons do not change, so a copy younger than a week (BFF_KEEP_DAYS) is kept instead of downloaded
 again; the update job keeps them between runs with a weekly cache. The current season, rosters, depth charts and
-rankings are downloaded every run.
+the player ID table are downloaded every run.
 """
 import os, sys, csv, json, time, datetime, urllib.request
 
 B = "https://github.com/nflverse/nflverse-data/releases/download/"
-DP = "https://raw.githubusercontent.com/dynastyprocess/data/master/files/"
-GAMES = "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
+GAMES = "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
 AS_OF = os.environ.get("BFF_AS_OF")
 TODAY = datetime.date.fromisoformat(AS_OF) if AS_OF else datetime.datetime.now(datetime.timezone.utc).date()
 
@@ -93,12 +92,7 @@ for y in (SEASON, SEASON - 1):   # rosters (bios, rookies, moves): this season's
     opt[f"roster_{y}.parquet"] = B + f"rosters/roster_{y}.parquet"
 for y in range(SEASON - 2 if WARM else LO, SEASON + 1):   # depth charts (the model reads who starts)
     opt[f"depth_charts_{y}.parquet"] = B + f"depth_charts/depth_charts_{y}.parquet"
-need["db_playerids.csv"] = DP + "db_playerids.csv"              # player ID crosswalk
-opt.update({
-    "values.csv": DP + "values-players.csv",                    # dynasty market (only used to keep injured stars in the player pool)
-    "db_fpecr_latest.csv": DP + "db_fpecr_latest.csv",          # FantasyPros consensus rankings, rest of season (draft rankings in the offseason)
-    "fp_latest_weekly.csv": DP + "fp_latest_weekly.csv",        # FantasyPros consensus rankings, this week
-})
+need["players.csv"] = B + "players/players.csv"               # nflverse player table: IDs (gsis, Pro Football Reference), bios, draft
 skip = {f for f in os.environ.get("BFF_SKIP", "").split(",") if f}   # testing only: files to leave out
 KEEP = float(os.environ.get("BFF_KEEP_DAYS", "7")) * 86400
 DONE = {f"{k}_{y}.parquet" for y in range(LO, SEASON) for k in ("pbp", "stats_player_week", "snap_counts", "roster_weekly", "injuries", "depth_charts")}
@@ -113,3 +107,21 @@ for name, url in opt.items():
     if name in skip or name in K: continue
     try: get(name, url, tries=2)
     except Exception as e: print(f"not available yet: {name} ({e}); continuing without it")
+
+# ---- the player ID table the pipeline reads (player_ids.csv): nflverse's player table, the columns BFF uses
+import pandas as pd
+_COLS = {"gsis_id", "pfr_id", "display_name", "position", "latest_team", "height", "weight", "college_name", "birth_date", "draft_year", "rookie_season",
+         "draft_round", "draft_pick", "status", "last_season"}
+try:
+    _P = pd.read_csv("players.csv", low_memory=False)
+    if not _COLS <= set(_P.columns) or len(_P) < 1000: raise ValueError(f"players.csv looks wrong ({len(_P)} rows; missing {sorted(_COLS - set(_P.columns))[:4]})")
+except Exception as e:   # a bad download: keep the last good player table (the run stops only when there is none)
+    if not os.path.exists("player_ids.csv"): raise
+    print("player table not updated this run, keeping the last one:", str(e)[:160], flush=True); _P = None
+if _P is not None:
+    _bd = pd.to_datetime(_P.birth_date, errors="coerce")
+    pd.DataFrame({"gsis_id": _P.gsis_id, "pfr_id": _P.pfr_id, "name": _P.display_name, "position": _P.position, "team": _P.latest_team,
+                  "height": _P.height, "weight": _P.weight, "college": _P.college_name, "birthdate": _P.birth_date,
+                  "age": ((pd.Timestamp(TODAY) - _bd).dt.days / 365.25).round(1), "draft_year": _P.draft_year.fillna(_P.rookie_season), "draft_round": _P.draft_round,
+                  "draft_ovr": _P.draft_pick, "status": _P.status, "last_season": _P.last_season}).to_csv("player_ids.csv", index=False)
+    print("player_ids.csv:", len(_P), "players", flush=True)

@@ -2,8 +2,15 @@
 
 These scripts reproduce every accuracy number BFF publishes about itself. They are not part of the site and the
 workflows never run them. Run them from the repository folder. The first run downloads what it needs: the nflverse
-data files for 2012-2026 (about 350 MB) and the FantasyPros ranking archive kept by DynastyProcess
-(`db_fpecr.parquet`, about 40 MB) into this folder.
+data files for 2012-2026 (about 350 MB) into this folder.
+
+**Since November 2026 the site uses BFF's own numbers only.** Several tests below compare BFF with ESPN, Sleeper and the
+FantasyPros expert consensus, or test the blends BFF used until then; those comparison sources (other sites' past
+projections in `hist/`, the FantasyPros archive `db_fpecr.parquet`, and real posted prop lines in `props/`) are kept
+out of the public repository, so those scripts reproduce only where you have them. The numbers they produced stay
+below as the record (and on the site's Learn page as comparisons). The scripts that set what the site runs now are
+`bt_weekly_v5.py` and `bt_value_v5.py` (BFF's model and value alone), `bt_lines_bff.py` and `bt_props_bff.py` (prop
+lines from BFF's own numbers), `bt_fillin.py`, `bt_commonsense.py` and `bt_kdst.py`.
 
 Every test is out of sample: each season is predicted by models trained only on earlier seasons, using only what was
 known before each game. The version 5 scripts use the site's own code (`ff_feat.py` builds the inputs, `ff_model.py`
@@ -17,7 +24,8 @@ the model), so what is tested is what the site runs.
 | `bt_props_more.py` | The newer props: pass attempts, completions, interceptions, rush attempts, targets, anytime and 1st-half TD. Rules fit to real week-7 lines, over rates in 2025 and 2026, and the interception and touchdown models fit on 2025 and checked on 2026. Data in `props/` | seconds |
 | `bt_fillin.py` | Fill-ins (backups who took a hurt starter's snaps) and returning starters: BFF's model vs what happened once the starter was back, 2020-25; the scaling the site uses | seconds |
 | `bt_commonsense.py` | Buy-low and sell-high calls with and without the common-sense checks (fill-ins, two games, falling snaps, top-6 usage), 2020-25 | seconds |
-| `hist_fetch.py` | Fetches ESPN's and Sleeper's past weekly projections into `hist/` (run on GitHub Actions or anywhere those sites are reachable; already done, the files are here) | about 15 minutes |
+| `bt_lines_bff.py` | Since Nov 2026: BFF's own model lines against both samples of real week-7 lines; the passing- and receiving-yard steps the site uses (adopted only where they beat the model line on both samples, players left out). Writes `results_lines_bff.json`. Data in `props/` | seconds |
+| `bt_props_bff.py` | Since Nov 2026: the newer props from BFF's own expected volume (count-line rules fit to real week-7 lines, over rates 2025-2026, interception and touchdown scales, outcome spreads). `BT_DATA=<folder>` points it at fresh nflverse files. Writes `results_props_bff.json` | about 2 minutes |
 | `bt_value_build.py` then `bt_value_eval.py` | The rest-of-season value formula (spread, expert weight, waiver-wire share) at 15 checkpoints (weeks 4, 6, 8, 10, 12 of 2023-2025), scored against 10 simulated 12-team leagues per checkpoint | about 20 minutes |
 | `bt_value_v5.py` | The same checkpoints and truth with the version 5 projections | about 40 minutes (`--reuse` re-scores in a few) |
 | `bt_weekly.py` | The previous model (version 4), kept for comparison | about 10 minutes |

@@ -54,6 +54,8 @@ jobs:
         run: python fetch_data.py
       - name: Build projections and collect news
         id: produce
+        env:
+          BFF_NEWS_LINKS: ${{ vars.BFF_NEWS_LINKS }}
         run: python ff_produce.py
       - name: Kickers and team defenses (points, projections, ranks)
         id: kdst
@@ -61,40 +63,34 @@ jobs:
       - name: Spin Draft data (rebuilt only when a season has finished)
         id: game
         run: python game_build.py
-      - name: Sync Sleeper league (optional)
-        id: sleeper
-        env:
-          SLEEPER_LEAGUE_ID: ${{ vars.SLEEPER_LEAGUE_ID }}
-        run: python sync_sleeper.py
-      - name: Predicted prop lines and parlay picks
+      - name: Predicted prop lines (BFF's own numbers)
         id: lines
-        run: |
-          python site_stats.py
-          python ff_lines.py
-          python parlay_update.py
+        run: python ff_lines.py
       - name: Weekly calls (lock at kickoff, grade with official stats)
         id: calls
         run: python calls_update.py
-      - name: Build the page (accounts turn on when BFF_FIREBASE is set; see README)
+      - name: Build the page (accounts, ads and tips turn on with repository variables; see README)
         id: page
         env:
           BFF_FIREBASE: ${{ vars.BFF_FIREBASE }}
           BFF_TERMS_STATE: ${{ vars.BFF_TERMS_STATE }}
           BFF_CONTACT: ${{ vars.BFF_CONTACT }}
+          BFF_ADS_CLIENT: ${{ vars.BFF_ADS_CLIENT }}
+          BFF_ADS_SLOT: ${{ vars.BFF_ADS_SLOT }}
+          BFF_TIP_URL: ${{ vars.BFF_TIP_URL }}
         run: python assemble.py
       - name: BFF Originals (game previews, recaps and breaking news; a failure is reported at the end of the run)
         id: articles
         continue-on-error: true
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          BFF_AI_MODEL: ${{ vars.BFF_AI_MODEL }}
-          BFF_AI_MAX_DAY: ${{ vars.BFF_AI_MAX_DAY }}
         run: python articles.py
       - name: Put the newest BFF Originals in the page
         env:
           BFF_FIREBASE: ${{ vars.BFF_FIREBASE }}
           BFF_TERMS_STATE: ${{ vars.BFF_TERMS_STATE }}
           BFF_CONTACT: ${{ vars.BFF_CONTACT }}
+          BFF_ADS_CLIENT: ${{ vars.BFF_ADS_CLIENT }}
+          BFF_ADS_SLOT: ${{ vars.BFF_ADS_SLOT }}
+          BFF_TIP_URL: ${{ vars.BFF_TIP_URL }}
         run: python assemble.py
       - name: Check the page before saving (keeps the last good page if anything is wrong)
         id: check
@@ -106,7 +102,7 @@ jobs:
         run: |
           git config user.name "gridiron-fantasy-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in index.html art game.json proj_history.json parlay_history.json calls_history.json bet_inputs.json lines.json parlays.json news.json news_state.json articles.json proj_compare.json site_stats.json; do if [ -e "$f" ]; then git add -A "$f"; fi; done
+          for f in index.html art game.json proj_history.json calls_history.json bet_inputs.json lines.json news.json news_state.json articles.json ads.txt; do if [ -e "$f" ] || git ls-files --error-unmatch "$f" >/dev/null 2>&1; then git add -A "$f"; fi; done
           if git diff --cached --quiet; then echo "No changes to save"; exit 0; fi
           git commit -m "Data update $(date -u +%F-%H%M)"
           for i in 1 2 3; do

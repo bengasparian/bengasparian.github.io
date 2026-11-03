@@ -3,7 +3,7 @@
 They are here for tracking and for leagues that start them; they stay out of BFF's trade values, buy/sell calls, waiver
 targets and prop lines, so nothing about the skill-player rankings changes.
 
-SCORING (Yahoo's default league settings, help.yahoo.com/kb/SLN6489, which Sleeper's defaults follow):
+SCORING (the most common default league settings, as Yahoo's help pages list them: help.yahoo.com/kb/SLN6489):
   kicker:  field goal 0-39 yards 3, 40-49 yards 4, 50+ yards 5; extra point 1 (no points off for misses)
   D/ST:    sack 1, interception 2, fumble recovery 2, touchdown 6 (interception, fumble, blocked kick, kickoff and punt
            returns), safety 2, blocked kick 2; points allowed 0: 10, 1-6: 7, 7-13: 4, 14-20: 1, 21-27: 0, 28-34: -1, 35+: -4.
@@ -35,10 +35,6 @@ TNAME = {'ARI': 'Arizona Cardinals', 'ATL': 'Atlanta Falcons', 'BAL': 'Baltimore
          'MIN': 'Minnesota Vikings', 'NE': 'New England Patriots', 'NO': 'New Orleans Saints', 'NYG': 'New York Giants', 'NYJ': 'New York Jets',
          'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers', 'SEA': 'Seattle Seahawks', 'SF': 'San Francisco 49ers', 'TB': 'Tampa Bay Buccaneers',
          'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders'}
-# ESPN's team ids (D/ST players are -16000 minus the team id in ESPN leagues)
-ESPN_TID = {'ATL': 1, 'BUF': 2, 'CHI': 3, 'CIN': 4, 'CLE': 5, 'DAL': 6, 'DEN': 7, 'DET': 8, 'GB': 9, 'TEN': 10, 'IND': 11, 'KC': 12, 'LV': 13, 'LA': 14,
-            'MIA': 15, 'MIN': 16, 'NE': 17, 'NO': 18, 'NYG': 19, 'NYJ': 20, 'PHI': 21, 'ARI': 22, 'PIT': 23, 'LAC': 24, 'SF': 25, 'SEA': 26, 'TB': 27,
-            'WAS': 28, 'CAR': 29, 'JAX': 30, 'BAL': 33, 'HOU': 34}
 # projection constants: research/bt_kdst.py (results_kdst.json 'model'); checked by tests/kdsttest.py
 DST_M = {'a': 12.8535, 'opp_it': -0.3933, 'rate': 0.2855, 'give': 0.3334, 'home': -0.2736}
 K_M = {'a': 2.6143, 'it': 0.1446, 'kavg': 0.2461, 'dome': 0.448}
@@ -188,7 +184,7 @@ def build(D):
         for r in fut[fut.team == t].itertuples():
             it, oit = it_of(r); ros.append([int(r.week), r.opp, round(float(dst_proj(oit, rate_of[t], give_of[r.opp], r.home)), 2), int(r.home)])
         nx = next((x for x in ros if x[0] == NW), None)
-        out.append({'id': 'DST_' + t, 'n': TNAME[t] + ' D/ST', 'p': 'DST', 't': t, 'eid': -16000 - ESPN_TID[t], 'sid': t,
+        out.append({'id': 'DST_' + t, 'n': TNAME[t] + ' D/ST', 'p': 'DST', 't': t,
                     'g': int(len(mine)), 'tot': int(mine.pts.sum()) if len(mine) else 0, 'fpg': round(float(mine.pts.mean()), 2) if len(mine) else None,
                     'wk': [[int(x.week), x.opp, int(x.pts), int(x.sack), int(x.int), int(x.fr), int(x.td), int(x.sfty), int(x.blk), int(x.pa)] for x in mine.itertuples()],
                     'ros': ros, 'nw': NW, 'opp': nx[1] if nx else None, 'home': nx[3] if nx else None, 'proj': nx[2] if nx else 0.0, 'bye': byes[t]})
@@ -198,30 +194,12 @@ def build(D):
         dc = pd.read_parquet(f'depth_charts_{SEASON}.parquet'); dc = dc[dc.pos_abb == 'K']
         if len(dc):
             last = dc[dc.dt == dc.dt.max()]; last = last.sort_values('pos_rank').drop_duplicates('team')
-            cur = {fix(r.team): (r.gsis_id, r.player_name, str(r.espn_id) if r.espn_id == r.espn_id else None) for r in last.itertuples() if isinstance(r.gsis_id, str)}
+            cur = {fix(r.team): (r.gsis_id, r.player_name) for r in last.itertuples() if isinstance(r.gsis_id, str)}
     except Exception as e:
         print('no depth chart for kickers:', e)
     for t in TNAME:   # a team the depth chart misses: its latest kicker this season
         if t not in cur and len(KG) and (KG.team == t).any():
-            r = KG[KG.team == t].sort_values('week').iloc[-1]; cur[t] = (r.pid, r['name'], None)
-    ids = pd.read_csv('db_playerids.csv', low_memory=False) if os.path.exists('db_playerids.csv') else pd.DataFrame()
-    key = lambda v: str(int(v)) if isinstance(v, float) and v == v else (str(v) if isinstance(v, str) else None)
-    E = {g: key(e) for g, e in zip(ids.get('gsis_id', []), ids.get('espn_id', [])) if isinstance(g, str)}
-    S_ = {g: key(s) for g, s in zip(ids.get('gsis_id', []), ids.get('sleeper_id', [])) if isinstance(g, str)}
-    # Sleeper ids for kickers the ID table does not have yet (rookies): Sleeper's kicker projections name each player
-    try:
-        import urllib.request, unicodedata, re as _re
-        nm = lambda z: _re.sub(r'[^a-z]', '', unicodedata.normalize('NFKD', str(z)).lower())
-        req = urllib.request.Request(f'https://api.sleeper.com/projections/nfl/{SEASON}/{NW}?season_type=regular&position[]=K', headers={'User-Agent': 'gridiron-fantasy'})
-        with urllib.request.urlopen(req, timeout=20) as r_: SK = json.load(r_)
-        byname = {}
-        for z in SK if isinstance(SK, list) else []:
-            pl = z.get('player') or {}
-            if z.get('player_id') and pl.get('first_name'): byname[(nm(pl['first_name'] + pl.get('last_name', '')), fix(pl.get('team') or z.get('team') or ''))] = str(z['player_id'])
-        for t, (pid, name, _) in cur.items():
-            if not S_.get(pid) and (nm(name), t) in byname: S_[pid] = byname[(nm(name), t)]
-    except Exception as e:
-        print('Sleeper kicker ids not fetched (rookie kickers may not match in Sleeper leagues until the next run):', str(e)[:120])
+            r = KG[KG.team == t].sort_values('week').iloc[-1]; cur[t] = (r.pid, r['name'])
     team_now = {v[0]: t for t, v in cur.items()}
     pids = list(dict.fromkeys(list(team_now) + (list(KG.pid.unique()) if len(KG) else [])))
     for pid in pids:
@@ -235,7 +213,7 @@ def build(D):
             for r in fut[fut.team == t].itertuples():
                 it, oit = it_of(r); ros.append([int(r.week), r.opp, round(float(k_proj(it, kavg, r.dome)), 2), int(r.home)])
         nx = next((x for x in ros if x[0] == NW), None)
-        out.append({'id': 'K_' + pid, 'n': name, 'p': 'K', 't': t, 'eid': E.get(pid) or next((v[2] for v in cur.values() if v[0] == pid), None), 'sid': S_.get(pid),
+        out.append({'id': 'K_' + pid, 'n': name, 'p': 'K', 't': t,
                     'cur': pid in team_now, 'g': int(len(mine)), 'tot': int(mine.pts.sum()) if len(mine) else 0, 'fpg': round(float(mine.pts.mean()), 2) if len(mine) else None,
                     'wk': [[int(x.week), x.opp, int(x.pts), int(x.fgm), int(x.fga), int(x.pat), int(x.pata), int(x.fg50), int(x.fg40_49)] for x in mine.itertuples()],
                     'ros': ros, 'nw': NW, 'opp': nx[1] if nx else None, 'home': nx[3] if nx else None, 'proj': nx[2] if nx else 0.0, 'bye': byes.get(t, [])})

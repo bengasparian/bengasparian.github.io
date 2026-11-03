@@ -139,7 +139,7 @@ def grade(H, D, season):
     npos = st.groupby(['week', 'position']).size().to_dict()
     played = set()                                     # on the field but no stat line (for example a receiver with no targets): 0 points
     try:
-        ids = pd.read_csv('db_playerids.csv', usecols=['pfr_id', 'gsis_id'], low_memory=False).dropna().drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
+        ids = pd.read_csv('player_ids.csv', usecols=['pfr_id', 'gsis_id'], low_memory=False).dropna().drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
         sn = pd.read_parquet(f'snap_counts_{season}.parquet', columns=['pfr_player_id', 'week', 'game_type', 'offense_snaps'])
         sn = sn[(sn.game_type == 'REG') & (sn.offense_snaps > 0)]
         played = {(ids.get(a), int(w)) for a, w in zip(sn.pfr_player_id, sn.week) if ids.get(a)}

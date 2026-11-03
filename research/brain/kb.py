@@ -123,7 +123,7 @@ KB = [
   '<b>Redraft</b>: a fresh draft every season (what BFF values are built for). <b>Keeper</b>: each team keeps a few players for next season. <b>Dynasty</b>: you keep your whole roster year to year, so young players are worth more. '
   '<b>Best ball</b>: no lineup setting; your top scorers count automatically.'),
  ('adp', ['what is adp', 'what is average draft position'],
-  '<b>ADP</b> (average draft position) is where a player usually goes in drafts. BFF\'s draft guide uses the FantasyPros consensus as its guide to where players go.'),
+  '<b>ADP</b> (average draft position) is where a player usually goes in drafts. BFF uses no outside draft-position data: its draft guide and mock draft use BFF\'s own board (BFF value) as the guide to where players go.'),
  ('draft_strategy', ['what is zero rb', 'what is hero rb', 'what is robust rb', 'what is the best draft strategy', 'should i draft a qb early'],
   '<b>Zero RB</b> waits on running backs and loads up on receivers early; <b>Hero RB</b> takes one elite back early then waits; <b>Robust RB</b> takes several backs early. '
   'In one-quarterback leagues, waiting on a quarterback is usually fine because many score similarly; in superflex take two early. Try strategies against AI teams in the Mock draft.'),
@@ -159,7 +159,7 @@ KB = [
   '<b>-110</b> means you risk 110 to win 100; the extra is the <b>vig</b>. A team\'s <b>implied total</b> = total ÷ 2 + spread ÷ 2 for the favorite (minus for the underdog); BFF uses it in every projection. For entertainment, 21+ where legal.'),
  ('parlay_term', ['what is a parlay', 'what is a same game parlay', 'what is a prop bet', 'what is a player prop', 'what is an anytime touchdown bet'],
   'A <b>parlay</b> combines bets: all legs must win, and the payout multiplies. A <b>same-game parlay</b> takes legs from one game. A <b>player prop</b> is a bet on a player\'s stat, like over 64.5 receiving yards or an anytime touchdown. '
-  'BFF predicts the lines and picks only where its projection disagrees enough. For entertainment, 21+ where legal.'),
+  'BFF predicts where books will post each line and shows its chance with fair odds; it makes no picks and builds no parlays (its betting page has a build-your-own slip). For entertainment, 21+ where legal.'),
  ('special_teams', ['what does a long snapper do', 'what does a punter do', 'what is special teams', 'what does a kicker do', 'what is a returner', 'what is a holder'],
   '<b>Special teams</b> are on the field for kicks: the <b>kicker</b> (field goals, extra points, kickoffs), the <b>punter</b>, the <b>long snapper</b> (snaps the ball 7-8 yards back to the holder or about 15 to the punter), the <b>holder</b> (often the punter) and the <b>returners</b>.'),
  ('eligible_receivers', ['can a quarterback catch a pass', 'can an offensive lineman catch a pass', 'who is an eligible receiver', 'what is an eligible receiver', 'can a qb catch a touchdown', 'what is reporting as eligible'],

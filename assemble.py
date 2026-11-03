@@ -1,5 +1,10 @@
 """Combine the template, styles, and data into index.html (the published page).
 
+Ads and tips (optional, both off until set): a repository variable BFF_ADS_CLIENT holding your Google AdSense publisher ID
+(ca-pub- and 16 digits) turns on AdSense (Auto ads: Google places the ads) and writes ads.txt; BFF_ADS_SLOT (an AdSense
+display ad unit's slot number) also fills BFF's own ad spaces; BFF_TIP_URL (a https link to your tip page, for example
+Ko-fi, Buy Me a Coffee or GitHub Sponsors) shows a "Support BFF" button.
+
 Accounts (optional): paste your Firebase web app config (the whole `const firebaseConfig = {...}` snippet is fine) into
 a GitHub repository variable named BFF_FIREBASE, or into a file named accounts.json. Optional variables BFF_TERMS_STATE
 (the state whose law governs the Terms of Use, default California) and BFF_CONTACT (how people reach you about their
@@ -29,22 +34,52 @@ def accounts():
     return out
 
 
+def ads():
+    """ads and tips from repository variables: {'client': 'ca-pub-...', 'slot': '...', 'tip': 'https://...'} (empty when off)"""
+    out = {}
+    cl = (os.environ.get("BFF_ADS_CLIENT") or "").strip()
+    if cl:
+        if re.fullmatch(r"ca-pub-\d{16}", cl): out["client"] = cl
+        elif re.fullmatch(r"pub-\d{16}", cl): out["client"] = "ca-" + cl
+        else: print("BFF_ADS_CLIENT should look like ca-pub-1234567890123456; ads stay off")
+    sl = (os.environ.get("BFF_ADS_SLOT") or "").strip()
+    if out.get("client") and re.fullmatch(r"\d{6,12}", sl): out["slot"] = sl
+    tip = (os.environ.get("BFF_TIP_URL") or "").strip()
+    if tip:
+        if re.fullmatch(r"https://[^\s\"'<>]{4,200}", tip): out["tip"] = tip
+        else: print("BFF_TIP_URL should be a https:// link; the tip button stays off")
+    return out
+
+
 t = open("template.html").read()
-assert t.count("__CSS__") == 1 and t.count("__DATA__") == 1 and t.count("__SDGAME__") == 1
+assert t.count("__CSS__") == 1 and t.count("__DATA__") == 1 and t.count("__SDGAME__") == 1 and t.count("<!--__ADS__-->") == 1
 D = json.load(open("ff_data.json"))
 A = accounts()
 if A: D["auth"] = A
+AD = ads()
+if AD: D["ads"] = AD
+# AdSense: the script in the page head (Auto ads and site verification) and ads.txt at the site's root
+head = ""
+if AD.get("client"):
+    head = (f'<meta name="google-adsense-account" content="{AD["client"]}">'
+            f'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={AD["client"]}" crossorigin="anonymous"></script>')
+    open("ads.txt", "w").write(f"google.com, {AD['client'][3:]}, DIRECT, f08c47fec0942fa0\n")
+elif os.path.exists("ads.txt"): os.remove("ads.txt")
+print("ads:", ("on (" + AD["client"] + (", BFF's ad spaces filled" if AD.get("slot") else ", Auto ads") + ")") if AD.get("client") else "off (set BFF_ADS_CLIENT to turn them on)",
+      "| tips:", "on" if AD.get("tip") else "off")
 # BFF Originals (articles.py): the latest ones ride along in the page, for copies that cannot load articles.json
 if os.path.exists("articles.json"):
     try:
         AR = json.load(open("articles.json")); D["articles"] = {"at": AR.get("at"), "items": [{k: v for k, v in a.items() if k not in ("digest", "sig", "key")} for a in AR.get("items", [])[:30]]}
     except Exception as e: print("articles.json could not be read:", e)
-# ESPN's injury lists for games not yet started (live.json), so the page can lay the newest status over the data build
-if os.path.exists("live.json"):
+# player photos (photos.py): freely licensed pictures from Wikimedia Commons, each with its author, license and source
+if os.path.exists("photos/credits.json"):
     try:
-        LV = json.load(open("live.json")); GS = {str(g.get("id")): g for g in LV.get("games") or []}
-        D["liveinj"] = {k: v for k, v in (LV.get("inj") or {}).items() if (GS.get(str(k)) or {}).get("state") == "pre" and isinstance(v, dict)}
-    except Exception as e: print("live.json injuries skipped:", e)
+        PC = json.load(open("photos/credits.json")).get("p") or {}
+        D["photos"] = {g: {"f": v["f"], "a": v.get("a") or "", "l": v["lic"], "lu": v.get("lu") or "", "s": v["src"], "m": v.get("m") or ""}
+                       for g, v in PC.items() if os.path.exists(os.path.join("photos", v["f"]))}
+        print("player photos:", len(D["photos"]))
+    except Exception as e: print("photos/credits.json could not be read:", e)
 # Super Bowl and conference championship results for BFF Coach (from the NFL schedule fetch_data.py downloads)
 if os.path.exists("games.csv"):
     try:
@@ -77,5 +112,5 @@ sdg = ""
 if os.path.exists("game.json"):
     try: sdg = '<script type="application/json" id="sdgame">' + json.dumps(json.load(open("game.json")), separators=(",", ":")).replace("</", "<\\/") + "</script>"
     except Exception as e: print("game.json could not be read:", e)
-open("index.html", "w").write(t.replace("__CSS__", css).replace("__DATA__", data).replace("__SDGAME__", sdg))
+open("index.html", "w").write(t.replace("<!--__ADS__-->", head).replace("__CSS__", css).replace("__DATA__", data).replace("__SDGAME__", sdg))
 print("index.html written")

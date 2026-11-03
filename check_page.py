@@ -3,7 +3,7 @@
 
   python check_page.py          check index.html (data job): placeholders filled, data readable, enough players,
                                 script free of syntax errors (node --check, preinstalled on GitHub's runners)
-  python check_page.py --json   check the small saved files: live.json, news.json, lines.json, parlays.json, calls_history.json, articles.json
+  python check_page.py --json   check the small saved files: live.json, news.json, lines.json, calls_history.json, articles.json, photos/credits.json
 
 Anything that fails is put back to the last saved version (git checkout), so the published site never breaks.
 The data check exits with an error so the run shows as failed and nothing new is saved; the next run tries again.
@@ -17,13 +17,14 @@ def restore(path, why):
 
 def check_json():
     bad = 0
-    for f in ('live.json', 'news.json', 'lines.json', 'parlays.json', 'parlay_history.json', 'bet_inputs.json', 'calls_history.json', 'articles.json'):
+    for f in ('live.json', 'news.json', 'lines.json', 'bet_inputs.json', 'calls_history.json', 'articles.json', 'photos/credits.json'):
         if not os.path.exists(f): continue
         try:
             d = json.load(open(f))
             if f == 'news.json' and not isinstance(d.get('items'), list): raise ValueError('no items list')
             if f == 'lines.json' and not isinstance(d.get('lines'), list): raise ValueError('no lines list')
             if f == 'calls_history.json' and not isinstance(d.get('weeks'), dict): raise ValueError('no weeks')
+            if f == 'photos/credits.json' and not all(isinstance(v, dict) and v.get('f') and v.get('lic') and v.get('src') for v in (d.get('p') or {}).values()): raise ValueError('a photo without its license or source')
             if f == 'articles.json' and not (isinstance(d.get('items'), list) and all(isinstance(a, dict) and a.get('id') and a.get('title') and isinstance(a.get('body'), list) for a in d['items'])): raise ValueError('bad articles')
         except Exception as e:
             restore(f, e); bad += 1

@@ -1,8 +1,8 @@
-name: Live scores, news and lines
+name: Scores, news and lines
 
 on:
   schedule:
-    - cron: "4-59/10 * * * *"   # every 10 minutes (stays under GitHub Pages' 10 site builds per hour); only saves when something changed
+    - cron: "4,34 * * * *"   # every 30 minutes; only saves when something changed
   workflow_dispatch: {}
 
 permissions:
@@ -24,34 +24,30 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Refresh scores and news (ESPN, CBS Sports, Yahoo Sports, Pro Football Talk, RotoWire, RotoBaller, PFF, Sharp Football, Sleeper)
+          cache: pip
+      - name: Install libraries (reading nflverse's stats files)
+        run: pip install pandas pyarrow
+      - name: Final scores and box scores (nflverse, after each game) and headline links
+        env:
+          BFF_NEWS_LINKS: ${{ vars.BFF_NEWS_LINKS }}
         run: |
           python live_update.py
           python news_update.py
-      - name: Move prop lines with ESPN's and Sleeper's latest projections, the odds and news; refresh parlay picks
-        run: |
-          python site_stats.py
-          python ff_lines.py --refresh
-          python parlay_update.py --refresh
-      - name: BFF Originals (breaking news, game previews and recaps; Claude writes them if ANTHROPIC_API_KEY is set)
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          BFF_AI_MODEL: ${{ vars.BFF_AI_MODEL }}
-          BFF_AI_MAX_DAY: ${{ vars.BFF_AI_MAX_DAY }}
+      - name: Pull prop lines for players ruled out in the news
+        run: python ff_lines.py --refresh
+      - name: BFF Originals (breaking news, game previews and recaps, written by BFF's own writer)
         id: articles
         continue-on-error: true
         run: python articles.py
-      - name: Save ESPN's and Sleeper's projections before kickoff (BFF's live head-to-head)
-        run: python proj_compare.py || echo "Projection tracker skipped this run"
       - name: Check the files before saving
         run: python check_page.py --json
       - name: Save
         run: |
           git config user.name "gridiron-fantasy-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in live.json news.json lines.json parlays.json parlay_history.json articles.json proj_compare.json site_stats.json; do if [ -f "$f" ]; then git add "$f"; fi; done
+          for f in live.json news.json lines.json articles.json; do if [ -f "$f" ]; then git add "$f"; fi; done
           if git diff --cached --quiet; then echo "Nothing changed"; exit 0; fi
-          git commit -m "Live update $(date -u +%H:%M)"
+          git commit -m "Scores update $(date -u +%H:%M)"
           for i in 1 2 3; do
             if git pull --rebase --autostash && git push; then exit 0; fi
             echo "Save attempt $i did not go through; retrying"; sleep $((i*10))

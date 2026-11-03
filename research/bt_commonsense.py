@@ -15,7 +15,7 @@ The checks tested (2020-25 regular seasons, weeks 4-13, the trade window):
 python research/bt_commonsense.py   (writes research/results_commonsense.json)"""
 import os, json, numpy as np, pandas as pd
 BT = os.path.dirname(os.path.abspath(__file__)); RUN = os.path.dirname(BT); os.chdir(RUN)
-ids = pd.read_csv('db_playerids.csv', usecols=['pfr_id', 'gsis_id'], low_memory=False).dropna().drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
+ids = pd.read_csv('player_ids.csv', usecols=['pfr_id', 'gsis_id'], low_memory=False).dropna().drop_duplicates('pfr_id').set_index('pfr_id').gsis_id.to_dict()
 SH = {'RB': .55, 'WR': .70, 'TE': .70}
 
 
