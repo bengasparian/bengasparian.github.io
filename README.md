@@ -395,9 +395,11 @@ recaps still in their window.
   makes someone else the subject, no painting, grave or card), a search result also with the same suffix ("Michael
   Carter II" is not Michael Carter) and filed under his team, draft team or college football team (never just a
   category named like him, which can be a namesake's; never when two BFF players share the name), and exactly one face
-  found in it (OpenCV face detection). The first search run, on November 3, 2026, took a few namesakes (a 19th-century
-  painter, an Air Force sergeant, a hockey goalie) before these rules; they were removed before reaching the site. A
-  run that would lose more than 15% of the photos, or that Wikidata answers with no players, stops and keeps them all. Only pictures whose license is public domain, CC0, CC BY or
+  found in it (OpenCV face detection, confirmed by an eye in the face). The first search run, on November 3, 2026, took
+  a few namesakes (a 19th-century painter, an Air Force sergeant, a hockey goalie) before these rules; two of them
+  replaced the right photos of Aaron Jones and Michael Wilson on the live site for about 13 minutes, until the next run
+  put the right ones back. A run that would lose more than 15% of the photos, or that Wikidata answers with no players,
+  now stops and keeps them all. Only pictures whose license is public domain, CC0, CC BY or
   CC BY-SA are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped). Each is
   cropped to a 3:4 portrait around the face, saved small in `photos/`, and credited (author, license with its link,
   "cropped and resized", and CC BY-SA kept as CC BY-SA) on the player's card and under Sources → Photo credits.
