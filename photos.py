@@ -455,6 +455,13 @@ def confirm(raw, fs):
     return [round(v, 4) for v in lo[0]] if len(hit) == 1 else None
 
 
+def face_in_crop(c, x):
+    """does the top-centered crop of a checked picture (x: its Commons size) show a clear face? (unknown: yes)"""
+    if not c or c.get('dv') != DV or not x.get('w') or not x.get('h'): return True
+    w, h = float(x['w']), float(x['h']); x0, y0, x1, y1 = crop_box(w, h)
+    return any(b[4] >= HIGH and x0 / w <= b[0] + b[2] / 2 <= x1 / w and y0 / h <= b[1] + b[3] / 2 <= y1 / h for b in c.get('b') or [])
+
+
 def subject(c, own):
     """the face to crop to in a checked photo, or None. Any photo: its only clear face, if big and central (good_face).
     His own picture (his Wikidata picture or his Wikipedia infobox's, chosen to show him): also the clear face at least
@@ -589,8 +596,10 @@ def main():
             if raw: raws[f] = raw
             box = subject(c, own)
             if box: pick = (f, how, box); break
-        if not pick:   # his face shows clearly in none of them: his own picture as it is (top-centered), else no photo
-            wf = next((c for c in ok_ if c[1] in ('wikidata', 'wikipedia')), None)
+        if not pick:   # his face shows clearly in none of them: his own picture as it is (top-centered), unless the
+            # part kept shows someone's clear face (it may not be his: Nov 4 2026, the tackler in George Holani's picture),
+            # else no photo
+            wf = next((c for c in ok_ if c[1] in ('wikidata', 'wikipedia') and not face_in_crop(chk.get(c[0]), info[c[0]])), None)
             if not wf: count('no photo with his face clearly visible'); continue
             pick = (wf[0], wf[1], None); noface += 1
         f, how, box = pick

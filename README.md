@@ -417,7 +417,8 @@ recaps still in their window.
   player in the background, the back of a helmet, or the defender tackling George Holani). His own picture also counts when one clear face is at
   least 1.6 times as wide as any other (a small face behind him), or, when no face is clear (a face mask, a shadow),
   when a closer look at the one faint face confirms it. A small face is cropped from a 1920-pixel copy (one of the
-  thumbnail sizes Commons serves) so it stays sharp. If no photo shows his face clearly, his own picture is used as it is (an action photo, top-centered). Face
+  thumbnail sizes Commons serves) so it stays sharp. If no photo shows his face clearly, his own picture is used as it is (an action photo, top-centered), unless
+  the part kept shows someone's clear face, which may not be his (then he keeps his jersey). Face
   checks are remembered in `photos/checks.json`, so each file is downloaded once. Only public domain, CC0, CC BY and
   CC BY-SA pictures are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped).
   Each is saved small in `photos/` and credited (author, license with its link, "cropped and resized", and CC BY-SA
