@@ -783,19 +783,6 @@
 0.145
 ]
 },
-"00-0033439": {
-"f": "00-0033439.webp",
-"a": "Erik Drost on Flickr",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Pharaoh_Brown_(48086781638)_(cropped).jpg",
-"ts": "2019-11-11 05:36:36",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0033526": {
 "f": "00-0033526.webp",
 "a": "Keith Allison",
@@ -906,13 +893,13 @@
 },
 "00-0033662": {
 "f": "00-0033662.webp",
-"a": "Chris Hunkeler on Flickr",
-"lic": "CC BY-SA 2.0",
-"lu": "https://creativecommons.org/licenses/by-sa/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Cooper_Rush_Arm_Back_for_the_Pass_(48619221998)_(cropped).jpg",
-"ts": "2019-12-30 06:56:59",
+"a": "DMC511",
+"lic": "CC BY-SA 4.0",
+"lu": "https://creativecommons.org/licenses/by-sa/4.0",
+"src": "https://commons.wikimedia.org/wiki/File:Cooper_Rush_(cropped).jpg",
+"ts": "2017-05-13 23:20:32",
 "m": "cropped and resized, CC BY-SA",
-"via": "wikipedia",
+"via": "wikidata",
 "cv": 6,
 "seen": "2026-11-04",
 "fb": null
@@ -934,32 +921,6 @@
 0.562,
 0.584
 ]
-},
-"00-0033757": {
-"f": "00-0033757.webp",
-"a": "All-Pro Reels",
-"lic": "CC BY-SA 2.0",
-"lu": "https://creativecommons.org/licenses/by-sa/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Robert_Tonyan_(51632500615)_(cropped).jpg",
-"ts": "2021-10-27 13:12:06",
-"m": "cropped and resized, CC BY-SA",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
-"00-0033854": {
-"f": "00-0033854.webp",
-"a": "E's Adventures in Life from USA! Where else could you live that would be this good!",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:20170102_Cotton_Bowl_UW_vs_W_Mich_(158)_(35673803601).jpg",
-"ts": "2019-12-30 04:49:12",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0033858": {
 "f": "00-0033858.webp",
@@ -1262,19 +1223,6 @@
 0.296
 ]
 },
-"00-0034487": {
-"f": "00-0034487.webp",
-"a": "Tennessee Titans",
-"lic": "CC BY 3.0",
-"lu": "https://creativecommons.org/licenses/by/3.0",
-"src": "https://commons.wikimedia.org/wiki/File:Trent_Sherfield_2.png",
-"ts": "2025-12-03 17:34:28",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0034577": {
 "f": "00-0034577.webp",
 "a": "All-Pro Reels from District of Columbia, USA",
@@ -1554,19 +1502,6 @@
 "ts": "2020-03-12 06:27:04",
 "m": "cropped and resized",
 "via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
-"00-0035100": {
-"f": "00-0035100.webp",
-"a": "Van Ha",
-"lic": "Public domain",
-"lu": "",
-"src": "https://commons.wikimedia.org/wiki/File:Jake_Browning_(cropped).jpg",
-"ts": "2019-10-12 03:34:08",
-"m": "cropped and resized",
-"via": "wikipedia",
 "cv": 6,
 "seen": "2026-11-04",
 "fb": null
@@ -2042,19 +1977,6 @@
 0.172
 ]
 },
-"00-0036139": {
-"f": "00-0036139.webp",
-"a": "Gamecock Central",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Rico_Dowdle.jpg",
-"ts": "2020-04-28 21:12:01",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0036158": {
 "f": "00-0036158.webp",
 "a": "All-Pro Reels",
@@ -2162,19 +2084,6 @@
 0.177,
 0.162
 ]
-},
-"00-0036259": {
-"f": "00-0036259.webp",
-"a": "Gamecock Central",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Jauan_Jennings.jpg",
-"ts": "2020-05-07 17:45:01",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0036264": {
 "f": "00-0036264.webp",
@@ -3206,19 +3115,6 @@
 0.24
 ]
 },
-"00-0037239": {
-"f": "00-0037239.webp",
-"a": "Maize & Blue Nation",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:IX8A4137_(45339431234)_(cropped).jpg",
-"ts": "2022-06-23 18:34:30",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0037240": {
 "f": "00-0037240.webp",
 "a": "The University of Alabama",
@@ -3299,32 +3195,6 @@
 0.369
 ]
 },
-"00-0037258": {
-"f": "00-0037258.webp",
-"a": "All-Pro Reels",
-"lic": "CC BY-SA 2.0",
-"lu": "https://creativecommons.org/licenses/by-sa/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Dameon_Pierce_(cropped).jpg",
-"ts": "2022-11-29 01:01:02",
-"m": "cropped and resized, CC BY-SA",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
-"00-0037261": {
-"f": "00-0037261.webp",
-"a": "United States Air Force",
-"lic": "Public domain",
-"lu": "",
-"src": "https://commons.wikimedia.org/wiki/File:Khalil_Shakir_(30740439657)_(cropped).jpg",
-"ts": "2023-02-13 01:10:19",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0037263": {
 "f": "00-0037263.webp",
 "a": "Atlanta Falcons",
@@ -3342,19 +3212,6 @@
 0.431,
 0.444
 ]
-},
-"00-0037267": {
-"f": "00-0037267.webp",
-"a": "Erik Drost",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Jerome_Ford_(52340583231)_(cropped).jpg",
-"ts": "2022-09-07 23:14:57",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0037277": {
 "f": "00-0037277.webp",
@@ -3409,19 +3266,6 @@
 0.21,
 0.226
 ]
-},
-"00-0037317": {
-"f": "00-0037317.webp",
-"a": "Gamecock Central",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Nick_Muse.jpg",
-"ts": "2022-06-21 18:31:53",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0037382": {
 "f": "00-0037382.webp",
@@ -3495,19 +3339,6 @@
 0.144
 ]
 },
-"00-0037563": {
-"f": "00-0037563.webp",
-"a": "All-Pro Reels",
-"lic": "CC BY-SA 4.0",
-"lu": "https://creativecommons.org/licenses/by-sa/4.0",
-"src": "https://commons.wikimedia.org/wiki/File:Malik_Davis.jpg",
-"ts": "2026-03-09 04:35:07",
-"m": "cropped and resized, CC BY-SA",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0037594": {
 "f": "00-0037594.webp",
 "a": "Tennessee Titans",
@@ -3534,19 +3365,6 @@
 "src": "https://commons.wikimedia.org/wiki/File:John_Metchie_III_2021.jpg",
 "ts": "2022-05-15 15:23:32",
 "m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
-"00-0037664": {
-"f": "00-0037664.webp",
-"a": "All-Pro Reels",
-"lic": "CC BY-SA 2.0",
-"lu": "https://creativecommons.org/licenses/by-sa/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Alec_Pierce_Commanders_vs_Colts_OCT2022_(cropped).jpg",
-"ts": "2024-02-01 07:04:51",
-"m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
 "seen": "2026-11-04",
@@ -3839,19 +3657,6 @@
 0.487,
 0.452
 ]
-},
-"00-0038098": {
-"f": "00-0038098.webp",
-"a": "Staff Sgt. Brittany Primavera",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Pierre_Strong_(cropped).jpg",
-"ts": "2026-04-09 01:07:07",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0038102": {
 "f": "00-0038102.webp",
@@ -4287,19 +4092,6 @@
 0.192,
 0.237
 ]
-},
-"00-0038563": {
-"f": "00-0038563.webp",
-"a": "All-Pro Reels from District of Columbia, USA",
-"lic": "CC BY-SA 4.0",
-"lu": "https://creativecommons.org/licenses/by-sa/4.0",
-"src": "https://commons.wikimedia.org/wiki/File:Tre_Tucker_(54841331175)_(cropped).jpg",
-"ts": "2025-10-09 01:23:56",
-"m": "cropped and resized, CC BY-SA",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0038576": {
 "f": "00-0038576.webp",
@@ -5037,19 +4829,6 @@
 0.149
 ]
 },
-"00-0039299": {
-"f": "00-0039299.webp",
-"a": "U.S. Air Force photo/Trevor Cokley",
-"lic": "Public domain",
-"lu": "",
-"src": "https://commons.wikimedia.org/wiki/File:George_Holani_(201031-F-XS730-1010)_(cropped).jpg",
-"ts": "2024-05-19 00:22:08",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0039337": {
 "f": "00-0039337.webp",
 "a": "Tammy Anthony Baker",
@@ -5269,19 +5048,6 @@
 0.313
 ]
 },
-"00-0039518": {
-"f": "00-0039518.webp",
-"a": "Trevor Cokley",
-"lic": "Public domain",
-"lu": "",
-"src": "https://commons.wikimedia.org/wiki/File:Air_Force_Academy_vs_Wyoming_Gameday_(231014-F-XS730-2008)_(cropped).jpg",
-"ts": "2026-05-02 18:37:07",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0039530": {
 "f": "00-0039530.webp",
 "a": "Tennessee Titans",
@@ -5299,19 +5065,6 @@
 0.361,
 0.346
 ]
-},
-"00-0039577": {
-"f": "00-0039577.webp",
-"a": "Steve Cheng, Bruin Report",
-"lic": "CC BY-SA 2.0",
-"lu": "https://creativecommons.org/licenses/by-sa/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:Kedon_Slovis.jpg",
-"ts": "2020-04-02 00:32:38",
-"m": "cropped and resized, CC BY-SA",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0039648": {
 "f": "00-0039648.webp",
@@ -5348,19 +5101,6 @@
 0.385,
 0.367
 ]
-},
-"00-0039703": {
-"f": "00-0039703.webp",
-"a": "Stephanie Mundwiller",
-"lic": "Public domain",
-"lu": "",
-"src": "https://commons.wikimedia.org/wiki/File:Cody_Schrader.webp",
-"ts": "2026-05-12 00:05:00",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0039710": {
 "f": "00-0039710.webp",
@@ -6423,19 +6163,6 @@
 0.204
 ]
 },
-"00-0040534": {
-"f": "00-0040534.webp",
-"a": "Cramerwiki",
-"lic": "CC0",
-"lu": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"src": "https://commons.wikimedia.org/wiki/File:KeshawnWilliams.jpg",
-"ts": "2025-08-10 07:25:31",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0040582": {
 "f": "00-0040582.webp",
 "a": "New York Jets",
@@ -6740,19 +6467,6 @@
 0.168
 ]
 },
-"00-0040729": {
-"f": "00-0040729.webp",
-"a": "Tennessee Titans",
-"lic": "CC BY 3.0",
-"lu": "https://creativecommons.org/licenses/by/3.0",
-"src": "https://commons.wikimedia.org/wiki/File:JackBech.png",
-"ts": "2025-09-03 20:08:10",
-"m": "cropped and resized",
-"via": "wikidata",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0040730": {
 "f": "00-0040730.webp",
 "a": "Tennessee Titans",
@@ -6976,19 +6690,6 @@
 0.334,
 0.374
 ]
-},
-"00-0041013": {
-"f": "00-0041013.webp",
-"a": "Unknown author Unknown author",
-"lic": "Public domain",
-"lu": "",
-"src": "https://commons.wikimedia.org/wiki/File:Emmett_Johnson_(221105-Z-VY191-0233)_(cropped).jpg",
-"ts": "2026-04-16 02:01:27",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
 },
 "00-0041027": {
 "f": "00-0041027.webp",
@@ -7358,19 +7059,6 @@
 0.357
 ]
 },
-"00-0041503": {
-"f": "00-0041503.webp",
-"a": "Maize & Blue Nation",
-"lic": "CC BY 2.0",
-"lu": "https://creativecommons.org/licenses/by/2.0",
-"src": "https://commons.wikimedia.org/wiki/File:2022_FB_UM_vs_Nebraska027_(52499830460)_(cropped).jpg",
-"ts": "2026-06-19 17:33:11",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
 "00-0041512": {
 "f": "00-0041512.webp",
 "a": "U.S. Army photo by Spc. David Poleski",
@@ -7378,19 +7066,6 @@
 "lu": "",
 "src": "https://commons.wikimedia.org/wiki/File:Jadarian_Price.jpg",
 "ts": "2026-01-26 20:48:52",
-"m": "cropped and resized",
-"via": "wikipedia",
-"cv": 6,
-"seen": "2026-11-04",
-"fb": null
-},
-"00-0041529": {
-"f": "00-0041529.webp",
-"a": "U.S. Navy photo by Mass Communication Specialist 2nd Class Clayton A. Wren",
-"lic": "Public domain",
-"lu": "",
-"src": "https://commons.wikimedia.org/wiki/File:Kevin_Coleman_Jr_(clear).jpg",
-"ts": "2025-12-05 01:16:52",
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
