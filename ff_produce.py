@@ -384,13 +384,14 @@ for pos in POS:
     u=U5[U5.pos==pos]
     if not len(u): continue
     P_=MODEL.next(pos,u); F1=u[u.gi==0]
+    C_=MODEL.parts(pos,u)['receptions'] if pos!='QB' else np.zeros(len(u))   # catches in each projection (half PPR and standard take them out)
     Pm_=MODEL.next(pos,F1.assign(dvp=1.0,**{'o_'+k:v for k,v in _LG.items()}))   # an average defense
     _px=[_proxy(t_,o_) for t_,o_ in zip(F1.team,F1.opp)]
     Pv_=MODEL.next(pos,F1.assign(it=[x[0] for x in _px],spread=[x[1] for x in _px],total=[x[2] for x in _px]))   # no betting line
     Pt_=MODEL.next(pos,F1.assign(bump=0.0,qbm=0,vac_all=0.0))   # no teammates out
     XL_=MODEL.parts(pos,F1)
     for pid_,ix in u.groupby('player_id',sort=False).indices.items():
-        PRED[pid_]={'P':P_[ix],'wk':u.week.values[ix],'dvp':u.dvp.values[ix],'bump':u.bump.values[ix],'efp':float(u.e_fp.values[ix[0]]) if u.e_fp.values[ix[0]]==u.e_fp.values[ix[0]] else None}
+        PRED[pid_]={'P':P_[ix],'C':C_[ix],'wk':u.week.values[ix],'dvp':u.dvp.values[ix],'bump':u.bump.values[ix],'efp':float(u.e_fp.values[ix[0]]) if u.e_fp.values[ix[0]]==u.e_fp.values[ix[0]] else None}
     for j,pid_ in enumerate(F1.player_id.values):
         PRED[pid_].update(Pm=float(Pm_[j]),Pv=float(Pv_[j]),Pt=float(Pt_[j]),xl={c:round(float(v[j]),1) for c,v in XL_.items()})
 # rest-of-season level = the average of his remaining game projections, each with its own opponent and team totals
@@ -426,7 +427,10 @@ for pid in pool:
     # (2023-25: 11% the first week, 34% by the fourth, about half later; 53% did not play again that season)
     _av=[(0.0 if ret_ and w[0]<ret_ else (AIR[min(len(AIR)-1,int(w[0])-ret_)] if ret_ else 1.0)) if ir else _avail(int(w[0])) for w in wk_rows if w[0]<=17]
     _raw=[float(P[i] if i==0 else PR[i]) for i,w in enumerate(wk_rows) if w[0]<=17]
-    ros=[[int(w[0]),w[1],r(_av[i]*_raw[i],1)] for i,w in enumerate(wk_rows) if w[0]<=17]
+    # each game's catches as a share of its PPR points (BFF's stat-by-stat model): the site takes them out for half PPR
+    # and standard, scaled with any later change to the points (research/bt_format.py)
+    _xr=[(r(min(1.0,float(X['C'][i])/float(X['P'][i])),3) if float(X['P'][i])>.5 else 0.0) for i,w in enumerate(wk_rows) if w[0]<=17] if pos!='QB' else None
+    ros=[[int(w[0]),w[1],r(_av[i]*_raw[i],1)]+([_xr[i]] if _xr is not None else []) for i,w in enumerate(wk_rows) if w[0]<=17]
     AVL[pid]=(_av,_raw)
     rl=role.loc[pid] if pid in role.index else None
     # no usage: on this team for 3+ weeks this season (active, inactive or practice squad, never on a reserve list) and
@@ -444,7 +448,7 @@ for pid in pool:
       'snap':r(rows.offense_pct.mean(),3) if len(rows) and rows.offense_pct.notna().any() else None,'ts':r(rows.target_share.mean(),3) if len(rows) else None,
       'ays':r(rows.air_yards_share.mean(),3) if len(rows) else None,'wopr':r(rows.wopr.mean(),3) if len(rows) else None,'tpg':r(rows.targets.mean(),1) if len(rows) else None,
       'cpg':r(rows.carries.mean(),1) if len(rows) else None,'cs':r(rows.car_share.mean(),3) if len(rows) else None,'rz':r(rows.rzo.mean(),1) if len(rows) else None,
-      'rpg':r(rec_pg,2),'mx':mix_of(pid,pos),'prev':r(pv,1),'dy':int(idx.loc[pid,'draft_year']) if pid in idx.index and pd.notna(idx.loc[pid,'draft_year']) else None,
+      'rpg':r(rec_pg,2),'xr':(r(min(1.0,float(X['C'][0])/float(X['P'][0])),3) if float(X['P'][0])>.5 else 0.0) if pos!='QB' else None,'mx':mix_of(pid,pos),'prev':r(pv,1),'dy':int(idx.loc[pid,'draft_year']) if pid in idx.index and pd.notna(idx.loc[pid,'draft_year']) else None,
       'gl':GL.get(pid,[]),
       'wk':[[int(x.week),r(x.fp,1),r(x.xfp,1),r(x.offense_pct,2),int(x.targets),int(x.carries),x.opponent_team] for x in rows.itertuples()],
       'proj':r(proj_next,1),'nw':int(nxt[0]),'opp':nxt[1],'home':int(nxt[2]) if nxt[2]==nxt[2] else 0,'it':r(nxt[3],1),'rl':r(Pr[0],1),'frm':r(base.get('efp'),1),

@@ -266,8 +266,13 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   is not out). When the starter missed his last game and his team has no injury report for the next one yet (Monday to
   Wednesday), he is projected for the measured chance he plays and the next quarterback for the rest, so the team's
   quarterback total stays whole; once the official report sets a status, the normal rule takes over.
-- **Half PPR and standard:** a player's catches are removed in proportion to how much the projection regressed his
-  scoring (tested on 2023-2025: lower error than removing his full catches per game).
+- **Half PPR and standard:** a projection loses the catches BFF's own stat-by-stat model has in it (each game's
+  catches as a share of its points, so the chance he plays or a fill-in role scales both). Tested on 2023-2025 games
+  (`research/bt_format.py`, each season predicted by models trained only on earlier ones): lower error than the old
+  estimate (his catches a game so far, scaled by how far the projection regressed his scoring) in every season, position
+  and format; half PPR 3.67 vs 3.70 points, standard 3.28 vs 3.34. Until November 4, 2026 the old estimate took about 6
+  catches a game out of Chase Brown's projection, which has 3.7 in it, so his half PPR and standard values were far too
+  low. A game already played loses the catches he really made in it.
 - **Custom scoring:** each player carries his own stat mix per game (this season, shrunk toward last season's or his
   position's average as if he had 3 more games of it); his PPR projection is converted by the ratio of his points under
   your rules to his PPR points on that mix (limited to 0.3x-3x).

@@ -223,6 +223,17 @@ const FMTN={ppr:'PPR',half:'half PPR',std:'standard'},fmtName=()=>FMT==='custom'
 // (catches x projection / points per game, kept between 0.5x and 1.5x). Tested on 2023-25 games: lower error than removing full catches.
 const recK=(p,v)=>p.fpg>3?Math.min(1.5,Math.max(.5,v/p.fpg)):1;
 const adj=(p,v)=>v==null?null:FMT==='custom'?Math.max(0,v*cmul(p)):FMT==='ppr'||p.p==='QB'?Math.max(0,v):Math.max(0,v-(1-RW[FMT])*(p.rpg||0)*recK(p,v));
+// a projection in half PPR / standard: take out the catches BFF's stat-by-stat model projects in it, as its share of the
+// points (each game's share r[3], his next game's p.xr), so anything that later scales the points (the chance he plays, a
+// fill-in role) scales the catches too. 2023-25 games (research/bt_format.py): lower error than the estimate above (his
+// catches a game so far, scaled) in every season, position and format; half PPR 3.67 vs 3.70, standard 3.28 vs 3.34.
+// Nov 4 2026: the old estimate took 6 catches a game out of Chase Brown's projection, which has 3.7 in it.
+const adjP=(p,v,xr)=>{if(v==null)return null;if(FMT==='custom'||FMT==='ppr'||p.p==='QB')return adj(p,v);const s=xr!=null?xr:p.xr;return s!=null?Math.max(0,v*(1-(1-RW[FMT])*s)):adj(p,v)};
+// a game he played (x: a p.wk row): his real catches that game (p.gl), not his average
+const glRec=(p,w)=>{const r=(p.gl||[]).find(x=>x[0]===w);return r?r[9]:null};
+const adjG=(p,x)=>{if(!x||x[1]==null)return null;if(FMT==='custom'||FMT==='ppr'||p.p==='QB')return adj(p,x[1]);const c=glRec(p,x[0]);return c!=null?Math.max(0,x[1]-(1-RW[FMT])*c):adj(p,x[1])};
+// expected points from usage (x[2], PPR) in half PPR / standard: his targets that game times his catch rate this season
+const adjX=(p,x)=>{if(!x||x[2]==null)return null;if(FMT==='custom')return Math.max(0,x[2]*cmul(p));if(FMT==='ppr'||p.p==='QB')return x[2];const t=x[4]||0,cr=p.tpg>0?Math.min(1,(p.rpg||0)/p.tpg):0;return Math.max(0,x[2]-(1-RW[FMT])*t*cr)};
 const out=p=>p.inj==='Out'||p.inj==='IR';
 // common sense on top of the numbers (research/bt_commonsense.py and bt_fillin.py, 2020-25). A usage gap is not a buy low
 // when he is a fill-in whose starter is back or due back within two games, has played only two games, is losing snaps
@@ -247,9 +258,9 @@ const fillDrop=p=>p.fpg*(1-(p.fill.f||.8));   // points a game a fill-in tends t
 const sellKey=p=>fillSoon(p)&&p.fpg>=8?100+fillDrop(p):p.fpg-p.xfpg,buyKey=p=>(p.xfpg-p.fpg)*Math.sqrt(p.xfpg);   // fill-ins whose starter is back first: the clearest sells
 const sellWhy=p=>sellNums(p)?`${f1(p.fpg)} a game on usage worth ${f1(p.xfpg)}`:`filling in for ${esc(p.fill.by)}, who ${fillState(p.fill)}`;
 function fillNote(p){const f=p.fill;if(!f)return '';return `His recent role came with ${esc(f.by)} out (${pc(f.m)} of snaps then${f.wi!=null?`, ${pc(f.wi)} beside him`:''}). ${esc(f.by)} ${fillState(f)}. BFF scales his projection to ${pc(f.f)} for the weeks ${esc(f.by)} plays: fill-ins scored about that share of their projections once the starter was back (2020-25).`}
-function proj(p){return out(p)?0:adj(p,p.proj)}
-function wkProj(p,w){if(w===p.nw)return proj(p);const r=p.ros.find(x=>x[0]===w);return r?adj(p,r[2]):0}
-function rosTot(p,a=NW,b=17){let s=0;for(const r of p.ros)if(r[0]>=a&&r[0]<=b)s+=r[0]===p.nw?proj(p):adj(p,r[2]);return s}
+function proj(p){return out(p)?0:adjP(p,p.proj)}
+function wkProj(p,w){if(w===p.nw)return proj(p);const r=p.ros.find(x=>x[0]===w);return r?adjP(p,r[2],r[3]):0}
+function rosTot(p,a=NW,b=17){let s=0;for(const r of p.ros)if(r[0]>=a&&r[0]<=b)s+=r[0]===p.nw?proj(p):adjP(p,r[2],r[3]);return s}
 function projFor(p){if(p.nw===NW)return proj(p);const h=(D.ph||{})[p.id];return h?(FMT==='custom'?Math.max(0,h[0]*cmul(p)):FMT==='ppr'||p.p==='QB'?Math.max(0,h[0]):Math.max(0,h[0]-(1-RW[FMT])*(h[1]||0)*recK(p,h[0]))):null}
 function qsFor(p,v){const Q=((D.model||{}).qs||{})[p.p]||{},b=v>=15?'15':v>=10?'10':'5';return Q[b]||Q['10']||Q['5']||null}
 function cdfQ(q,x){if(x<q[0]){const w=Math.max(q[1]-q[0],.05)*3;return Math.max(0,.05*(1-(q[0]-x)/w))}if(x>=q[18]){const w=Math.max(q[18]-q[17],.05)*3;return Math.min(1,.95+.05*(x-q[18])/w)}for(let i=0;i<18;i++){if(x<q[i+1]){const d=q[i+1]-q[i];return(i+1+(d>0?(x-q[i])/d:0))/20}}return .95}
@@ -294,8 +305,8 @@ function lineup(ids,w,vf){const S=slots(),pts=id=>{const p=PI[id];return p?(vf?v
 function rosLineup(ids){let s=0;for(let w=FW;w<=17;w++)s+=lineup(ids,w).tot;return s}
 // ---------- THIS WEEK
 let WPOS='ALL',WN=50,OPEN=new Set();const CMP=new Set();
-function spark(p){const L=p.wk.slice(-5);if(!L.length)return'<span class="sub">no games</span>';const mx=Math.max(8,...L.map(x=>adj(p,x[1])||0)),w=78,h=30,bw=w/L.length-4;
- return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Recent fantasy points">${L.map((x,i)=>{const v=adj(p,x[1])||0,bh=Math.max(2,v/mx*(h-4));return `<rect x="${i*(bw+4)}" y="${h-bh}" width="${bw}" height="${bh}" rx="2" fill="var(--acc2)" opacity="${.45+.55*(i+1)/L.length}"><title>Week ${x[0]}: ${f1(v)}</title></rect>`}).join('')}</svg>`}
+function spark(p){const L=p.wk.slice(-5);if(!L.length)return'<span class="sub">no games</span>';const mx=Math.max(8,...L.map(x=>adjG(p,x)||0)),w=78,h=30,bw=w/L.length-4;
+ return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Recent fantasy points">${L.map((x,i)=>{const v=adjG(p,x)||0,bh=Math.max(2,v/mx*(h-4));return `<rect x="${i*(bw+4)}" y="${h-bh}" width="${bw}" height="${bh}" rx="2" fill="var(--acc2)" opacity="${.45+.55*(i+1)/L.length}"><title>Week ${x[0]}: ${f1(v)}</title></rect>`}).join('')}</svg>`}
 function whyHtml(p){const v=proj(p),am=p.adjm||0,av=p.adjv||0,at=p.adjt||0,base=Math.max(0,v-am-av-at),mx=Math.max(v,base,1)*1.05,gr=grade(p.p,p.opp),[lo,hi]=rng(p);
  const bar=(lab,val,col,signed)=>`<div class="wb"><span>${lab}</span><div class="t">${signed?`<i style="left:${val>=0?50:50+val/mx*50}%;width:${Math.abs(val)/mx*50}%;background:${val>=0?'var(--good)':'var(--bad)'}"></i><i style="left:50%;width:1px;background:var(--line2)"></i>`:`<i style="left:0;width:${val/mx*100}%;background:${col}"></i>`}</div><b>${signed?sg(val):f1(val)}</b></div>`;
  const R=[];if(p.p!=='QB'){R.push(p.p==='RB'?`Handles ${pc(p.cs)} of his team's carries and ${f1(p.tpg)} targets a game${p.snap!=null?`, on ${pc(p.snap)} of snaps`:''}.`:`Gets ${pc(p.ts)} of his team's targets (${f1(p.tpg)} a game)${p.snap!=null?` on ${pc(p.snap)} of snaps`:''}.`);
@@ -308,8 +319,8 @@ function whyHtml(p){const v=proj(p),am=p.adjm||0,av=p.adjv||0,at=p.adjt||0,base=
  if(p.tpl)R.push(`${p.t} runs ${f1(p.tpl)} plays a game and passes on ${pc(p.tpr)} of them.`);
  const xNR=p.injs==='expected'&&/no injury report/.test(p.injn||'');
  if((p.inj||p.prac)&&!xNR)R.push(`Injury report: ${p.inj||'no game status'}${p.prac?`, practice: ${p.prac==='DNP'?'did not practice':p.prac==='Limited'?'limited':'full'}`:''}.`);
- if(xNR&&p.pj0!=null)R.push(`${esc(p.injn)}, so he is projected for the chance he plays, measured on players in the same spot (${f1(adj(p,p.pj0))} if he plays).`);
- if(p.qbf){const s=P.find(q=>q.t===p.t&&q.p==='QB'&&q.qbs);R.push(`${s?esc(s.n):'The starter'} missed his last game and has no injury report yet, so ${esc(p.n)} is projected for the share of the game he is likely to start (${f1(adj(p,p.pj0))} if he starts).`)}
+ if(xNR&&p.pj0!=null)R.push(`${esc(p.injn)}, so he is projected for the chance he plays, measured on players in the same spot (${f1(adjP(p,p.pj0))} if he plays).`);
+ if(p.qbf){const s=P.find(q=>q.t===p.t&&q.p==='QB'&&q.qbs);R.push(`${s?esc(s.n):'The starter'} missed his last game and has no injury report yet, so ${esc(p.n)} is projected for the share of the game he is likely to start (${f1(adjP(p,p.pj0))} if he starts).`)}
  return `<div class="why"><div><div class="sub" style="margin-bottom:4px">What builds the ${f1(v)}</div>${bar('Usage and form',base,'linear-gradient(90deg,var(--acc2),var(--acc))')}${bar('Matchup',am,'',true)}${bar('Vegas outlook',av,'',true)}${Math.abs(at)>=.1?bar('Teammate injuries',at,'',true):''}<div class="sub" style="margin-top:6px">Realistic range ${f1(lo)} to ${f1(hi)}. Matchup and Vegas show how much the projection moves versus an average opponent and an average scoring environment. Every number here comes from BFF's own model; no other site's projections or rankings are used.</div></div><div><ul class="key">${R.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`}
 const CUT={QB:12,RB:24,WR:30,TE:12},PNAME={QB:'Quarterbacks',RB:'Running backs',WR:'Wide receivers',TE:'Tight ends'};
 // The cheat sheet looks at the week that matters for lineup decisions: once 2 or fewer games are left this week, it moves to next week.
@@ -318,7 +329,7 @@ const FW=LEFT.length/2<=2&&NW<18?NW+1:NW;
 const schW=(p,w)=>(D.sched[p.t]||[]).find(x=>x[0]===w)||[];
 const oppW=p=>{const r=p.ros.find(x=>x[0]===FW);return r?r[1]:(p.nw===FW?p.opp:null)},homeW=p=>schW(p,FW)[2],itW=p=>{const v=schW(p,FW)[3];return v==null?null:v};
 const pw=p=>wkProj(p,FW),avail=p=>p.nw===FW?!out(p):(p.inj!=='IR'&&p.ros.some(r=>r[0]===FW));
-function usual(p){const r=p.ros.filter(x=>x[0]!==FW&&x[0]<=17);return r.length?r.reduce((s,x)=>s+(x[0]===p.nw?proj(p):adj(p,x[2])),0)/r.length:pw(p)}
+function usual(p){const r=p.ros.filter(x=>x[0]!==FW&&x[0]<=17);return r.length?r.reduce((s,x)=>s+(x[0]===p.nw?proj(p):adjP(p,x[2],x[3])),0)/r.length:pw(p)}
 function weekRanks(pos){const L=P.filter(p=>p.p===pos&&avail(p)).sort((a,b)=>pw(b)-pw(a)),wr={},rr={};L.forEach((p,i)=>wr[p.id]=i+1);P.filter(p=>p.p===pos&&p.inj!=='IR').sort((a,b)=>rosTot(b)-rosTot(a)).forEach((p,i)=>rr[p.id]=i+1);return{L,wr,rr}}
 function cheatLists(pos){const cut=CUT[pos],{L,wr,rr}=weekRanks(pos),must=L.filter(p=>!(p.nw===FW&&p.inj==='Doubtful')).slice(0,10),ms=new Set(must.map(p=>p.id));
  const MINU={QB:13,RB:6,WR:7.5,TE:5.5}[pos],role=p=>p.p!=='RB'||(p.cs||0)>=.15||(p.tpg||0)>=3,inj=p=>p.nw===FW&&(p.inj==='Doubtful'||p.inj==='Questionable');
@@ -363,7 +374,7 @@ function cmpRows(L){const gr=p=>grade(p.p,p.opp),R=p=>rng(p),nx=p=>p.ros.filter(
   {lab:'Scoring vs usage',vals:L.map(p=>p.p==='QB'||!p.g||p.xfpg==null?null:p.fpg-p.xfpg),fmt:v=>Math.abs(v)<2.5?'In line':v>0?`Running hot ${sg(v)}`:`Due for more ${sg(v)}`},
   num('Snap share',p=>p.snap,v=>pc(v)),num('Target share',p=>p.p==='QB'?null:p.ts,v=>pc(v)),num('Targets per game',p=>p.p==='QB'?null:p.tpg,f1),num('Carry share',p=>p.p==='QB'?null:p.cs,v=>pc(v)),num('Carries per game',p=>p.cpg,f1),
   num('WOPR',p=>p.p==='QB'||p.p==='RB'?null:p.wopr,v=>(+v).toFixed(2),true,'Blend of target share and air-yards share; above 0.5 is a lead receiver.'),num('Red-zone chances / game',p=>p.p==='QB'?null:p.rz,f1),
-  num('Team plays / game',p=>p.tpl,f1),{lab:'Team pass rate',vals:L.map(p=>p.tpr),fmt:v=>pc(v)},{lab:'Last 3 games',vals:L.map(p=>p.wk.slice(-3).map(x=>f1(adj(p,x[1]))).join(', ')||null),fmt:v=>v},{lab:'Next 3 matchups',vals:L.map(p=>nx(p)||null),fmt:v=>v},
+  num('Team plays / game',p=>p.tpl,f1),{lab:'Team pass rate',vals:L.map(p=>p.tpr),fmt:v=>pc(v)},{lab:'Last 3 games',vals:L.map(p=>p.wk.slice(-3).map(x=>f1(adjG(p,x))).join(', ')||null),fmt:v=>v},{lab:'Next 3 matchups',vals:L.map(p=>nx(p)||null),fmt:v=>v},
   {lab:'Depth chart',vals:L.map(p=>p.role),fmt:v=>v},num('BFF value',p=>tradeVal(p),v=>Math.round(v))]}
 function radar(L){const ax=[['Projection',p=>proj(p)],['Floor',p=>rng(p)[0]],['Ceiling',p=>rng(p)[1]],['Boom chance',p=>(boomBust(p)||{}).boom||0],['Usage',p=>p.p==='QB'?(p.fpg||0):(p.xfpg||0)],['Matchup',p=>((grade(p.p,p.opp).d||[])[2])||1],['Vegas total',p=>p.it||22.5]];
  const C=['var(--acc)','var(--acc2)','var(--acc3)','var(--warn)'],W=300,cx=150,cy=150,R=108,n=ax.length,pt=(i,f)=>{const a=-Math.PI/2+i*2*Math.PI/n;return[cx+Math.cos(a)*R*f,cy+Math.sin(a)*R*f]};
@@ -395,11 +406,11 @@ function renderCompare(){const L=[...CMP].map(id=>PI[id]).filter(Boolean);g('tra
  g('nstart').onchange=e=>{NSTART=+e.target.value;renderCompare()}}
 // ---------- PLAYERS
 let CUR=null;
-function bigChart(p){const W=Math.max(1,p.wk.length),w=680,h=200,pad=28,mx=Math.max(10,...p.wk.map(x=>Math.max(adj(p,x[1])||0,x[2]||0)))*1.15,bw=Math.min(64,(w-2*pad)/W*.55);
+function bigChart(p){const W=Math.max(1,p.wk.length),w=680,h=200,pad=28,mx=Math.max(10,...p.wk.map(x=>Math.max(adjG(p,x)||0,adjX(p,x)||0)))*1.15,bw=Math.min(64,(w-2*pad)/W*.55);
  let s=`<svg viewBox="0 0 ${w} ${h}" class="chart" role="img" aria-label="Fantasy points by week versus expected points"><defs><linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)"/><stop offset="1" stop-color="var(--acc2)"/></linearGradient></defs><line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="var(--line2)"/>`;
- p.wk.forEach((x,i)=>{const cx=pad+(i+.5)*(w-2*pad)/W,y=v=>h-pad-(v||0)/mx*(h-2*pad),v=adj(p,x[1])||0;s+=`<rect x="${cx-bw/2}" y="${y(v)}" width="${bw}" height="${h-pad-y(v)}" rx="6" fill="url(#gb)"><title>Week ${x[0]}: ${f1(v)}</title></rect>`;
-  if(p.p!=='QB')s+=`<line x1="${cx-bw/2-5}" x2="${cx+bw/2+5}" y1="${y(x[2])}" y2="${y(x[2])}" stroke="var(--ink)" stroke-width="3" stroke-dasharray="6 3"><title>Expected from usage: ${f1(x[2])}</title></line>`;
-  s+=`<text x="${cx}" y="${h-9}" text-anchor="middle">WK ${x[0]} ${x[6]||''}</text><text x="${cx}" y="${Math.min(y(v),p.p!=='QB'?y(x[2]):1e9)-8}" text-anchor="middle" style="font:800 13px var(--cond);fill:var(--ink)">${f1(v)}</text>`});return s+'</svg>'}
+ p.wk.forEach((x,i)=>{const cx=pad+(i+.5)*(w-2*pad)/W,y=v=>h-pad-(v||0)/mx*(h-2*pad),v=adjG(p,x)||0,xe=adjX(p,x);s+=`<rect x="${cx-bw/2}" y="${y(v)}" width="${bw}" height="${h-pad-y(v)}" rx="6" fill="url(#gb)"><title>Week ${x[0]}: ${f1(v)}</title></rect>`;
+  if(p.p!=='QB')s+=`<line x1="${cx-bw/2-5}" x2="${cx+bw/2+5}" y1="${y(xe)}" y2="${y(xe)}" stroke="var(--ink)" stroke-width="3" stroke-dasharray="6 3"><title>Expected from usage: ${f1(xe)}</title></line>`;
+  s+=`<text x="${cx}" y="${h-9}" text-anchor="middle">WK ${x[0]} ${x[6]||''}</text><text x="${cx}" y="${Math.min(y(v),p.p!=='QB'?y(xe):1e9)-8}" text-anchor="middle" style="font:800 13px var(--cond);fill:var(--ink)">${f1(v)}</text>`});return s+'</svg>'}
 function notes(p){const N=[];if(p.p!=='QB'&&p.g&&p.xfpg!=null){const d=p.fpg-p.xfpg;if(d>3)N.push(`Scoring ${sg(d)} a game above what his targets and carries usually produce. That gap tends to shrink, often through fewer touchdowns.`);else if(d<-3)N.push(csNoBuy(p)?`Scoring ${f1(-d)} a game below what his usage usually produces, but ${csNoBuy(p)}: the usage may not last.`:`Scoring ${f1(-d)} a game below what his usage usually produces. If the role holds, a bounce-back is likely.`)}
  if(p.fill)N.push(fillNote(p));if(p.rtn&&p.rtn.length)N.push(`Back after missing games (${p.rtn.map(esc).join(' and ')} filled in). Returning starters scored 100-104% of BFF's projection, and as buy lows they were right 72% of the time (2020-25).`);
  if(p.wk.length>=3&&p.p!=='QB'){const a=p.wk.slice(0,-2),b=p.wk.slice(-2),m=(L,k)=>L.reduce((s,x)=>s+(x[k]||0),0)/L.length,sa=m(a,3),sb=m(b,3);if(a.length&&Math.abs(sb-sa)>=0.1)N.push(`Snap share ${sb>sa?'up':'down'} from ${pc(sa)} earlier in the season to ${pc(sb)} over his last two games.`)}
@@ -1387,7 +1398,7 @@ const leagueN=()=>LG&&LG.teams&&LG.teams.length>=4?LG.teams.length:12;
 const posPart=(d,s)=>{const z=d/s;return d*ncdf(z)+s*.3989422804*Math.exp(-z*z/2)};
 let TVC=null;
 function tvCache(){const S=slots(),n=leagueN(),key=[FW,fmtKey(),n,S.QB,S.RB,S.WR,S.TE,S.FLEX,S.SF].join('|');if(TVC&&TVC.key===key)return TVC;
- const W={},mb={};P.forEach(p=>{const L=[];for(const r of p.ros)if(r[0]>=FW&&r[0]<=17)L.push([r[0],r[0]===p.nw?proj(p):adj(p,r[2])]);W[p.id]=L;const v=L.filter(x=>x[1]>0);mb[p.id]=v.length?v.reduce((s,x)=>s+x[1]/irA(p,x[0]),0)/v.length:0});
+ const W={},mb={};P.forEach(p=>{const L=[];for(const r of p.ros)if(r[0]>=FW&&r[0]<=17)L.push([r[0],r[0]===p.nw?proj(p):adjP(p,r[2],r[3])]);W[p.id]=L;const v=L.filter(x=>x[1]>0);mb[p.id]=v.length?v.reduce((s,x)=>s+x[1]/irA(p,x[0]),0)/v.length:0});
  // who starts in this league: dedicated slots, then flex (RB/WR/TE), then superflex (anyone), by per-game projection
  const by={},cnt={};POS.forEach(q=>{by[q]=P.filter(p=>p.p===q&&p.inj!=='IR'&&mb[p.id]>0).sort((a,b)=>mb[b.id]-mb[a.id]);cnt[q]=Math.min(by[q].length,n*(S[q]||0))});
  const fill=(k,ok)=>{const C=[];POS.forEach(q=>{if(ok(q))C.push(...by[q].slice(cnt[q]))});C.sort((a,b)=>mb[b.id]-mb[a.id]).slice(0,k).forEach(p=>cnt[p.p]++)};
@@ -1881,7 +1892,7 @@ function favFlags(p){const F=[];if(isBuy(p))F.push(['buy','Buy low']);if(isSell(
 function favCard(p){const v=pw(p),[lo,hi]=rng(p),gr=grade(p.p,oppW(p)),vd=verdict(p),{r,gm}=liveLine(p),lv=gm&&gm.state!=='pre'&&r,last=(p.wk||[]).slice(-1)[0],L=(L0=>L0.filter(x=>MAINK.has(x.k)).concat(L0.filter(x=>x.k==='td')).slice(0,3))(propLines().filter(x=>x.pid===p.id)),N=favNews(p),F=favFlags(p),k=(schW(p,FW)||[])[5];
  return `<div class="favc ${ani()}" style="--c1:${TC[p.t]||'#445'}"><div class="favh">${avatar(p,44)}<div class="favnm"><span class="favline"><a href="#" data-pl="${p.id}" class="pnm">${esc(p.n)}</a>${jn(p)}${injTag(p)}</span><span class="sub">${p.p} · ${team(p.t)} · ${oppW(p)?`${homeW(p)?'vs':'@'} ${oppW(p)}${k?' · '+kickTxt(k):''}`:`bye in week ${FW}`}</span></div>${favBtn(p)}</div>
  <div class="favst">${lv?`<div class="favbig live"><span><i class="lvdot"></i>Live</span><b>${f1(fpts(r))}</b><em>${statLine(r)}</em></div>`:`<div class="favbig"><span>Week ${FW}</span><b>${f1(v)}</b><em>${f1(lo)} to ${f1(hi)} · <span class="gr ${gr.cls}">${gr.lab}</span></em></div>`}
- <div class="favbig"><span>Last game</span><b>${last?f1(adj(p,last[1])):'–'}</b><em>${last?`week ${last[0]} vs ${last[6]}`:'no games yet'}</em></div><div class="favbig"><span>Season</span><b>${p.fpg!=null?f1(adj(p,p.fpg)):'–'}</b><em>pts a game · ${p.p}${PR[p.id]||'–'}</em></div></div>
+ <div class="favbig"><span>Last game</span><b>${last?f1(adjG(p,last)):'–'}</b><em>${last?`week ${last[0]} vs ${last[6]}`:'no games yet'}</em></div><div class="favbig"><span>Season</span><b>${p.fpg!=null?f1(adj(p,p.fpg)):'–'}</b><em>pts a game · ${p.p}${PR[p.id]||'–'}</em></div></div>
  <div class="favtags"><span class="verdict ${vd.cls}">${vd.lab}</span>${F.map(([c,l])=>`<span class="favtag ${c}">${l}</span>`).join('')}${L.map(x=>`<span class="favtag line">${YN.has(x.k)?`${lnLab(x)} ${Math.round(x.po*100)}%`:`${SNAME[x.k]} ${x.line}${x.pick?` · ${x.po>=.5?'over':'under'}`:''}`}</span>`).join('')}</div>
  ${N?`<div class="favnews">${N.u?`<a href="${esc(N.u)}" target="_blank" rel="noopener">${esc(N.h)}</a>`:esc(N.h)}<span class="sub"> · ${esc(N.s)}${N.d?' · '+ago(N.d):''}</span></div>`:''}</div>`}
 function renderFavs(){const el=g('favlist');if(!el)return;ANI=0;posRanks();const L=[...FAV].map(id=>PI[id]).filter(Boolean).sort((a,b)=>POS.indexOf(a.p)-POS.indexOf(b.p)||pw(b)-pw(a));favCount();
@@ -2321,8 +2332,8 @@ function botDvpList(Q,lo){const R=BOTTEAMS().map(t=>({t,d:(D.dvp[t]||{})[Q]})).f
 function botSos(Q,lo){const W=sosWeeks(lo),R=BOTTEAMS().map(t=>{const o=W.map(w=>sch(t,w)).filter(x=>x[1]);const r=o.map(x=>dvpR(x[1],Q)).filter(v=>v!=null);return{t,o,r:r.length?r.reduce((a,b)=>a+b,0)/r.length:null}}).filter(x=>x.r!=null).sort((a,b)=>b.r-a.r);
  if(!R.length)return{html:'<p>No schedule data yet.</p>',ok:true};const hard=/hardest|toughest|worst/i.test(lo)&&!/easiest|best/i.test(lo),row=x=>`<li>${esc(TNAME[x.t]||x.t)}: ${x.o.map(y=>`${y[2]?'':'@'}${y[1]}`).join(', ')} <span class="sub">(${Math.round((x.r-1)*100)>=0?'+':''}${Math.round((x.r-1)*100)}% vs average)</span></li>`;
  return{html:`<p>${Q} schedules, ${sosLab(lo)}: how many more (or fewer) fantasy points the opponents allow to ${Q}s than average.</p>${hard?'':`<p><b>Easiest</b></p><ul>${R.slice(0,5).map(row).join('')}</ul>`}<p><b>Hardest</b></p><ul>${R.slice(-5).reverse().map(row).join('')}</ul>${bgo('help:matchups','Matchups')}`,ok:true,intent:'sos'}}
-function botPlayerSched(p,lo){const W=/playoff/i.test(lo)?[15,16,17]:Array.from({length:Math.max(0,18-FW)},(_,i)=>FW+i),G=W.map(w=>[w,sch(p.t,w)]),PRW=Object.fromEntries((p.ros||[]).map(r=>[r[0],r[2]]));
- const li=G.map(([w,x])=>x[1]?`<li>Week ${w}: ${x[2]?'vs':'@'} ${esc(TNAME[x[1]]||x[1])} · ${grade(p.p,x[1]).lab}${(w===FW||PRW[w]!=null)?` · ${f1(w===FW?pw(p):adj(p,PRW[w]))} projected`:''}</li>`:`<li>Week ${w}: bye</li>`).join('');
+function botPlayerSched(p,lo){const W=/playoff/i.test(lo)?[15,16,17]:Array.from({length:Math.max(0,18-FW)},(_,i)=>FW+i),G=W.map(w=>[w,sch(p.t,w)]),PRW=Object.fromEntries((p.ros||[]).map(r=>[r[0],adjP(p,r[2],r[3])]));
+ const li=G.map(([w,x])=>x[1]?`<li>Week ${w}: ${x[2]?'vs':'@'} ${esc(TNAME[x[1]]||x[1])} · ${grade(p.p,x[1]).lab}${(w===FW||PRW[w]!=null)?` · ${f1(w===FW?pw(p):PRW[w])} projected`:''}</li>`:`<li>Week ${w}: bye</li>`).join('');
  const avg=ws=>{const r=ws.map(w=>sch(p.t,w)).filter(x=>x[1]).map(x=>dvpR(x[1],p.p)).filter(v=>v!=null);return r.length?r.reduce((a,b)=>a+b,0)/r.length:null},n4=avg([FW,FW+1,FW+2,FW+3]),pl=avg([15,16,17]),pc=v=>v==null?'–':`${Math.round((v-1)*100)>=0?'+':''}${Math.round((v-1)*100)}%`;
  return{html:`<p>${bchip(p)} ${p.p} · ${esc(p.t)} schedule. Opponents allow ${pc(n4)} vs average to ${p.p}s over the next 4 weeks and ${pc(pl)} in the fantasy playoffs (weeks 15-17).</p><ul>${li}</ul>`,ok:true,intent:'sos'}}
 // streaming a team defense: BFF does not project defenses, so the guide is the opponent's Vegas implied total (lower = better for the defense)
