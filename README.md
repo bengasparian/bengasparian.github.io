@@ -400,13 +400,19 @@ recaps still in their window.
   like "injury", "trainer", "fans" or "crowd" that puts other people in it, no painting, grave or card), a search result
   also with the same suffix ("Michael Carter II" is not Michael Carter) and filed under his team, draft team or college
   football team (never just a category named like him, which can be a namesake's; never when two BFF players share the
-  name). Of those, BFF uses **the most recent photo** (the date it was taken, else uploaded) **where his face shows
-  clearly**, cropped head and shoulders around it so it shows even in small avatars. Faces are found by YuNet, a
+  name), and no other NFL player named in the file name (checked against nflverse's table of every player, since
+  November 4, 2026, when "Quinn meinerz calvin ridley" put the Broncos guard's face on Calvin Ridley's card). BFF uses
+  **his own picture when his face shows clearly in it** (chosen by Wikidata and Wikipedia editors to show him, it is the
+  surest), else **the most recent category or search photo** (the date it was taken, else uploaded) **where his face
+  shows clearly** (until November 4, 2026 the newest photo came first, and two newer photos showed someone else: a
+  player in a Commanders uniform on the Cowboys' Ryan Flournoy, and Quinn Meinerz on Calvin Ridley), cropped head and shoulders around it so it shows even in small avatars. Faces
+  are found by YuNet, a
   neural face detector from OpenCV Zoo (MIT license, in `models/`), looking at each picture at three sizes. A category
-  or search photo needs exactly one clear face, big and central. His own picture also counts when one clear face is at
+  or search photo needs exactly one clear face, big, central and not cut off at the top edge (a face there was a
+  player in the background or the back of a helmet). His own picture also counts when one clear face is at
   least 1.6 times as wide as any other (a small face behind him), or, when no face is clear (a face mask, a shadow),
-  when a closer look at the one faint face confirms it. A small face is cropped from a 2000-pixel copy so it stays
-  sharp. If no photo shows his face clearly, his own picture is used as it is (an action photo, top-centered). Face
+  when a closer look at the one faint face confirms it. A small face is cropped from a 1920-pixel copy (one of the
+  thumbnail sizes Commons serves) so it stays sharp. If no photo shows his face clearly, his own picture is used as it is (an action photo, top-centered). Face
   checks are remembered in `photos/checks.json`, so each file is downloaded once. Only public domain, CC0, CC BY and
   CC BY-SA pictures are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped).
   Each is saved small in `photos/` and credited (author, license with its link, "cropped and resized", and CC BY-SA

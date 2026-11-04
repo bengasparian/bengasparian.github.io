@@ -10,8 +10,10 @@ How it works (run weekly by .github/workflows/photos.yml; nothing to set up):
      category or from a search counts only when it is verifiably him and him alone: the file name has his name (and no
      "and", "with" or "vs", nothing like "injury" or "fans" that puts other people in it), a search result is also filed
      under his team, his draft team or his college's football team, and exactly one face shows clearly in it (OpenCV
-     face detection; a photo it cannot check is not used). The most recent one (the date it was taken, else uploaded)
-     where his face shows clearly is used; if his face shows clearly in none, his own picture as it is.
+     face detection; a photo it cannot check is not used), and no other NFL player is named in it (nflverse's player
+     table). His own picture is used when his face shows clearly in it (chosen to show him, it is the surest); else
+     the most recent category or search photo (the date it was taken, else uploaded) where it does; else his own
+     picture as it is.
   3. Only public domain, CC0, CC BY and CC BY-SA pictures are used; anything else (no license found, non-free, "no
      derivatives", "non-commercial") is skipped, and that player keeps his jersey icon.
   4. The picture is cropped to a 3:4 head-and-shoulders portrait around his face (top-centered when no face is clear
@@ -46,7 +48,7 @@ TEAM_FULL = {'ARI': 'Arizona Cardinals', 'ATL': 'Atlanta Falcons', 'BAL': 'Balti
              'NYJ': 'New York Jets', 'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers', 'SEA': 'Seattle Seahawks', 'SF': 'San Francisco 49ers',
              'TB': 'Tampa Bay Buccaneers', 'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders'}
 MAX_TRIES = int(os.environ.get('BFF_PHOTO_TRIES') or 6)   # new photos downloaded to check, per player and run (his Wikidata and Wikipedia pictures are always checked; checked photos are remembered in photos/checks.json)
-CROPV = 5   # how photos are cropped (5: head and shoulders around his face, from a 2000-px copy when the face is small; else top-centered); a new version re-crops every photo once
+CROPV = 6   # how photos are cropped (6: head and shoulders around his face, from a 1920-px copy when the face is small; else top-centered); a new version re-crops every photo once
 DV = 2      # how faces are found (2: at three sizes, faint ones kept for a closer look); checks of another version are made again
 HIGH, LOW = .85, .6   # face detector scores: a clear face; a faint one (a face mask, a shadow) that only counts if a closer look confirms it
 OTHERS = re.compile(r"\b(injur(y|ed|ies)|trainers?|carted|medical|fans|crowd|cheerleaders?|mascots?|referees?|umpires?)\b", re.I)   # something else going on in the photo
@@ -196,6 +198,38 @@ def wikipedia_images(titles):
     out = {back[t]: f for t, f in pic.items() if infobox_image(texts.get(t)) == f}
     if len(out) < len(pic): print('Wikipedia pictures not in the article\'s infobox (not used):', len(pic) - len(out))
     return out
+
+
+NFLVERSE_PLAYERS = 'https://github.com/nflverse/nflverse-data/releases/download/players/players.csv'
+NAMES = os.path.join(OUT, 'nfl_names.json')
+
+
+def nfl_names():
+    """every NFL player's name as norm() writes it (nflverse's player table, 2+ words), saved in photos/nfl_names.json for
+    a run when the table cannot be read. A Commons file naming another player is a photo of him too (Nov 4 2026: "Quinn
+    meinerz calvin ridley" showed the Broncos guard's face, and he is not in BFF's list)."""
+    try:
+        import csv
+        rows = csv.DictReader(io.StringIO(get(NFLVERSE_PLAYERS, timeout=120).decode('utf-8', 'replace')))
+        out = sorted({' '.join(norm(r.get('display_name'))) for r in rows if len(norm(r.get('display_name'))) >= 2})
+        if len(out) < 5000: raise ValueError(f'only {len(out)} names')
+        if not DRY: json.dump(out, open(NAMES, 'w'), separators=(',', ':'))
+        return set(out)
+    except Exception as e:
+        print("nflverse's player names unavailable, using the saved list:", str(e)[:100])
+        try: return set(json.load(open(NAMES)))
+        except Exception: return set()
+
+
+def names_in(title, me, names):
+    """other people's names (from names) in a file name, his own taken out; his name with a short first name counts as
+    his ("Josh Dobbs" for Joshua Dobbs, "Kenny Gainwell" for Kenneth Gainwell: same last name, first names starting alike)"""
+    t = ' ' + ' '.join(norm(re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I))) + ' '
+    w = t.replace(' ' + me + ' ', ' | ').split() if me else t.split()
+    mw = me.split() or ['']
+    grams = {' '.join(w[i:i + k]) for k in (2, 3, 4) for i in range(len(w) - k + 1)}
+    return {g for g in grams if '|' not in g and g in names and g != me
+            and not (g.split()[-1] == mw[-1] and g.split()[0][:3] == mw[0][:3])}
 
 
 def norm(s):
@@ -380,11 +414,12 @@ def free_license(x):
 
 def good_face(box):
     """a face big and central enough to be the photo's subject and to show sharply: at least 8% of the picture's width,
-    its center in the middle 70% (Nov 3 2026: smaller ones were blurry, or a bystander, like a referee beside a player
-    in a helmet)"""
+    its center in the middle 70% across (Nov 3 2026: smaller ones were blurry, or a bystander, like a referee beside a
+    player in a helmet) and not at the top edge (Nov 4 2026: a face cut off there was a player in the background, or
+    the back of a helmet)"""
     if not box: return False
     x, y, w, h = box[:4]
-    return w >= .08 and .15 <= x + w / 2 <= .85
+    return w >= .08 and .15 <= x + w / 2 <= .85 and .08 <= y + h / 2 <= .8
 
 
 def crop_box(w, h, face=None):
@@ -434,9 +469,10 @@ def subject(c, own):
 
 
 def bigger(x):
-    """a 2000-px copy of a Commons picture (the original when it is no wider), or None"""
-    if (x.get('w') or 0) <= 2000: u = x.get('orig')
-    else: u = re.sub(r'/\d+px-', '/2000px-', x.get('thumb') or '', count=1)
+    """a 1920-px copy of a Commons picture (the original when it is no wider), or None. Commons serves only its standard
+    thumbnail widths (20, 40, 60, 120, 250, 330, 500, 960, 1280, 1920, 3840; Nov 4 2026: 2000 px was refused)"""
+    if (x.get('w') or 0) <= 1920: u = x.get('orig')
+    else: u = re.sub(r'/\d+px-', '/1920px-', x.get('thumb') or '', count=1)
     if not u or u == x.get('thumb'): return None
     try: return get(u, tries=2)
     except Exception as e: print('no bigger copy of', x.get('page'), str(e)[:80]); return None
@@ -471,7 +507,7 @@ def main():
         if e.get('wp') and wpi.get(e['wp']): e['wpimg'] = wpi[e['wp']]
     print('pictures from English Wikipedia articles:', sum(1 for e in wd.values() if e.get('wpimg')))
     info = commons_info(sorted({e['img'] for e in wd.values() if e.get('img')} | {e['wpimg'] for e in wd.values() if e.get('wpimg')}))
-    names_ = [' '.join(norm(p['n'])) for p in P]; others = set(names_); dup = {n for n in others if names_.count(n) > 1}
+    names_ = [' '.join(norm(p['n'])) for p in P]; others = set(names_) | nfl_names(); dup = {n for n in set(names_) if names_.count(n) > 1}
     cred = {}; kept = new = skipped = noface = 0; reasons = {}; via = {}; staged = []   # (new files are written as .new and kept only if the run is sound)
     count = lambda k: reasons.__setitem__(k, reasons.get(k, 0) + 1)
     usable = lambda x: bool(x and x.get('thumb') and free_license(x) and str(x.get('mime') or '').startswith('image/'))
@@ -532,13 +568,14 @@ def main():
             count('Commons lookup failed'); print('Commons lookup failed for', p['n'], str(ex)[:100])
         bio = p.get('bio') or {}; ctx = [TEAM_FULL.get(p.get('t')), TEAM_FULL.get(bio.get('dc')), bio.get('col')]
         ok_ = [(f, how) for f, how in cands if usable(info.get(f)) and (how in ('wikidata', 'wikipedia') or (verified(f, p['n'], fc.get(f) or [], ctx, how == 'category')
-               and not any(o_ != me and ' ' + o_ + ' ' in ' ' + ' '.join(norm(f)) + ' ' for o_ in others)))]
+               and not names_in(f, me, others)))]
         if not ok_:
             x = info.get(e.get('img')) if e.get('img') else None
             count(f"Wikidata picture not free ({(x or {}).get('lic') or 'no license'})" if x else 'no photo on Commons' if not cands else 'no photo verifiably of him alone'); continue
-        # the most recent photo (the date it was taken, else uploaded) where his face shows clearly, alone
+        # his own picture where his face shows clearly (the newest first), else the most recent category or search photo
+        # (the date it was taken, else uploaded) where his face shows clearly, alone
         when = lambda f: info[f].get('taken') or str(info[f].get('ts') or '')[:10]
-        ok_.sort(key=lambda c: (when(c[0]), c[1] in ('wikidata', 'wikipedia')), reverse=True)
+        ok_.sort(key=lambda c: (c[1] in ('wikidata', 'wikipedia'), when(c[0])), reverse=True)   # his own pictures first (Nov 4 2026: two newer category and search photos showed someone else)
         pick = None; tries = 0; raws = {}
         for f, how in ok_:
             own = how in ('wikidata', 'wikipedia'); c = chk.get(f)
