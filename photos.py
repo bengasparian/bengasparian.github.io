@@ -516,8 +516,9 @@ def main():
         nonlocal kept, new, skipped
         path = os.path.join(OUT, g + '.webp'); o = (old.get('p') or {}).get(g)
         entry = {'f': g + '.webp', 'a': x['artist'] or 'Unknown author', 'lic': x['lic'], 'lu': x['lu'], 'src': x['page'], 'ts': x['ts'],
-                 'm': 'cropped and resized' + (', CC BY-SA' if 'sa' in x['lic'].lower() else ''), 'via': how, 'cv': CROPV, 'seen': NOW.date().isoformat()}
-        if o and o.get('src') == x['page'] and o.get('ts') == x['ts'] and o.get('cv') == CROPV and os.path.exists(path):
+                 'm': 'cropped and resized' + (', CC BY-SA' if 'sa' in x['lic'].lower() else ''), 'via': how, 'cv': CROPV, 'seen': NOW.date().isoformat(),
+                 'fb': [round(float(v), 3) for v in face[:4]] if face else None}   # (the face it is cropped to; None: top-centered)
+        if o and o.get('src') == x['page'] and o.get('ts') == x['ts'] and o.get('cv') == CROPV and o.get('fb', 0) == entry['fb'] and os.path.exists(path):   # (Nov 4 2026: a new face rule left George Holani's old crop in place)
             cred[g] = entry; kept += 1; via[how] = via.get(how, 0) + 1; return True
         if DRY: print('would save', g, how, x['page'], x['lic']); via[how] = via.get(how, 0) + 1; return True
         try:
