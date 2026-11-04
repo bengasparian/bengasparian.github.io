@@ -392,26 +392,34 @@ recaps still in their window.
   brick wall, two club spotlights, a faded BFF tag, spray-paint underlines, neon glow and marker-style tags. All of it
   stops for anyone who asks their device for less motion, and the heavy parts stay off on phones and low-power devices.
 - **Player photos** (`photos.py`, weekly): every verified photo of a player on Wikimedia Commons is considered: his
-  Wikidata picture (Wikidata links his Pro Football Reference ID, or his exact name and birth date, to his item), the
-  picture in his English Wikipedia article (linked from that item; free licenses only), the photos in his own Commons
-  category, and photos found by his full name. A category or search photo counts only when it
-  is verifiably him alone: his name in the file name (no "and", "with" or "vs", nobody else's name, nothing before it
-  that makes someone else the subject, no painting, grave or card), a search result also with the same suffix
-  ("Michael Carter II" is not Michael Carter) and filed under his team, draft team or college football team (never just
-  a category named like him, which can be a namesake's; never when two BFF players share the name). Of those, BFF uses
-  **the most recent photo** (the date it was taken, else uploaded) **where exactly one face shows clearly** (YuNet, a
-  neural face detector from OpenCV Zoo, MIT license, in `models/`), cropped head and shoulders around the face so it
-  shows even in small avatars; if no photo shows his face clearly, his Wikidata picture is used as it is. Face checks
-  are remembered in `photos/checks.json`, so each file is downloaded once. Only public domain, CC0, CC BY and CC BY-SA
-  pictures are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped). Each is saved
-  small in `photos/` and credited (author, license with its link, "cropped and resized", and CC BY-SA kept as CC BY-SA)
-  on the player's card and under Sources → Photo credits. A player with no free photo of himself (about a third,
-  mostly young and backup players) gets his jersey in team colors with his number; BFF does not draw faces made to
-  look like real players (a likeness raises the same rights questions as a photo, and a guessed likeness can be wrong).
-  The first search run, on November 3, 2026, took a few namesakes (a 19th-century painter, an Air Force sergeant, a
-  hockey goalie) before these rules; two of them replaced the right photos of Aaron Jones and Michael Wilson on the
-  live site for about 13 minutes, until the next run put the right ones back. A run that would lose more than 15% of
-  the photos, or that Wikidata answers with no players, stops and keeps them all. Photos only show on your own site
+  own picture (his Wikidata picture, found by his Pro Football Reference ID or his exact name and birth date, and the
+  picture his English Wikipedia article's infobox shows; any other picture in the article is not used, since an article
+  without an infobox picture can give a stadium or a teammate), the photos in his own Commons category, and photos
+  found by his full name. A category or search photo counts only when it is verifiably him alone: his name in the file
+  name (no "and", "with" or "vs", nobody else's name, nothing before it that makes someone else the subject, nothing
+  like "injury", "trainer", "fans" or "crowd" that puts other people in it, no painting, grave or card), a search result
+  also with the same suffix ("Michael Carter II" is not Michael Carter) and filed under his team, draft team or college
+  football team (never just a category named like him, which can be a namesake's; never when two BFF players share the
+  name). Of those, BFF uses **the most recent photo** (the date it was taken, else uploaded) **where his face shows
+  clearly**, cropped head and shoulders around it so it shows even in small avatars. Faces are found by YuNet, a
+  neural face detector from OpenCV Zoo (MIT license, in `models/`), looking at each picture at three sizes. A category
+  or search photo needs exactly one clear face, big and central. His own picture also counts when one clear face is at
+  least 1.6 times as wide as any other (a small face behind him), or, when no face is clear (a face mask, a shadow),
+  when a closer look at the one faint face confirms it. A small face is cropped from a 2000-pixel copy so it stays
+  sharp. If no photo shows his face clearly, his own picture is used as it is (an action photo, top-centered). Face
+  checks are remembered in `photos/checks.json`, so each file is downloaded once. Only public domain, CC0, CC BY and
+  CC BY-SA pictures are used (anything with "no derivatives", "non-commercial", fair use or no license is skipped).
+  Each is saved small in `photos/` and credited (author, license with its link, "cropped and resized", and CC BY-SA
+  kept as CC BY-SA) on the player's card and under Sources → Photo credits. A player with no free photo of himself
+  (about a quarter, mostly young and backup players) gets his jersey in team colors with his number; BFF does not draw
+  faces made to look like real players (a likeness raises the same rights questions as a photo, and a guessed likeness
+  can be wrong). The first search run, on November 3, 2026, took a few namesakes (a 19th-century painter, an Air Force
+  sergeant, a hockey goalie) before these rules; two of them replaced the right photos of Aaron Jones and Michael
+  Wilson on the live site for about 13 minutes, until the next run put the right ones back. A later run that day showed
+  someone else's face for Brock Purdy for about 30 minutes (a 49ers staff member, in a photo of Purdy's injury), until
+  the next run put his own picture back; the file-name rule above now keeps such photos out. A run that would lose
+  more than 15% of the photos, or that Wikidata answers with no players, stops and keeps them all. Photos only show on
+  your own site
   (the claude.ai copy shows jerseys).
 - **Team badges:** BFF draws its own shield for each team from its abbreviation and colors, used wherever a logo would go.
 - **Readable text on every picture:** text on artwork sits on a dark scrim sized to the text block, so white text keeps

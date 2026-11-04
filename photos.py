@@ -5,15 +5,17 @@ How it works (run weekly by .github/workflows/photos.yml; nothing to set up):
   1. Wikidata links NFL players to their Pro Football Reference ID, to a picture on Wikimedia Commons and to the
      player's own Commons category (the property that holds Pro Football Reference IDs is looked up by its link pattern,
      so a renumbering cannot break this).
-  2. For the players BFF shows, the picture comes from, in order: the player's Wikidata picture; else a photo in his own
-     Commons category; else a Commons photo found by his full name. A photo from his category or from a search is used
-     only when it is verifiably him and him alone: the file name has his name (and no "and", "with" or "vs"), a search
-     result is also filed under his team, his draft team or his college's football team, and exactly one face shows
-     clearly in it (OpenCV face detection; a photo it cannot check is not used).
+  2. The candidates for a player: his own picture (his Wikidata picture, and the picture his English Wikipedia article's
+     infobox shows), the photos in his own Commons category and Commons photos found by his full name. A photo from his
+     category or from a search counts only when it is verifiably him and him alone: the file name has his name (and no
+     "and", "with" or "vs", nothing like "injury" or "fans" that puts other people in it), a search result is also filed
+     under his team, his draft team or his college's football team, and exactly one face shows clearly in it (OpenCV
+     face detection; a photo it cannot check is not used). The most recent one (the date it was taken, else uploaded)
+     where his face shows clearly is used; if his face shows clearly in none, his own picture as it is.
   3. Only public domain, CC0, CC BY and CC BY-SA pictures are used; anything else (no license found, non-free, "no
      derivatives", "non-commercial") is skipped, and that player keeps his jersey icon.
-  4. The picture is cropped to a 3:4 portrait around the face (or top-centered when no single face is found) and saved
-     small as photos/<player id>.webp. photos/credits.json keeps, for every photo, its author, license, license link,
+  4. The picture is cropped to a 3:4 head-and-shoulders portrait around his face (top-centered when no face is clear
+     enough) and saved small as photos/<player id>.webp. photos/credits.json keeps, for every photo, its author, license, license link,
      the Commons page and how it was found, which the site shows on the player's card and under Sources -> Photo
      credits. CC BY-SA photos stay under CC BY-SA after cropping (the credit says so).
 Pictures already saved are kept until their source changes. A player who drops out of BFF keeps his photo for 60 days.
@@ -43,8 +45,11 @@ TEAM_FULL = {'ARI': 'Arizona Cardinals', 'ATL': 'Atlanta Falcons', 'BAL': 'Balti
              'MIA': 'Miami Dolphins', 'MIN': 'Minnesota Vikings', 'NE': 'New England Patriots', 'NO': 'New Orleans Saints', 'NYG': 'New York Giants',
              'NYJ': 'New York Jets', 'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers', 'SEA': 'Seattle Seahawks', 'SF': 'San Francisco 49ers',
              'TB': 'Tampa Bay Buccaneers', 'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders'}
-MAX_TRIES = 6   # new photos downloaded to check, per player and run (checked photos are remembered in photos/checks.json)
-CROPV = 4   # how photos are cropped (4: head and shoulders around a large, central face, from a 1000-px copy; else top-centered); a new version re-crops every photo once
+MAX_TRIES = int(os.environ.get('BFF_PHOTO_TRIES') or 6)   # new photos downloaded to check, per player and run (his Wikidata and Wikipedia pictures are always checked; checked photos are remembered in photos/checks.json)
+CROPV = 5   # how photos are cropped (5: head and shoulders around his face, from a 2000-px copy when the face is small; else top-centered); a new version re-crops every photo once
+DV = 2      # how faces are found (2: at three sizes, faint ones kept for a closer look); checks of another version are made again
+HIGH, LOW = .85, .6   # face detector scores: a clear face; a faint one (a face mask, a shadow) that only counts if a closer look confirms it
+OTHERS = re.compile(r"\b(injur(y|ed|ies)|trainers?|carted|medical|fans|crowd|cheerleaders?|mascots?|referees?|umpires?)\b", re.I)   # something else going on in the photo
 MODEL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'face_detection_yunet_2023mar.onnx')   # YuNet (MIT, OpenCV Zoo)
 CHECKS = os.path.join(OUT, 'checks.json')
 
@@ -131,21 +136,65 @@ def wikidata_by_birth(players):
 WIKI = 'https://en.wikipedia.org/w/api.php'
 
 
+def fname(v):
+    """a Commons file name written the way Commons does ("brock_Purdy&amp;x.jpg" -> "Brock Purdy&x.jpg")"""
+    v = re.sub(r'\s+', ' ', html.unescape(urllib.parse.unquote(str(v or ''))).replace('_', ' ')).strip()
+    return v[:1].upper() + v[1:]
+
+
+def infobox_image(text):
+    """the picture an article's infobox shows (its image parameter, before the first section heading), or None"""
+    lead = re.split(r'\n==[^=]', text or '', maxsplit=1)[0]
+    m = re.search(r'^[ \t]*\|[ \t]*image[ \t]*=[ \t]*(.*?)[ \t]*$', lead, re.M | re.I)
+    if not m: return None
+    v = re.sub(r'<!--.*?-->', '', m.group(1)).strip()
+    v = re.sub(r'^\[\[\s*', '', v); v = re.sub(r'^(file|image)\s*:', '', v, flags=re.I).split('|')[0].split(']]')[0].strip()
+    return fname(v) if v else None
+
+
+def article_texts(titles):
+    """{article title: its wikitext} (20 per request, following continuation)"""
+    out = {}
+    for i in range(0, len(titles), 20):
+        q = {'action': 'query', 'format': 'json', 'formatversion': 2, 'prop': 'revisions', 'rvprop': 'content', 'rvslots': 'main', 'titles': '|'.join(titles[i:i + 20]), 'maxlag': 5}
+        cont = {}
+        for _ in range(20):
+            for k in range(4):   # (busy servers answer "maxlag": wait and ask again)
+                d = json.loads(get(WIKI + '?' + urllib.parse.urlencode({**q, **cont})))
+                if not d.get('error'): break
+                time.sleep(5 + 5 * k)
+            if d.get('error'): raise RuntimeError(str(d['error'])[:100])
+            for pg in (d.get('query') or {}).get('pages') or []:
+                r = (pg.get('revisions') or [None])[0]
+                if r: out[pg['title']] = (((r.get('slots') or {}).get('main') or {}).get('content') or r.get('content') or '')
+            cont = d.get('continue') or {}
+            if not cont: break
+            time.sleep(.5)
+        time.sleep(.5)
+    return out
+
+
 def wikipedia_images(titles):
     """{article title: the free picture its infobox shows (on Commons)} for English Wikipedia articles (50 per request).
-    Nov 3 2026: Jahmyr Gibbs's article showed "Gibbs in 2026" while his Wikidata item had no picture yet."""
-    out = {}
+    Nov 3 2026: Jahmyr Gibbs's article showed "Gibbs in 2026" while his Wikidata item had no picture yet. Wikipedia's
+    picture for an article (its "page image") is used only when it is the one the infobox shows: an article without one
+    could otherwise give a picture of a stadium or a teammate."""
+    pic, back = {}, {}
     titles = sorted({t for t in titles if t})
     for i in range(0, len(titles), 50):
         q = {'action': 'query', 'format': 'json', 'prop': 'pageimages', 'piprop': 'name', 'pilicense': 'free', 'redirects': 1, 'titles': '|'.join(titles[i:i + 50]), 'maxlag': 5}
         try: d = json.loads(get(WIKI + '?' + urllib.parse.urlencode(q)))
         except Exception as e: print('Wikipedia pictures unavailable:', str(e)[:100]); continue
-        back = {}
+        bk = {}
         for k in ('normalized', 'redirects'):
-            for n in (d.get('query') or {}).get(k) or []: back[n['to']] = back.get(n['from'], n['from'])
+            for n in (d.get('query') or {}).get(k) or []: bk[n['to']] = bk.get(n['from'], n['from'])
         for pg in ((d.get('query') or {}).get('pages') or {}).values():
-            if pg.get('pageimage'): out[back.get(pg.get('title'), pg.get('title'))] = pg['pageimage'].replace('_', ' ')
+            if pg.get('pageimage'): t = pg.get('title'); pic[t] = fname(pg['pageimage']); back[t] = bk.get(t, t)
         time.sleep(.5)
+    try: texts = article_texts(sorted(pic))
+    except Exception as e: print('Wikipedia infoboxes unavailable (no Wikipedia pictures this run):', str(e)[:100]); return {}
+    out = {back[t]: f for t, f in pic.items() if infobox_image(texts.get(t)) == f}
+    if len(out) < len(pic): print('Wikipedia pictures not in the article\'s infobox (not used):', len(pic) - len(out))
     return out
 
 
@@ -187,11 +236,20 @@ def file_categories(files):
     return out
 
 
+def iou(a, b):
+    """how much two boxes overlap (0: not at all, 1: the same box)"""
+    iw = max(0., min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])); ih = max(0., min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1]))
+    u = a[2] * a[3] + b[2] * b[3] - iw * ih
+    return iw * ih / u if u > 0 else 0.
+
+
 def faces(raw):
-    """the clear faces in a photo, as boxes (x, y, w, h) in fractions of its width and height: YuNet (OpenCV's neural face
-    detector, model in models/), score 0.85 or more and at least 4% of the picture's short side; if the model cannot run,
-    OpenCV's older detector with an eye found in the face (Nov 3 2026: without that check a leg or a glove could count).
-    None if neither can run."""
+    """the faces in a photo, best first, as (x, y, w, h, score): the box in fractions of its width and height and the
+    detector's score (.85 or more: a clear face; .6 to .85: a faint one). YuNet (OpenCV's neural face detector, model in
+    models/) looks at the picture as it is and at 640 and 320 pixels (Nov 3 2026: at one size it missed the big faces of
+    close-up portraits), one box per face, each at least 4% of the picture's short side. If the model cannot run,
+    OpenCV's older detector with an eye found in the face (Nov 3 2026: without that check a leg or a glove could count),
+    each counted as clear. None if neither can run."""
     try:
         import cv2, numpy as np
         from PIL import Image, ImageOps
@@ -199,10 +257,20 @@ def faces(raw):
     except Exception:
         return None
     try:
-        d = cv2.FaceDetectorYN.create(MODEL, '', (W_, H_), 0.85, 0.3, 5000)
-        _, F = d.detect(cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))
-        m = .04 * min(W_, H_)
-        return [(float(f[0]) / W_, float(f[1]) / H_, float(f[2]) / W_, float(f[3]) / H_) for f in (F if F is not None else []) if min(f[2], f[3]) >= m]
+        bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR); m = .04 * min(W_, H_); found = []
+        for side in (None, 640, 320):
+            s = 1. if side is None else side / max(W_, H_)
+            if side and s >= 1: continue
+            img = bgr if side is None else cv2.resize(bgr, (max(1, round(W_ * s)), max(1, round(H_ * s))), interpolation=cv2.INTER_AREA)
+            h2, w2 = img.shape[:2]
+            _, F = cv2.FaceDetectorYN.create(MODEL, '', (w2, h2), LOW, 0.3, 5000).detect(img)
+            for f in (F if F is not None else []):
+                b = (float(f[0]) / w2, float(f[1]) / h2, float(f[2]) / w2, float(f[3]) / h2, float(f[14]))
+                if min(b[2] * W_, b[3] * H_) >= m: found.append(b)
+        out = []
+        for b in sorted(found, key=lambda b: -b[4]):
+            if all(iou(b, o) < .3 for o in out): out.append(b)
+        return out
     except Exception:
         pass
     try:
@@ -213,7 +281,7 @@ def faces(raw):
         m = max(24, int(min(g.shape) * .08)); out = []
         for (x, y, w, h) in fc.detectMultiScale(g, scaleFactor=1.1, minNeighbors=6, minSize=(m, m)):
             e = max(6, int(w) // 10)
-            if len(ec.detectMultiScale(g[y:y + int(h * .6), x:x + w], scaleFactor=1.1, minNeighbors=4, minSize=(e, e))): out.append((x / W_, y / H_, w / W_, h / H_))
+            if len(ec.detectMultiScale(g[y:y + int(h * .6), x:x + w], scaleFactor=1.1, minNeighbors=4, minSize=(e, e))): out.append((x / W_, y / H_, w / W_, h / H_, 1.))
         return out
     except Exception:
         return None
@@ -251,12 +319,13 @@ def name_in(title, name):
 def verified(title, name, cats, ctx, own_cat):
     """a Commons file is this player alone. Always: one person in the file name (no "and", "with", "vs"), not a painting,
     grave or card, and nothing before his name that makes someone else the subject ("Sgt. ... donates a football signed
-    by ... Aaron Jones", "Tech Sgt Michael Wilson"). From his own Commons category (linked from his Wikidata item): his
+    by ... Aaron Jones", "Tech Sgt Michael Wilson"), and nothing else going on that puts another face in it (Nov 3 2026: the
+    one clear face in "Brock Purdy injury 49ers Bears 2024" was a 49ers staff member's). From his own Commons category (linked from his Wikidata item): his
     last name in the file name. From a search: his full name (same suffix), and the file is filed under his team, his
     draft team or his college's football team (a category named like him can be a namesake's: a painter, a hockey
     goalie, a basketball player)"""
-    stem = re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I)
-    if MULTI.search(stem) or NOTPHOTO.search(stem): return False
+    stem = re.sub(r'\.[a-z]{3,4}$', '', title, flags=re.I).replace('_', ' ')
+    if MULTI.search(stem) or NOTPHOTO.search(stem) or OTHERS.search(stem): return False
     if own_cat:
         if not has_name(title, name, full=False): return False
         last = words(re.sub(r'\s+(jr|sr|ii|iii|iv|v)\.?$', '', name, flags=re.I))[-1:]
@@ -282,7 +351,7 @@ def taken(v):
 
 
 def commons_info(files):
-    """license and a 600-px rendition for each Commons file (50 per request)"""
+    """license, a 1000-px rendition and the original's size and address for each Commons file (50 per request)"""
     info = {}
     for i in range(0, len(files), 50):
         chunk = files[i:i + 50]
@@ -298,7 +367,8 @@ def commons_info(files):
             info[fn] = {'thumb': ii.get('thumburl') or ii.get('url'), 'mime': ii.get('mime'), 'page': ii.get('descriptionurl'),
                         'lic': plain(v('LicenseShortName')), 'lu': (v('LicenseUrl') or '').strip(), 'nonfree': str(v('NonFree') or '').lower() == 'true',
                         'artist': plain(v('Artist')) or plain(v('Credit')), 'ts': ii.get('timestamp') or (v('DateTime') or ''),
-                        'taken': taken(v('DateTimeOriginal')), 'w': ii.get('width'), 'h': ii.get('height')}
+                        'taken': taken(v('DateTimeOriginal')), 'w': ii.get('width'), 'h': ii.get('height'), 'orig': ii.get('url'),
+                        'tw': ii.get('thumbwidth') or ii.get('width'), 'th': ii.get('thumbheight') or ii.get('height')}
         time.sleep(1)
     return info
 
@@ -313,25 +383,63 @@ def good_face(box):
     its center in the middle 70% (Nov 3 2026: smaller ones were blurry, or a bystander, like a referee beside a player
     in a helmet)"""
     if not box: return False
-    x, y, w, h = box
+    x, y, w, h = box[:4]
     return w >= .08 and .15 <= x + w / 2 <= .85
+
+
+def crop_box(w, h, face=None):
+    """the 3:4 part of a w x h picture to keep, in pixels"""
+    if face:                              # head and shoulders: 2.7 face-heights tall, the face centered a little above the middle
+        fx, fy, fw, fh = face[0] * w, face[1] * h, face[2] * w, face[3] * h
+        ch = min(h, max(int(fh * 2.7), 60)); cw = int(round(ch * 3 / 4))
+        if cw > w: cw = w; ch = min(h, int(round(cw * 4 / 3)))
+        x0 = min(max(0, int(fx + fw / 2 - cw / 2)), w - cw); y0 = min(max(0, int(fy + fh / 2 - ch * .42)), h - ch); return (x0, y0, x0 + cw, y0 + ch)
+    if w / h > 3 / 4:                     # no clear face: wider than 3:4 keeps the middle
+        cw = int(round(h * 3 / 4)); x0 = (w - cw) // 2; return (x0, 0, x0 + cw, h)
+    ch = int(round(w * 4 / 3)); y0 = min(int(h * .06), h - ch); return (0, y0, w, y0 + ch)   # taller: the top part (heads are near the top), a little below the edge
 
 
 def crop_save(raw, path, face=None):
     from PIL import Image, ImageOps
     im = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert('RGB')
-    w, h = im.size
-    if face:                              # head and shoulders: 2.7 face-heights tall, the face centered a little above the middle
-        fx, fy, fw, fh = face[0] * w, face[1] * h, face[2] * w, face[3] * h
-        ch = min(h, max(int(fh * 2.7), 60)); cw = int(round(ch * 3 / 4))
-        if cw > w: cw = w; ch = min(h, int(round(cw * 4 / 3)))
-        x0 = min(max(0, int(fx + fw / 2 - cw / 2)), w - cw); y0 = min(max(0, int(fy + fh / 2 - ch * .42)), h - ch); box = (x0, y0, x0 + cw, y0 + ch)
-    elif w / h > 3 / 4:                   # no clear face: wider than 3:4 keeps the middle
-        cw = int(round(h * 3 / 4)); x0 = (w - cw) // 2; box = (x0, 0, x0 + cw, h)
-    else:                                 # taller: keep the top part (heads are near the top), a little below the edge
-        ch = int(round(w * 4 / 3)); y0 = min(int(h * .06), h - ch); box = (0, y0, w, y0 + ch)
-    im = im.crop(box).resize((W, H), Image.LANCZOS)
+    im = im.crop(crop_box(im.size[0], im.size[1], face)).resize((W, H), Image.LANCZOS)
     im.save(path, 'WEBP', quality=82, method=6)
+
+
+def confirm(raw, fs):
+    """when no face in a picture is clear (a face mask, a shadow): the faint face (score .6 or more) that is big, central
+    and at least 1.6 times as wide as any other, if a closer look (its head-and-shoulders crop, checked again) finds one
+    clear face in the middle; else None"""
+    if not fs or any(b[4] >= HIGH for b in fs): return None
+    lo = sorted(fs, key=lambda b: -b[2])
+    if not good_face(lo[0]) or (len(lo) > 1 and lo[0][2] < 1.6 * lo[1][2]): return None
+    from PIL import Image, ImageOps
+    im = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert('RGB')
+    b = io.BytesIO(); im.crop(crop_box(im.size[0], im.size[1], lo[0])).save(b, 'PNG')
+    hit = [f for f in faces(b.getvalue()) or [] if f[4] >= HIGH and f[2] >= .25 and .25 <= f[0] + f[2] / 2 <= .75 and .15 <= f[1] + f[3] / 2 <= .65]
+    return [round(v, 4) for v in lo[0]] if len(hit) == 1 else None
+
+
+def subject(c, own):
+    """the face to crop to in a checked photo, or None. Any photo: its only clear face, if big and central (good_face).
+    His own picture (his Wikidata picture or his Wikipedia infobox's, chosen to show him): also the clear face at least
+    1.6 times as wide as any other (Nov 3 2026: a small face behind him had made Jarrett Stidham's picture "two faces"),
+    or, when no face is clear, the faint one a closer look confirmed"""
+    if not c: return None
+    hi = sorted((b for b in c.get('b') or [] if b[4] >= HIGH), key=lambda b: -b[2])
+    if len(hi) == 1: f = hi[0]
+    elif hi: f = hi[0] if own and hi[0][2] >= 1.6 * hi[1][2] else None
+    else: f = c.get('lo') if own else None
+    return tuple(f[:4]) if f and good_face(f) else None
+
+
+def bigger(x):
+    """a 2000-px copy of a Commons picture (the original when it is no wider), or None"""
+    if (x.get('w') or 0) <= 2000: u = x.get('orig')
+    else: u = re.sub(r'/\d+px-', '/2000px-', x.get('thumb') or '', count=1)
+    if not u or u == x.get('thumb'): return None
+    try: return get(u, tries=2)
+    except Exception as e: print('no bigger copy of', x.get('page'), str(e)[:80]); return None
 
 
 def main():
@@ -364,7 +472,7 @@ def main():
     print('pictures from English Wikipedia articles:', sum(1 for e in wd.values() if e.get('wpimg')))
     info = commons_info(sorted({e['img'] for e in wd.values() if e.get('img')} | {e['wpimg'] for e in wd.values() if e.get('wpimg')}))
     names_ = [' '.join(norm(p['n'])) for p in P]; others = set(names_); dup = {n for n in others if names_.count(n) > 1}
-    cred = {}; kept = new = skipped = 0; reasons = {}; via = {}; staged = []   # (new files are written as .new and kept only if the run is sound)
+    cred = {}; kept = new = skipped = noface = 0; reasons = {}; via = {}; staged = []   # (new files are written as .new and kept only if the run is sound)
     count = lambda k: reasons.__setitem__(k, reasons.get(k, 0) + 1)
     usable = lambda x: bool(x and x.get('thumb') and free_license(x) and str(x.get('mime') or '').startswith('image/'))
 
@@ -378,7 +486,9 @@ def main():
         if DRY: print('would save', g, how, x['page'], x['lic']); via[how] = via.get(how, 0) + 1; return True
         try:
             raw = raw or get(x['thumb'])
-            crop_save(raw, path + '.new', face)   # (face: the one clear face, checked by the caller; None: top-centered)
+            if face and face[3] * (x.get('th') or 0) * 2.7 < H and (x.get('w') or 0) >= 1.4 * (x.get('tw') or 1e9):   # (its crop would be enlarged: a sharper copy)
+                raw = bigger(x) or raw
+            crop_save(raw, path + '.new', face)   # (face: the face to crop to, checked by the caller; None: top-centered)
             staged.append(g); cred[g] = entry; new += 1; via[how] = via.get(how, 0) + 1; time.sleep(.5); return True
         except Exception as e:
             skipped += 1; print('could not save', g, x.get('page'), str(e)[:100])
@@ -390,13 +500,14 @@ def main():
     used = set()
 
     def check(f, x):
-        """(number of clear faces, the face if exactly one, the downloaded picture or None): remembered when the file is unchanged"""
+        """(the faces found: {'b': every face with its score, 'lo': a faint face a closer look confirmed}, the downloaded
+        picture or None): remembered in photos/checks.json while the file and the way faces are found are unchanged"""
         used.add(f); c = chk.get(f)
-        if c and c.get('ts') == x['ts']: return c['n'], c.get('f'), None
+        if c and c.get('ts') == x['ts'] and c.get('dv') == DV: return c, None
         raw = get(x['thumb']); fs = faces(raw); time.sleep(.3)
-        if fs is None: return None, None, raw
-        chk[f] = {'n': len(fs), 'f': [round(v, 4) for v in fs[0]] if len(fs) == 1 else None, 'ts': x['ts']}
-        return chk[f]['n'], chk[f]['f'], raw
+        if fs is None: return None, raw
+        chk[f] = {'b': [[round(v, 4) for v in b] for b in fs[:12]], 'lo': confirm(raw, fs), 'ts': x['ts'], 'dv': DV}
+        return chk[f], raw
 
     for p in sorted(P, key=lambda p: p['id']):
         g = p['id']; e = wd.get(g) or {}
@@ -430,19 +541,20 @@ def main():
         ok_.sort(key=lambda c: (when(c[0]), c[1] in ('wikidata', 'wikipedia')), reverse=True)
         pick = None; tries = 0; raws = {}
         for f, how in ok_:
-            c = chk.get(f)
-            if not (c and c.get('ts') == info[f]['ts']):
+            own = how in ('wikidata', 'wikipedia'); c = chk.get(f)
+            if not (c and c.get('ts') == info[f]['ts'] and c.get('dv') == DV) and not own:
                 if tries >= MAX_TRIES: continue
                 tries += 1
-            try: n_, box, raw = check(f, info[f])
+            try: c, raw = check(f, info[f])
             except Exception as ex: print('could not check', f, str(ex)[:80]); continue
-            if n_ is None: count('face check unavailable (opencv-python-headless 4 not installed)'); break
+            if c is None: count('face check unavailable (opencv-python-headless 4 not installed)'); break
             if raw: raws[f] = raw
-            if n_ == 1 and good_face(box): pick = (f, how, box); break
-        if not pick:   # his face shows clearly in none of them: his Wikidata picture as it is (top-centered), else no photo
+            box = subject(c, own)
+            if box: pick = (f, how, box); break
+        if not pick:   # his face shows clearly in none of them: his own picture as it is (top-centered), else no photo
             wf = next((c for c in ok_ if c[1] in ('wikidata', 'wikipedia')), None)
             if not wf: count('no photo with his face clearly visible'); continue
-            pick = (wf[0], wf[1], None)
+            pick = (wf[0], wf[1], None); noface += 1
         f, how, box = pick
         save(g, info[f], how, raws.get(f), box)
     if not DRY:
@@ -465,7 +577,7 @@ def main():
     for g, o in (old.get('p') or {}).items():
         if g not in cred and not DRY and os.path.exists(os.path.join(OUT, o['f'])): os.remove(os.path.join(OUT, o['f']))
     if not DRY: json.dump({'at': NOW.date().isoformat(), 'p': dict(sorted(cred.items()))}, open(CRED, 'w'), indent=0)
-    print(f'photos: {len(cred)} in use ({new} new, {kept} unchanged, {skipped} failed); found by: '
+    print(f'photos: {len(cred)} in use ({new} new, {kept} unchanged, {skipped} failed; {noface} of them his own picture with no face clear enough to crop to); found by: '
           + ', '.join(f'{k} {v}' for k, v in sorted(via.items())) + '; no photo: ' + ', '.join(f'{k} {v}' for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])[:8]))
 
 

@@ -1,9 +1,10 @@
 name: Player photos (Wikimedia Commons, free licenses only)
 
 # Once a week: finds freely licensed photos of the players BFF shows (Wikidata + Wikimedia Commons: his Wikidata picture,
-# his own Commons category, and photos found by his name and verified as him alone), uses the most recent one where his
-# face shows clearly (YuNet face detector, models/), saves small head-and-shoulders crops
-# copies in photos/ with each one's author and license (photos/credits.json). The next data update puts them on the site.
+# the picture his English Wikipedia article's infobox shows, his own Commons category, and photos found by his name and
+# verified as him alone), uses the most recent one where his face shows clearly (YuNet face detector, models/), and
+# saves small head-and-shoulders crops in photos/ with each one's author and license (photos/credits.json). The site
+# serves them from photos/ as soon as they are saved.
 # Set the repository variable BFF_PLAYER_PHOTOS to off to stop using player photos.
 on:
   schedule:
