@@ -415,11 +415,11 @@ def free_license(x):
 def good_face(box):
     """a face big and central enough to be the photo's subject and to show sharply: at least 8% of the picture's width,
     its center in the middle 70% across (Nov 3 2026: smaller ones were blurry, or a bystander, like a referee beside a
-    player in a helmet) and not at the top edge (Nov 4 2026: a face cut off there was a player in the background, or
-    the back of a helmet)"""
+    player in a helmet) and not at the top edge (Nov 4 2026: a face cut off there was a player in the background, the
+    back of a helmet, or the defender tackling George Holani)"""
     if not box: return False
     x, y, w, h = box[:4]
-    return w >= .08 and .15 <= x + w / 2 <= .85 and .08 <= y + h / 2 <= .8
+    return w >= .08 and .15 <= x + w / 2 <= .85 and .08 <= y + h / 2 <= .8 and y >= .01
 
 
 def crop_box(w, h, face=None):

@@ -409,7 +409,7 @@ recaps still in their window.
   are found by YuNet, a
   neural face detector from OpenCV Zoo (MIT license, in `models/`), looking at each picture at three sizes. A category
   or search photo needs exactly one clear face, big, central and not cut off at the top edge (a face there was a
-  player in the background or the back of a helmet). His own picture also counts when one clear face is at
+  player in the background, the back of a helmet, or the defender tackling George Holani). His own picture also counts when one clear face is at
   least 1.6 times as wide as any other (a small face behind him), or, when no face is clear (a face mask, a shadow),
   when a closer look at the one faint face confirms it. A small face is cropped from a 1920-pixel copy (one of the
   thumbnail sizes Commons serves) so it stays sharp. If no photo shows his face clearly, his own picture is used as it is (an action photo, top-centered). Face
