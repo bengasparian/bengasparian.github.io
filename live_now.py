@@ -18,9 +18,10 @@ How it works (run by .github/workflows/live.yml; nothing to do once the key is s
 
   python live_now.py --once      one check, prints the games (needs BFF_BDL_KEY)
   python live_now.py --due       exit code 0 if a game is under way or within 75 minutes (and the key is set), else 3
+  python live_now.py --check     asks BALLDONTLIE for this week's games once: shows the key works (exit 1 if it does not)
   python live_now.py             the loop (what live.yml runs)
 """
-import datetime, json, os, re, subprocess, sys, tempfile, time, urllib.parse, urllib.request
+import datetime, json, os, re, subprocess, sys, tempfile, time, urllib.error, urllib.parse, urllib.request
 from zoneinfo import ZoneInfo
 
 KEY = (os.environ.get('BFF_BDL_KEY') or '').strip()
@@ -148,6 +149,14 @@ def main():
         if '--due' in sys.argv: sys.exit(3)
         return
     S = schedule()
+    if '--check' in sys.argv:   # (after saving the key: one request, nothing pushed)
+        t = now(); days = [(t.astimezone(ET).date() + datetime.timedelta(days=k)).isoformat() for k in range(-3, 5)]
+        try: G = fetch(days)
+        except urllib.error.HTTPError as e: print('BALLDONTLIE refused the request:', e.code, '(401: the key is wrong or not active)'); sys.exit(1)
+        mine = convert(G, S)
+        print(f'key works: BALLDONTLIE returned {len(G)} NFL games for {days[0]} to {days[-1]}, {len(mine)} of them on BFF\'s schedule:')
+        for g in mine: print(' ', g['id'], g['state'], g['as'], '-', g['hs'])
+        return
     if '--due' in sys.argv:   # (for the scores job: is a live run needed now?)
         sys.exit(0 if window(S, now()) else 3)
     if '--once' in sys.argv:

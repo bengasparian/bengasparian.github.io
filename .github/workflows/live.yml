@@ -12,7 +12,12 @@ on:
     - cron: "17,47 0-3 * * 2"     # Monday night games (UTC Tuesday)
     - cron: "17,47 0-3 * * 5"     # Thursday night games (UTC Friday)
     - cron: "17,47 17-23 * * 6"   # Saturday games late in the season
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      check:
+        description: "Only check that the BALLDONTLIE key works (one request, nothing saved)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write   # push live_now.json to the live branch
@@ -41,4 +46,4 @@ jobs:
         env:
           BFF_BDL_KEY: ${{ secrets.BFF_BDL_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: python live_now.py
+        run: python live_now.py ${{ inputs.check && '--check' || '' }}
