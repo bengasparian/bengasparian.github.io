@@ -45,10 +45,10 @@ OPEN = {
     'standings': ["Here's the table.", "Standings check:"],
     'defense': ["Here's who's giving up points.", "Matchup check:"],
     'sos': ["Schedule check:", "Here's who has it easy and who doesn't."],
-    # props and betting: BFF predicts lines and shows chances; it makes no picks and builds no parlays (Nov 2026)
+    # props and betting: BFF predicts lines and shows chances; asked for bets or a parlay it gives the likeliest outcomes it sees (Nov 2026)
     'prop': ["Let's look at the number.", "Here's what BFF's numbers say."],
-    'bets': ["No picks here, just BFF's numbers (21+ only).", "BFF doesn't make picks, but here's what the numbers say (21+ only):"],
-    'parlay': ["BFF doesn't build parlays, but here's what it can tell you.", "No parlays from me, but here are the numbers you'd want:"],
+    'bets': ["Here are the likeliest outcomes BFF sees (21+ only).", "These are the bets BFF's numbers like most (21+ only):"],
+    'parlay': ["Here's a parlay built from BFF's numbers.", "Here's the parlay I'd build from the numbers:"],
     'td': ["Here's who's most likely to find the end zone.", "Touchdown chances:"],
     'weather': ["Weather check:"],
     # explaining
