@@ -472,6 +472,12 @@ body.noscroll{overflow:hidden}
 .mtastats{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:10px 0}.mtastats>div{display:flex;flex-direction:column;align-items:center;text-align:center}.mtastats b{font:800 1.8rem var(--cond)}.mtav{font:800 1.1rem var(--cond);letter-spacing:.05em;text-transform:uppercase;padding:6px 12px;border-radius:99px;border:1px solid var(--line2)}
 .bnote{border-left-color:var(--warn)!important}.bchk{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:start}@media(max-width:700px){.bchk{grid-template-columns:1fr}}.pcomb{margin:8px 0 6px;font-size:.9rem}.pcomb b{font:800 1.2rem var(--cond);color:var(--acc)}
 #bt_leans table{min-width:640px}#hp_bet h3{margin-top:16px}
+/* this week's lines: a box with its own scroll, so the touchdown chances, line moves, prop checker and parlay builder stay close */
+#bt_leans.btbox{max-height:min(640px,72vh);overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel);scrollbar-gutter:stable}
+#bt_leans.btbox table{margin:0}#bt_leans.btbox th{position:sticky;top:0;z-index:2;background:var(--solid)}
+#bt_leans.btbox:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+.btcount{margin:6px 0 8px}#bt_find{margin-left:8px;min-width:150px;max-width:220px}
+.btkind{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 
 /* =================== v18: organized layout =================== */
 .subtabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:4px;margin:0 0 14px;box-shadow:var(--d3)}
@@ -1954,3 +1960,4 @@ table.bx.btab td:nth-child(6){white-space:normal;min-width:160px;max-width:260px
 .adslot{display:block;margin:14px auto;max-width:100%;min-height:90px;text-align:center;overflow:hidden}
 .adslot .adlab{display:block;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mut,#9aa3b2);margin-bottom:4px}
 .tipbtn{display:inline-flex;align-items:center;gap:6px}
+@media(max-width:700px){#bt_leans.btbox{max-height:62vh;border-radius:12px;padding:0 8px}#bt_find{margin-left:0;min-width:0;flex:1 1 140px;max-width:none}}
