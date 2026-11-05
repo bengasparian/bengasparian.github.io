@@ -266,6 +266,11 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   is not out). When the starter missed his last game and his team has no injury report for the next one yet (Monday to
   Wednesday), he is projected for the measured chance he plays and the next quarterback for the rest, so the team's
   quarterback total stays whole; once the official report sets a status, the normal rule takes over.
+- **Recent form (quarterbacks):** for the games after the next one, a quarterback's projection is 85% BFF's model and
+  15% his recent form (this season's games, the latest weighted most, a blow-up game counted at most about 1.6 times his
+  usual, weighted against his last two seasons). Tested on 2023-2025 rest-of-season order (`research/bt_recency.py`):
+  better or equal in every season for quarterbacks (0.625 to 0.638); for running backs, receivers and tight ends the same
+  formula, alone or blended, made the order less accurate, so they keep the model (the formula alone: RB 0.54 vs 0.61).
 - **Half PPR and standard:** a projection loses the catches BFF's own stat-by-stat model has in it (each game's
   catches as a share of its points, so the chance he plays or a fill-in role scales both). Tested on 2023-2025 games
   (`research/bt_format.py`, each season predicted by models trained only on earlier ones): lower error than the old

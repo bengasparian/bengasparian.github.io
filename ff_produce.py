@@ -399,6 +399,17 @@ for pos in POS:
 for pid_,X in PRED.items():
     m_=X['wk']<=17; X['L']=float(np.mean(X['P'][m_])) if m_.any() else float(np.mean(X['P'])); X['PR']=X['P']
 print('projected',len(PRED),'players,',len(U5),'games',flush=True)
+QB_FORM=0.15
+def _recent_form(y,pp1,pp2,pid):
+    """recent form with track record: this season's games, half-life 3 games, each game capped at max(1.6 x median, median + 8);
+    weighted n/(n+4) against his last seasons (0.7 last, 0.3 the one before; 4+ games each)"""
+    if not len(y): return None
+    n=len(y); med=float(np.median(y)); cap=np.minimum(y,max(1.6*med,med+8)); ew=float(np.average(cap,weights=0.5**((n-1-np.arange(n))/3)))
+    a=float(pp1.loc[pid,'mean']) if pid in pp1.index and pp1.loc[pid,'size']>=4 else None
+    b=float(pp2.loc[pid,'mean']) if pid in pp2.index and pp2.loc[pid,'size']>=4 else None
+    tr=(.7*a+.3*b) if a is not None and b is not None else a
+    if tr is None: return ew
+    k=n/(n+4); return k*ew+(1-k)*tr
 for pid in pool:
     if pid not in PRED: continue
     tm,status,pos,name=_ID[pid]; X=PRED[pid]
@@ -427,6 +438,12 @@ for pid in pool:
     # (2023-25: 11% the first week, 34% by the fourth, about half later; 53% did not play again that season)
     _av=[(0.0 if ret_ and w[0]<ret_ else (AIR[min(len(AIR)-1,int(w[0])-ret_)] if ret_ else 1.0)) if ir else _avail(int(w[0])) for w in wk_rows if w[0]<=17]
     _raw=[float(P[i] if i==0 else PR[i]) for i,w in enumerate(wk_rows) if w[0]<=17]
+    # quarterbacks, the games after the next one: 15% recent form (his games this season, the latest weighted most, a
+    # blow-up game counted at most about 1.6x his usual) with his last two seasons. research/bt_recency.py, 2023-25
+    # rest-of-season order: better or equal in every season for QBs (0.625 -> 0.638); worse for RB, WR and TE.
+    if pos=='QB' and len(rows) and len(_raw)>1:
+        _rf=_recent_form(rows.fp.values.astype(float),_pp1,_pp2,pid)
+        if _rf is not None: _raw=[_raw[0]]+[(1-QB_FORM)*v+QB_FORM*_rf if v>0 else v for v in _raw[1:]]; Pr=np.array([float(np.mean(_raw))])
     # each game's catches as a share of its PPR points (BFF's stat-by-stat model): the site takes them out for half PPR
     # and standard, scaled with any later change to the points (research/bt_format.py)
     _xr=[(r(min(1.0,float(X['C'][i])/float(X['P'][i])),3) if float(X['P'][i])>.5 else 0.0) for i,w in enumerate(wk_rows) if w[0]<=17] if pos!='QB' else None
