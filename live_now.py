@@ -5,19 +5,24 @@ fantasy sports included, without attribution, as long as the data is not present
 How it works (run by .github/workflows/live.yml; nothing to do once the key is set):
   1. The repository secret BFF_BDL_KEY holds a free BALLDONTLIE API key (app.balldontlie.io). Without it this script
      does nothing, and the site keeps its after-game scores from nflverse.
-  2. The kickoff times come from the published page (index.html, the schedule BFF already shows). The script runs
-     while a game is under way or kicks off within 75 minutes, and stops when none is.
-  3. Once a minute (the free tier allows 5 requests a minute) it asks BALLDONTLIE for the games of the day and writes
-     live_now.json: each game's score, the score by quarter, the quarter it is in and its state. When anything changed
-     (or every 10 minutes) the file is pushed to the `live` branch, as a single commit (the branch keeps no history),
-     so GitHub Pages does not rebuild the site each minute. The page reads it from raw.githubusercontent.com every
-     minute during games and shows the score as "live (unofficial)"; the official score, box score and scoring plays
-     replace it after the game (live_update.py, nflverse).
-  4. A GitHub job can run for 6 hours: after 5 h 35 min, if games are still on, it starts the next run of live.yml and
-     ends.
+  2. The kickoff times come from the published page (index.html, the schedule BFF already shows). GitHub starts
+     scheduled jobs late or skips them when it is busy (in Nov 2026 only about 1 in 12 of the every-30-minutes runs ran,
+     and Thursday's game was picked up in the 4th quarter), so a run started up to 20 hours before a kickoff stays on
+     and waits for it, and every job (data, scores, photos and this one's own timer) starts it when a game is that near.
+  3. From 75 minutes before a kickoff, once a minute (the free tier allows 5 requests a minute), it asks BALLDONTLIE for
+     the games of the day and writes live_now.json: each game's score, the score by quarter, the quarter it is in and
+     its state. When anything changed (or every 10 minutes) the file is pushed to the `live` branch, as a single commit
+     (the branch keeps no history), so GitHub Pages does not rebuild the site each minute. The page reads it from
+     raw.githubusercontent.com every minute during games and shows the score as "live (unofficial)".
+  4. While games are on, and for 3 hours after the last one ends, it starts the scores job every 30 minutes (and as soon
+     as a game ends), so the official final score, box score and scoring plays (live_update.py, nflverse) come in as soon
+     as nflverse publishes them instead of whenever GitHub gets to the scores job's own timer.
+  5. A GitHub job can run for 6 hours: after 5 h 35 min, if a game is on or near, it starts the next run of live.yml and
+     ends (the two never overlap: they share a queue).
 
   python live_now.py --once      one check, prints the games (needs BFF_BDL_KEY)
-  python live_now.py --due       exit code 0 if a game is under way or within 75 minutes (and the key is set), else 3
+  python live_now.py --due       exit code 0 if a game is under way or kicks off within 20 hours, the key is set and no
+                                 live run is already going (or queued), else 3
   python live_now.py --check     asks BALLDONTLIE for this week's games once: shows the key works (exit 1 if it does not)
   python live_now.py             the loop (what live.yml runs)
 """
@@ -32,9 +37,13 @@ ET = ZoneInfo('America/New_York')
 ABBR = {'LAR': 'LA', 'WSH': 'WAS', 'JAC': 'JAX', 'LVR': 'LV', 'OAK': 'LV', 'SD': 'LAC', 'STL': 'LA'}   # BALLDONTLIE -> nflverse
 POLL = 60          # seconds between checks (free tier: 5 requests a minute)
 BEAT = 600         # push at least this often while games are on, so the page can tell the feed is alive
-AHEAD = 75 * 60    # start this long before a kickoff
+AHEAD = 75 * 60    # ask BALLDONTLIE from this long before a kickoff
+LEAD = 20 * 3600   # a run started this long before a kickoff waits for it (GitHub's timers run hours late)
 LONGEST = 5 * 3600 # a game is over by then (to stop waiting on one BALLDONTLIE never marks final)
+AFTER = 3 * 3600   # after the last game ends, keep starting the scores job (official box scores) this long
+SCORES_EVERY = 1800
 RUN_LIMIT = 5 * 3600 + 35 * 60
+DATA_JOBS = ('.github/workflows/scores.yml', '.github/workflows/update.yml', '.github/workflows/photos.yml')
 UA = {'User-Agent': 'BFF-fantasy-football/1.0 (https://github.com/bengasparian/bengasparian.github.io)'}
 
 
@@ -62,9 +71,13 @@ def schedule(path='index.html'):
     return sorted(out)
 
 
-def window(S, t):
-    """games under way (kicked off within LONGEST) or kicking off within AHEAD"""
-    return [g for g in S if g[0] - datetime.timedelta(seconds=AHEAD) <= t <= g[0] + datetime.timedelta(seconds=LONGEST)]
+def window(S, t, lead=AHEAD, done=()):
+    """games under way (kicked off within LONGEST, and not yet final) or kicking off within `lead` seconds"""
+    return [g for g in S if g[0] - datetime.timedelta(seconds=lead) <= t <= g[0] + datetime.timedelta(seconds=LONGEST) and gid_of(g) not in done]
+
+
+def gid_of(g):
+    return nflid(g[1], g[2], g[3], g[4])
 
 
 def fetch(dates):
@@ -134,13 +147,43 @@ def push(doc):
     sh('git', 'push', '-q', '-f', f'https://x-access-token:{token}@github.com/{repo}.git', f'{BRANCH}:{BRANCH}')
 
 
-def next_run():
-    repo = os.environ.get('GITHUB_REPOSITORY'); token = os.environ.get('GITHUB_TOKEN')
-    if not (repo and token): return
-    req = urllib.request.Request(f'https://api.github.com/repos/{repo}/actions/workflows/live.yml/dispatches', method='POST',
-                                 data=json.dumps({'ref': os.environ.get('GITHUB_REF_NAME') or 'main'}).encode(),
+def gh(path, body=None):
+    """GitHub's API with the job's own token (None outside GitHub Actions)"""
+    repo = os.environ.get('GITHUB_REPOSITORY'); token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
+    if not (repo and token): return None
+    req = urllib.request.Request(f'https://api.github.com/repos/{repo}/{path}', method='POST' if body is not None else 'GET',
+                                 data=json.dumps(body).encode() if body is not None else None,
                                  headers=dict(UA, Authorization='Bearer ' + token, Accept='application/vnd.github+json'))
-    urllib.request.urlopen(req, timeout=30); print('started the next run of live.yml (games still on)')
+    with urllib.request.urlopen(req, timeout=30) as r: return json.loads(r.read() or b'{}')
+
+
+def waiting(paths, states=('queued', 'pending', 'waiting', 'requested', 'in_progress')):
+    """is a run of one of these workflows going or waiting its turn? (None: unknown)"""
+    try: j = gh('actions/runs?per_page=40')
+    except Exception as e: print('could not list runs:', str(e)[:120]); return None
+    if j is None: return None
+    me = os.environ.get('GITHUB_RUN_ID')
+    return any(r.get('path') in paths and r.get('status') in states and str(r.get('id')) != me for r in j.get('workflow_runs') or [])
+
+
+def dispatch(wf):
+    try:
+        if gh(f'actions/workflows/{wf}/dispatches', {'ref': os.environ.get('GITHUB_REF_NAME') or 'main'}) is None: return False
+        return True
+    except Exception as e:
+        print('could not start', wf + ':', str(e)[:160]); return False
+
+
+def next_run():
+    if dispatch('live.yml'): print('started the next run of live.yml (games still on or near)')
+
+
+def scores_job(why):
+    """start the scores job, unless a data job is already waiting its turn (a new run would push it out of the queue)"""
+    if waiting(DATA_JOBS, ('queued', 'pending', 'waiting', 'requested')): print('scores job: one is already waiting'); return True
+    ok = dispatch('scores.yml')
+    if ok: print(now().strftime('%H:%M'), 'started the scores job (' + why + ')')
+    return ok
 
 
 def main():
@@ -157,30 +200,53 @@ def main():
         print(f'key works: BALLDONTLIE returned {len(G)} NFL games for {days[0]} to {days[-1]}, {len(mine)} of them on BFF\'s schedule:')
         for g in mine: print(' ', g['id'], g['state'], g['as'], '-', g['hs'])
         return
-    if '--due' in sys.argv:   # (for the scores job: is a live run needed now?)
-        sys.exit(0 if window(S, now()) else 3)
+    if '--due' in sys.argv:   # (for the other jobs: is a live run needed now?)
+        if not window(S, now(), LEAD): sys.exit(3)
+        if waiting(('.github/workflows/live.yml',)): print('a live run is already going'); sys.exit(3)
+        sys.exit(0)
     if '--once' in sys.argv:
         print(json.dumps(snapshot(now(), S) or {'games': [], 'note': 'no game under way or within 75 minutes'}, indent=1)); return
-    t0 = time.time(); last = None; last_push = 0; fails = 0
-    if not window(S, now()): print('no game under way or within 75 minutes'); return
+    loop(S)
+
+
+def loop(S, clock=time.time, sleep=time.sleep):
+    t0 = clock(); last = None; last_push = 0; fails = 0; done = {}; last_scores = 0
+    if not window(S, now(), LEAD): print('no game under way or within 20 hours'); return
+    print('waiting for kickoff:', ', '.join(f"{a}@{h} {k.astimezone(ET):%a %H:%M} ET" for k, _, _, a, h in window(S, now(), LEAD)[:16]))
     while True:
-        t = now()
-        if not window(S, t): print('no game under way or within 75 minutes: done'); return
-        if time.time() - t0 > RUN_LIMIT: next_run(); return
-        try:
-            doc = snapshot(t, S); fails = 0
-            sig = json.dumps(doc['games'], sort_keys=True)
-            if sig != last or time.time() - last_push > BEAT:
-                push(doc); last = sig; last_push = time.time()
-                live = [g for g in doc['games'] if g['state'] == 'in_progress']
-                print(t.strftime('%H:%M'), 'pushed:', ', '.join(f"{g['away']} {g['as']}-{g['hs']} {g['home']} Q{g['q']}" for g in live) or 'no game in progress yet')
-        except Exception as e:
-            fails += 1; print('live check failed:', str(e)[:200])
-            if fails >= 15: print('15 failures in a row: stopping (the next scheduled run tries again)'); return
-        if all(g[0] > now() + datetime.timedelta(minutes=10) for g in window(S, now())):
-            time.sleep(min(600, max(POLL, (min(g[0] for g in window(S, now())) - now()).total_seconds() - 300)))   # before kickoff: no need to ask every minute
-        else:
-            time.sleep(POLL)
+        t = now(); left = RUN_LIMIT - (clock() - t0)
+        on = window(S, t, AHEAD, done)                                   # under way, or kicking off within 75 minutes
+        near = window(S, t, LEAD, done)                                  # ... or within 20 hours
+        after = bool(done) and clock() - max(done.values()) < AFTER     # the official box scores are still coming in
+        if not on and not near and not after: print(t.strftime('%H:%M'), 'no game under way or within 20 hours: done'); return
+        if left <= 0:
+            next_run(); return
+        if on:
+            try:
+                doc = snapshot(t, S); fails = 0
+                sig = json.dumps(doc['games'], sort_keys=True)
+                if sig != last or clock() - last_push > BEAT:
+                    push(doc); last = sig; last_push = clock()
+                    live = [g for g in doc['games'] if g['state'] == 'in_progress']
+                    print(t.strftime('%H:%M'), 'pushed:', ', '.join(f"{g['away']} {g['as']}-{g['hs']} {g['home']} Q{g['q']}" for g in live) or 'no game in progress yet')
+                ended = [g['id'] for g in doc['games'] if g['state'] == 'final' and g['id'] not in done and g['id'] in {gid_of(x) for x in on}]
+                for x in ended: done[x] = clock(); print(t.strftime('%H:%M'), 'final:', x)
+                if ended and scores_job('a game ended'): last_scores = clock()
+            except Exception as e:
+                fails += 1; print('live check failed:', str(e)[:200])
+                if fails >= 15: print('15 failures in a row: stopping (the next run tries again)'); return
+            if any(g[0] <= now() for g in on) and clock() - last_scores >= SCORES_EVERY and scores_job('games on'): last_scores = clock()
+            w = window(S, now(), AHEAD, done)
+            if w and all(g[0] > now() + datetime.timedelta(minutes=10) for g in w):
+                sleep(max(1, min(600, left, max(POLL, (min(g[0] for g in w) - now()).total_seconds() - 300))))   # before kickoff: no need to ask every minute
+            else:
+                sleep(max(1, min(POLL, left)))
+            continue
+        # no game on: the official box scores of the games that ended, then wait for the next kickoff
+        if after and clock() - last_scores >= SCORES_EVERY and scores_job('after the games'): last_scores = clock()
+        wake = [(min(g[0] for g in near) - datetime.timedelta(seconds=AHEAD) - now()).total_seconds()] if near else []
+        if after: wake.append(max(60, SCORES_EVERY - (clock() - last_scores)))
+        sleep(max(1, min(min(wake) if wake else 600, 1800, left)))
 
 
 if __name__ == '__main__':

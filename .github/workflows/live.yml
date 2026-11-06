@@ -1,17 +1,18 @@
 name: Live scores during games
 
-# While an NFL game is under way (or kicks off within 75 minutes), checks the score once a minute with the BALLDONTLIE
-# NFL API (free tier; its terms allow commercial use) and pushes live_now.json to the `live` branch, which the page
-# reads during games. Needs the repository secret BFF_BDL_KEY (a free key from app.balldontlie.io); without it the run
-# ends at once and the site keeps its after-game scores. It also starts itself from the scores job before kickoffs, and
-# starts its own next run when a game day runs longer than one 6-hour GitHub job.
+# Live scores during NFL games: once a minute from 75 minutes before each kickoff, BALLDONTLIE's NFL API (free tier; its
+# terms allow commercial use) is read and live_now.json is pushed to the `live` branch, which the page reads during
+# games. Needs the repository secret BFF_BDL_KEY (a free key from app.balldontlie.io); without it the run ends at once
+# and the site keeps its after-game scores.
+# GitHub starts scheduled jobs late or skips them when it is busy, so this job does not count on its timer: a run that
+# starts up to 20 hours before a kickoff stays on and waits for it, every data job (scores, data update, photos) starts
+# it when a game is that near, each run starts the next one before GitHub's 6-hour limit while games are on or near, and
+# during and after games it starts the scores job every 30 minutes for the official box scores. The timer below is one
+# more chance to start it on game days (Thursday to Monday night, UTC); a run with no game near ends in seconds.
 on:
   schedule:
-    - cron: "17,47 16-23 * * 0"   # Sundays 16:17-23:47 UTC (games from 9:30 AM Eastern)
-    - cron: "17,47 0-4 * * 1"     # Sunday night games (UTC Monday)
-    - cron: "17,47 0-3 * * 2"     # Monday night games (UTC Tuesday)
-    - cron: "17,47 0-3 * * 5"     # Thursday night games (UTC Friday)
-    - cron: "17,47 17-23 * * 6"   # Saturday games late in the season
+    - cron: "17,47 * * * 4,5,6,0,1"   # Thursday to Monday (UTC)
+    - cron: "17,47 0-5 * * 2"         # Monday night games (UTC Tuesday)
   workflow_dispatch:
     inputs:
       check:
@@ -21,7 +22,7 @@ on:
 
 permissions:
   contents: write   # push live_now.json to the live branch
-  actions: write    # start the next run when games go on past 6 hours
+  actions: write    # start the next run before the 6-hour limit, and the scores job during and after games
 
 concurrency:
   group: bff-live   # one live job at a time; separate from the data jobs, so it never holds them up
@@ -30,7 +31,7 @@ concurrency:
 jobs:
   live:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 350   # (each run hands over to the next after 5 h 35 min)
     steps:
       - uses: actions/checkout@v5
         with:

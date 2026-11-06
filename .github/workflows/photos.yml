@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # starts the live-scores job when a game is within 20 hours
 
 concurrency:
   group: bff-site-data
@@ -30,6 +31,13 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - name: Start the live-scores job if a game is within 20 hours (only with the BALLDONTLIE key)
+        continue-on-error: true
+        env:
+          BFF_BDL_KEY: ${{ secrets.BFF_BDL_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if python live_now.py --due; then gh workflow run live.yml --ref main && echo "live-scores job started"; fi
       - name: Install the image libraries (face detection checks that a found photo shows one person)
         run: pip install pillow "opencv-python-headless==4.11.0.86"
       - name: Find and save freely licensed player photos

@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  actions: write   # starts the live-scores job when a game is near
+  actions: write   # starts the live-scores job when a game is within 20 hours
 
 # shares a queue with the data update so the two never save at the same moment
 concurrency:
@@ -34,7 +34,7 @@ jobs:
         run: |
           python live_update.py
           python news_update.py
-      - name: Start the live-scores job if a game is near (only with the BALLDONTLIE key)
+      - name: Start the live-scores job if a game is within 20 hours (only with the BALLDONTLIE key)
         continue-on-error: true
         env:
           BFF_BDL_KEY: ${{ secrets.BFF_BDL_KEY }}

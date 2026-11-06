@@ -132,9 +132,14 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   score and scoring plays replace it after the game. It needs a free key from
   [app.balldontlie.io](https://app.balldontlie.io/signup) saved as the repository secret `BFF_BDL_KEY` (Settings >
   Secrets and variables > Actions > New repository secret); without it the page says final scores come after each
-  game. The live job starts from its own schedule on game days and from the scores job before kickoffs, and starts its
-  next run when a game day lasts longer than one 6-hour GitHub job; like every GitHub schedule it can start late when
-  GitHub is busy. Tap a game for its game center (outlook, win chances from the spread, injuries, expected starting
+  game. GitHub starts scheduled jobs late or skips them when it is busy (in the first week of Nov 2026 only about 1 in
+  12 of the scores job's every-30-minutes runs ran, and Thursday's game was only picked up in the 4th quarter), so the
+  live job does not count on its timer: a run started up to 20 hours before a kickoff stays on and waits for it, every
+  data job (scores, data update, photos) starts it when a game is that near, each run starts the next one before
+  GitHub's 6-hour limit, and during games and for 3 hours after the last one it starts the scores job every 30 minutes
+  (and as soon as a game ends), so the official box score comes in as soon as nflverse publishes it. Live player stats
+  (a live box score) are not in BALLDONTLIE's free tier (its ALL-STAR plan, $9.99 a month, has them); no free source
+  licensed for commercial use had them in Nov 2026. Tap a game for its game center (outlook, win chances from the spread, injuries, expected starting
   quarterbacks, top performers, box score). Past and future weeks too.
 - **News:** a sports-site layout with a top story, lead stories and rails. Outside stories are **headline links only**
   (CBS Sports, Pro Football Talk, RotoBaller, PFF, Sharp Football Analysis): the publisher's headline, linked to its own

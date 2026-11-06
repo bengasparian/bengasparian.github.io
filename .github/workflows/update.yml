@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # starts the live-scores job when a game is within 20 hours
 
 # the score job and this job share one queue, so they never save at the same moment
 concurrency:
@@ -27,6 +28,13 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip                # reuses the downloaded libraries between runs instead of downloading them again
+      - name: Start the live-scores job if a game is within 20 hours (only with the BALLDONTLIE key)
+        continue-on-error: true
+        env:
+          BFF_BDL_KEY: ${{ secrets.BFF_BDL_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if python live_now.py --due; then gh workflow run live.yml --ref main && echo "live-scores job started"; fi
       - name: Install libraries (tested versions; the newest ones if those ever stop installing)
         run: pip install -r requirements.txt || pip install pandas pyarrow scikit-learn scipy
       - name: Reuse the model's feature tables from earlier runs
