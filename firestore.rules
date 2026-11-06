@@ -1,14 +1,130 @@
 rules_version = '2';
-// BFF accounts: each signed-in person can read, save and delete only their own saved data (users/<their id>).
-// Paste this into Firebase console > Firestore Database > Rules, then Publish.
+// BFF's database rules (paste into Firebase console > Firestore Database > Rules, then Publish).
+// - users/{uid}: each account's own saved data (leagues, favorites, settings): only that account reads and writes it.
+// - profiles/{uid} and usernames/{name}: public username and picture. A picture shows to others only once the site
+//   owner approves it (picOk), and changing the picture takes the approval away.
+// - posts/{id}: the Community tab. Anyone reads; a signed-in member with a username and a verified email posts, at most
+//   once every 20 seconds, within the content filter below. The author or the site owner deletes; three reports hide a
+//   post on the page until the owner reviews it.
+// - reports/{post_uid}: one report per member per post; only the site owner reads them.
+// - scores/{uid} and daily/{day_format}/scores/{uid}: the Spin Draft leaderboard (one daily score per member: the first try).
+// The site owner's account id goes in admin() below and in accounts.json ("admins").
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() { return signedIn() && request.auth.uid in ['O1iKoNpqRmTKsUHFt3rzhArUwBt2']; }
+    function prof(uid) { return get(/databases/$(database)/documents/profiles/$(uid)).data; }
+    // the core of the page's content filter (lowercase text): slurs, sexual talk aimed at a person, threats, explicit
+    // sexual content, hate slogans. Swearing about teams and games passes.
+    function clean(s) {
+      return !s.lower().matches('(?s).*\\b(nigg(a|ah|as|az|er|ers|uh)|nigr|faggots?|fags?|retard(s|ed)?|kikes?|spics?|chinks?|wetbacks?|trann(y|ie|ies)|gooks?|ragheads?|towelheads?|beaners?|jigaboos?|shemales?|cunts?)\\b.*')
+        && !s.lower().matches('(?s).*\\b(fuck|fk|fck|fuk|screw|bang|rape|suck|lick|molest)(ing|in)?\\s+(you|u|ya|yo|your mom|ur mom|her|him|them|me)\\b.*')
+        && !s.lower().matches('(?s).*(\\b(kill|murder|shoot|stab|hang|strangle|choke)(ing|in)?\\s+(you|u|ya|yourself|urself|him|her|them)\\b|\\bkys\\b|\\bkill (your|ur) ?self\\b|\\bgo die\\b).*')
+        && !s.lower().matches('(?s).*\\b(porn\\w*|xxx|nudes?|blow ?jobs?|hand ?jobs?|cumshot|jizz|dildos?|pussy|pussies|tits|titties|onlyfans|hentai|incest|pedo(phile|s)?|child porn|rap(e|ed|es|ing|ist)|heil hitler|sieg heil|white power)\\b.*');
+    }
+    function picOkay(p) { return p == '' || (p.size() < 400000 && p.matches('data:image/(webp|jpeg);base64,[A-Za-z0-9+/=]+')); }
+
     match /users/{uid} {
-      allow read, delete: if request.auth != null && request.auth.uid == uid;
-      allow create, update: if request.auth != null && request.auth.uid == uid
+      allow read, delete: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['data', 'updated'])
         && request.resource.data.data is string
         && request.resource.data.data.size() < 900000;
+    }
+
+    match /usernames/{name} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid
+        && name.matches('[a-z0-9_]{3,20}') && clean(name)
+        && getAfter(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.uname == name;
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || admin());
+    }
+
+    match /profiles/{uid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['username', 'uname', 'av', 'pic', 'picOk', 'created', 'lastPost'])
+        && request.resource.data.username is string && request.resource.data.username.matches('[A-Za-z0-9_]{3,20}')
+        && request.resource.data.uname == request.resource.data.username.lower()
+        && existsAfter(/databases/$(database)/documents/usernames/$(request.resource.data.uname))
+        && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.uname)).data.uid == uid
+        && request.resource.data.av is string && request.resource.data.av.size() <= 24
+        && request.resource.data.pic == '' && request.resource.data.picOk == false
+        && request.resource.data.created == request.time && request.resource.data.lastPost == request.time;
+      // the owner: a BFF design or a new picture (which then waits for approval again)
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['av', 'pic', 'picOk'])
+        && request.resource.data.av is string && request.resource.data.av.size() <= 24
+        && picOkay(request.resource.data.pic)
+        && ((request.resource.data.pic == resource.data.pic && request.resource.data.picOk == resource.data.picOk) || request.resource.data.picOk == false);
+      // the owner, posting: the time of the last post (at most one post every 20 seconds)
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastPost'])
+        && request.resource.data.lastPost == request.time
+        && request.time > resource.data.lastPost + duration.value(20, 's');
+      // the site owner: approve or remove a picture
+      allow update: if admin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pic', 'picOk'])
+        && (request.resource.data.pic == resource.data.pic || request.resource.data.pic == '');
+      allow delete: if signedIn() && (request.auth.uid == uid || admin());
+    }
+
+    match /posts/{pid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.token.email_verified == true
+        && request.resource.data.keys().hasOnly(['uid', 'username', 'av', 'kind', 'text', 'ref', 'pic', 'picOk', 'rc', 'created'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.username == prof(request.auth.uid).username
+        && request.resource.data.av is string && request.resource.data.av.size() <= 24
+        && request.resource.data.kind in ['take', 'trade', 'parlay', 'help']
+        && request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+        && clean(request.resource.data.text)
+        && request.resource.data.ref is string && request.resource.data.ref.size() <= 2000
+        && picOkay(request.resource.data.pic) && request.resource.data.picOk == false
+        && request.resource.data.rc == 0 && request.resource.data.created == request.time
+        && getAfter(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.lastPost == request.time;
+      // a report: the count goes up by one, with the reporter's report written in the same commit
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rc'])
+        && request.resource.data.rc == resource.data.rc + 1
+        && !exists(/databases/$(database)/documents/reports/$(pid + '_' + request.auth.uid))
+        && existsAfter(/databases/$(database)/documents/reports/$(pid + '_' + request.auth.uid));
+      // the site owner: approve a picture
+      allow update: if admin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['picOk', 'rc']);
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || admin());
+    }
+
+    match /reports/{rid} {
+      allow read, delete: if admin();
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['post', 'uid', 'why', 'created'])
+        && request.resource.data.uid == request.auth.uid
+        && rid == request.resource.data.post + '_' + request.auth.uid
+        && request.resource.data.why is string && request.resource.data.why.size() <= 200
+        && request.resource.data.created == request.time;
+    }
+
+    match /scores/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['username', 'av', 'best_ppr', 'best_half', 'best_std', 'at'])
+        && request.resource.data.username == prof(uid).username
+        && request.resource.data.get('best_ppr', 0) is int && request.resource.data.get('best_ppr', 0) >= 0 && request.resource.data.get('best_ppr', 0) <= 4000
+        && request.resource.data.get('best_half', 0) is int && request.resource.data.get('best_half', 0) >= 0 && request.resource.data.get('best_half', 0) <= 4000
+        && request.resource.data.get('best_std', 0) is int && request.resource.data.get('best_std', 0) >= 0 && request.resource.data.get('best_std', 0) <= 4000
+        && request.resource.data.at == request.time;
+      allow delete: if signedIn() && (request.auth.uid == uid || admin());
+    }
+
+    match /daily/{day}/scores/{uid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid
+        && day.matches('20[0-9]{2}-[0-9]{2}-[0-9]{2}_(ppr|half|std)')
+        && request.resource.data.keys().hasOnly(['username', 'av', 'score', 'at'])
+        && request.resource.data.username == prof(uid).username
+        && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= 4000
+        && request.resource.data.at == request.time;
+      allow delete: if signedIn() && (request.auth.uid == uid || admin());
     }
   }
 }

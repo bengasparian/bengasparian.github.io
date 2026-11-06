@@ -31,6 +31,9 @@ def accounts():
     law = os.environ.get("BFF_TERMS_STATE") or cfg.get("law"); contact = os.environ.get("BFF_CONTACT") or cfg.get("contact")
     if law: out["law"] = str(law)[:40]
     if contact: out["contact"] = str(contact)[:120]
+    # the site owner's account id(s): approve pictures, review reports (firestore.rules checks the same ids)
+    adm = [str(x) for x in (cfg.get("admins") or []) if re.fullmatch(r"[A-Za-z0-9]{20,40}", str(x))][:5]
+    if adm and "firebase" in out: out["admins"] = adm
     return out
 
 

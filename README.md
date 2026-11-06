@@ -498,13 +498,37 @@ free Google Firebase project that you own:
 2. **Security > Authentication > Get started > Sign-in method:** enable **Email/password**, then **Save**.
 3. **Databases & Storage > Firestore > Create database:** pick a location, choose **production mode**, create it. Open
    its **Rules** tab, replace everything with the contents of `firestore.rules` from this kit, and **Publish**. (These
-   rules let each signed-in person read, save and delete only their own data.)
+   rules let each signed-in person read, save and delete only their own data, and keep the public members features
+   below in line.) Put your own account's id (Authentication > Users > User UID, once you have made an account on your
+   site) in `admin()` in `firestore.rules` and in `accounts.json` as `"admins": ["<your id>"]`, then publish the rules
+   again: that account can approve pictures and review reported posts.
 4. **Project settings** (gear icon) **> General > Your apps > Web app (</>)**: register an app (any nickname, no
    hosting needed) and copy the `firebaseConfig` snippet it shows.
 5. In GitHub: **Settings > Secrets and variables > Actions > Variables > New repository variable**, name it
    `BFF_FIREBASE` and paste the snippet. Optional variables: `BFF_TERMS_STATE` (the state whose law governs the terms;
    California if not set) and `BFF_CONTACT` (an email address or link where people can reach you about their data).
 6. Run **Update Gridiron Fantasy** once. The account button now offers **Create account** and **Sign in**.
+
+**Members (Nov 2026):** an account has a **username** (3-20 letters, numbers or underscores; swearing, slurs and
+reserved names like "admin" or "BFF" are refused, and one person per name) and a **picture**: one of 16 BFF designs, or
+their own picture (cropped and compressed on their device, up to 60 KB, stored in their profile; it shows to others only
+after the site owner approves it, and changing it takes the approval away). Free Firestore only: no Cloud Storage, no
+server code, no card on file.
+- **Community tab:** everyone reads; a member with a username and a verified email (the site sends the link at sign-up)
+  posts takes, mock trades (attached from the Trade Analyzer, with BFF's fairness call), parlays (attached from the
+  betting slip, with BFF's chances) and lineup questions (with a screenshot). A content filter on the page, repeated in
+  `firestore.rules` so a modified page cannot skip it, allows trash talk about teams and games ("fuck the chargers")
+  but blocks slurs, sexual talk aimed at a person ("im gonna fuck you", also spelled with symbols or spaces), threats,
+  explicit content, hate slogans, phone numbers, email addresses and links to unknown sites. One post every 20 seconds
+  at most; three reports hide a post until the site owner reviews it; the author or the site owner deletes.
+- **Spin Draft leaderboard:** members' best score ever and today's daily challenge (the first try counts), by scoring
+  format, in the Spin Draft and the Community tab, under their usernames.
+- **Sign-up prompt:** after 5 minutes of use without an account, BFF asks the visitor to create one (or sign in); the
+  prompt cannot be closed without an account. Search engines, ad crawlers and automated browsers never see it, so
+  search listings and ads keep working.
+- Deleting an account removes its profile, username, posts and leaderboard scores too. Tested end to end against a
+  stand-in for Firebase (36 checks: sign-up, usernames, pictures, the filter, posting, reports, approvals, the
+  leaderboard, the sign-up prompt and deleting an account).
 
 The Firebase web config is not a secret (it is meant to be in web pages); the Firestore rules are what protect the
 data. The free plan allows 50,000 reads and 20,000 writes a day, far more than a personal site needs. People can delete
