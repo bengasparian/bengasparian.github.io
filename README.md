@@ -25,7 +25,7 @@ it over if the site starts earning real money.
 | [nflverse data](https://github.com/nflverse/nflverse-data) | play-by-play, weekly player stats, snap counts, rosters (height, weight, college, draft), depth charts, injury reports, the player table, and the schedule with final scores and the Vegas spread and total (the `schedules` release) | [CC BY 4.0](https://github.com/nflverse/nflverse-data/blob/master/LICENSE.md): commercial use allowed with credit, which the Sources page gives |
 | BFF's own models and writing | every projection, ranking, BFF value, trade and waiver call, prop line, kicker and defense number, and every BFF Original | yours |
 | [Wikidata](https://www.wikidata.org) + [Wikimedia Commons](https://commons.wikimedia.org) | player photos | Wikidata is CC0; each photo is used only under a free license (public domain, CC0, CC BY or CC BY-SA), with its author and license on the player's card and under Sources → Photo credits |
-| BFF's team badges | team marks everywhere a logo would go | drawn by BFF from each team's abbreviation and colors; no NFL or team logos are used |
+| BFF's team badges | team marks everywhere a logo would go | drawn by BFF from each team's abbreviation, colors and a generic nod to its nickname; no NFL or team logos, helmet designs or wordmarks are used |
 | Headline links (CBS Sports, Pro Football Talk, RotoBaller, PFF, Sharp Football Analysis) | the News tab | the headline and a link to the publisher's own page, nothing else (no teaser text, no pictures); `BFF_NEWS_LINKS` turns them off |
 | [Tesseract.js](https://github.com/naptha/tesseract.js) 6.0.1 | reading league screenshots in the browser | Apache 2.0 |
 | [WebLLM](https://github.com/mlc-ai/web-llm) 0.2.86 + [Qwen3.5](https://huggingface.co/mlc-ai) | BFF's AI, on the visitor's own device | Apache 2.0 |
@@ -276,6 +276,15 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   usual, weighted against his last two seasons). Tested on 2023-2025 rest-of-season order (`research/bt_recency.py`):
   better or equal in every season for quarterbacks (0.625 to 0.638); for running backs, receivers and tight ends the same
   formula, alone or blended, made the order less accurate, so they keep the model (the formula alone: RB 0.54 vs 0.61).
+- **Proven producers (running backs and receivers):** the trees (150+ games in each leaf) squeeze the very top toward
+  the middle, so a back or receiver projected 10+ who has outscored BFF's projection this season (4+ games) and last
+  season (4+ games) has his level raised by the smaller of the two gaps (in full once this season's gap is 5+ points a
+  game and last season's 1+; nothing below 3 and 0), every game scaled alike. In Nov 2026 this raised Jaxon
+  Smith-Njigba (27.5 points a game over 8 games, 21.2 last season) from 18.4 to 21.2 a game. Tested on 2023-2025
+  (`research/bt_toptail.py`): such players had scored 3.7 points a game more than projected afterwards; with the rule
+  the order of the top 24 receivers was better in every season (0.25 to 0.27, 0.40 to 0.42, 0.15 to 0.29), the full
+  order and the error better in two of three (2023 about even). Not used for tight ends (worse in 2023) or
+  quarterbacks (no such squeeze).
 - **Half PPR and standard:** a projection loses the catches BFF's own stat-by-stat model has in it (each game's
   catches as a share of its points, so the chance he plays or a fill-in role scales both). Tested on 2023-2025 games
   (`research/bt_format.py`, each season predicted by models trained only on earlier ones): lower error than the old
@@ -307,6 +316,18 @@ right when the starter comes back. BFF checks for that and a few other things, a
   with flex and superflex filled by projection). Each week counts `0.98 x 0.985^weeks-away` times the expected points
   above that level, allowing for weekly ups and downs (a bell curve with a spread of half the replacement level), and
   15% of its weight comes from VORP (below). Scaled 0-100 (the top players sit near 100).
+- **Supply and demand by position.** The replacement levels already make a scarce position worth more (fewer good
+  players means a lower bar). Two measured corrections on top (`research/bt_qbvalue.py`, simulated leagues 2023-2025):
+  - **Quarterbacks in 1-QB leagues** (no superflex) are measured against the middle starting quarterback (QB7 of 12)
+    instead of the first one who would not start, and count 85%: anyone can stream a quarterback by matchup. The three
+    best quarterbacks were worth about the 40th-best player but were valued about 15th; now about 36th. Trade charts
+    agree: in Nov 2026 (12-team PPR 1QB) the best quarterback sat about where the 11th-best receiver did.
+  - **Running backs count 10% more:** good ones are scarcer and injuries hit them most, so teams need more of them than
+    their lineup slots say; they were the one position valued below what they added.
+
+  Both together, with realistic rosters (half the teams hold one quarterback and stream): lopsided trades called right
+  72.5% -> 73.3% (better in every season, and with two quarterbacks a team too), rank 0.445 -> 0.453, R² 0.263 ->
+  0.274, position bias QB -16% -> -4%, RB +4% -> +1% (`research/results_qbvalue_final.json`).
 - **Since November 2026 it is BFF's own projections alone** (it used to be blended with the FantasyPros rest-of-season
   consensus). Backtest, 2023-2025 (15 checkpoints; only what was known at the time; truth = the real starting-lineup
   points each player added over the best free agent in 10 simulated 12-team leagues per checkpoint):
@@ -443,7 +464,25 @@ recaps still in their window.
   more than 15% of the photos, or that Wikidata answers with no players, stops and keeps them all. Photos only show on
   your own site
   (the claude.ai copy shows jerseys).
-- **Team badges:** BFF draws its own shield for each team from its abbreviation and colors, used wherever a logo would go.
+- **Team badges:** BFF draws its own shield for each team, used wherever a logo would go: the team's abbreviation and
+  colors with a spray-painted nod to its nickname (a falcon for Atlanta, a raven for Baltimore, an eagle for
+  Philadelphia, a seahawk with a fish for Seattle, a bear, a lion, a bison, claw marks for Cincinnati, a cowboy hat, a jet,
+  a bugle sounding the charge for the Chargers, a halo for the Saints, an arrow for the Chiefs...). Every one is drawn by
+  BFF from generic animals and objects; no NFL or team logo, helmet design or wordmark is copied or imitated, so there is
+  no lightning bolt, fleur-de-lis, arrowhead, horseshoe, star, horn or crossed swords (those are the league's and teams'
+  trademarks).
+- **Player cards:** a player whose photo is clear gets a cut-out (his photo with the background taken out by U2-Net's
+  person model, Apache 2.0, run with OpenCV by `photos.py` in the weekly photo job) standing in front of paint sprayed in
+  his team's second color, like a trading card; the credit line says "background removed". A cut-out is kept only when it
+  looks like one person from the shoulders up (12-85% of the picture, one piece, reaching the bottom edge, not filling the
+  top corners); otherwise the photo keeps its background (340 of 411 photos had cut-outs in Nov 2026). A player with no
+  free photo gets a spray-paint stencil of a generic player (helmet and shoulders) in his team's colors with his number,
+  never a drawn face (that would be a guess at what he looks like).
+- **Graffiti look (Nov 2026):** the logo is a football with "BFF" sprayed on by hand in pink (strokes, not a font, with
+  overspray and drips); headings, tabs and buttons use Sedgwick Ave Display (SIL Open Font License, from Google Fonts),
+  buttons and panels are cut by hand, page titles get a sprayed underline that drips, and BFF's own faded spray art sits
+  on the wall behind the page (off in the lighter mode for slow phones). Numbers, tables, articles and small labels keep
+  the clean fonts.
 - **Readable text on every picture:** text on artwork sits on a dark scrim sized to the text block, so white text keeps
   at least 4.5:1 contrast, and text on team colors switches to dark ink where white would be hard to read.
 - **Game cards** show both teams' badges and colors (no outside game photos).

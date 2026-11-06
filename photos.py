@@ -53,6 +53,12 @@ DV = 2      # how faces are found (2: at three sizes, faint ones kept for a clos
 HIGH, LOW = .85, .6   # face detector scores: a clear face; a faint one (a face mask, a shadow) that only counts if a closer look confirms it
 OTHERS = re.compile(r"\b(injur(y|ed|ies)|trainers?|carted|medical|fans|crowd|cheerleaders?|mascots?|referees?|umpires?)\b", re.I)   # something else going on in the photo
 MODEL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'face_detection_yunet_2023mar.onnx')   # YuNet (MIT, OpenCV Zoo)
+# player cut-outs (Nov 2026): U2-Net's person model (Apache 2.0; 176 MB, so the workflow downloads it into models/ and
+# keeps it in the Actions cache), run with OpenCV's own DNN. A cut-out is kept only when it looks like one person from the
+# shoulders up (see cut_one); otherwise the card shows the photo with its background.
+SEG = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'u2net_human_seg.onnx')
+SEGV = 2   # how cut-outs are made (2: holes inside him filled); a new version makes them all again
+CUT = os.path.join(OUT, 'cut')
 CHECKS = os.path.join(OUT, 'checks.json')
 
 
@@ -485,6 +491,72 @@ def bigger(x):
     except Exception as e: print('no bigger copy of', x.get('page'), str(e)[:80]); return None
 
 
+_SEGNET = []
+def seg_mask(bgr):
+    """the chance each pixel is the person (0-1), at the photo's size"""
+    import cv2, numpy as np
+    if not _SEGNET: _SEGNET.append(cv2.dnn.readNetFromONNX(SEG))
+    H_, W_ = bgr.shape[:2]; rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB).astype(np.float32)
+    x = cv2.resize(rgb, (320, 320), interpolation=cv2.INTER_LANCZOS4) / max(1.0, float(rgb.max()))
+    x = (x - np.array([.485, .456, .406], np.float32)) / np.array([.229, .224, .225], np.float32)
+    _SEGNET[0].setInput(cv2.dnn.blobFromImage(x)); o = _SEGNET[0].forward()[0, 0]
+    o = (o - o.min()) / (float(o.max() - o.min()) + 1e-6)
+    return cv2.resize(o, (W_, H_), interpolation=cv2.INTER_CUBIC).clip(0, 1)
+
+
+def cut_one(src, dst):
+    """his photo without its background (WebP with transparency), if the mask looks like one person from the shoulders
+    up: 12-85% of the picture, one piece (90%+ of it), reaching the bottom edge across a quarter of it or more, and not
+    filling the top corners. Returns the reason when it does not."""
+    import cv2, numpy as np
+    from PIL import Image
+    bgr = cv2.imread(src)
+    if bgr is None: return 'unreadable'
+    a = seg_mask(bgr); fg = a > .5; H_, W_ = fg.shape; cov = float(fg.mean())
+    if not .12 <= cov <= .85: return f'covers {cov:.0%}'
+    n, lab, st, _ = cv2.connectedComponentsWithStats(fg.astype(np.uint8), 8)
+    if n < 2 or st[1:, cv2.CC_STAT_AREA].max() < .9 * fg.sum(): return 'in pieces'
+    if fg[-3:].mean() < .25: return 'does not reach the bottom'
+    c = max(4, W_ // 8)
+    if fg[:c, :c].mean() > .5 or fg[:c, -c:].mean() > .5: return 'fills the top corners'
+    # holes inside him (a dark visor, a shadow on the face) and see-through patches inside the outline are filled
+    bgm = (~fg).astype(np.uint8); nb, lb, sb, _ = cv2.connectedComponentsWithStats(bgm, 4)
+    for k in range(1, nb):
+        x_, y_, w_, h_ = sb[k, :4]
+        if x_ > 0 and y_ > 0 and x_ + w_ < W_ and y_ + h_ < H_: fg[lb == k] = True
+    inner = cv2.erode(fg.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    a = np.where(inner, 1.0, np.where(fg, np.maximum(a, .5), a))
+    a = np.clip((a - .06) / .88, 0, 1)   # (a faint halo of background at the edge goes)
+    rgba = np.dstack([cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB), (a * 255 + .5).astype(np.uint8)])
+    Image.fromarray(rgba, 'RGBA').save(dst, 'WEBP', quality=82, alpha_quality=90, method=6)
+    return None
+
+
+def cutouts(cred, old):
+    """a cut-out for every player photo in use (kept while his photo and SEGV are unchanged)"""
+    if DRY: return
+    os.makedirs(CUT, exist_ok=True); have = os.path.exists(SEG); made = kept = refused = 0; why = {}
+    for g, e in cred.items():
+        o = (old.get('p') or {}).get(g) or {}; dst = os.path.join(CUT, e['f'])
+        same = o.get('src') == e.get('src') and o.get('ts') == e.get('ts') and o.get('cv') == e.get('cv') and o.get('fb', 0) == e.get('fb', 0)
+        if same and o.get('sv') == SEGV and 'cut' in o:   # (unchanged: keep the result, a cut-out or a refusal)
+            e['sv'] = SEGV; e['cut'] = o['cut']
+            if o['cut'] and os.path.exists(dst): kept += 1; continue
+            if not o['cut']: continue
+        if not have: continue
+        try: r = cut_one(os.path.join(OUT, e['f']), dst)
+        except Exception as ex: r = 'failed: ' + str(ex)[:60]
+        e['sv'] = SEGV
+        if r is None: e['cut'] = 'cut/' + e['f']; made += 1
+        else:
+            e['cut'] = ''; refused += 1; why[r.split(' ')[0]] = why.get(r.split(' ')[0], 0) + 1
+            if os.path.exists(dst): os.remove(dst)
+    for f in os.listdir(CUT):   # cut-outs of photos no longer in use
+        if not any(e.get('cut') == 'cut/' + f for e in cred.values()): os.remove(os.path.join(CUT, f))
+    print(f'cut-outs: {made} made, {kept} unchanged, {refused} kept with their background ({", ".join(f"{k} {v}" for k, v in why.items()) or "none"})'
+          + ('' if have else '; the cut-out model is not in models/ (the workflow downloads it): no new cut-outs this run'))
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     old = json.load(open(CRED)) if os.path.exists(CRED) else {'p': {}}
@@ -492,6 +564,8 @@ def main():
         for g in list((old.get('p') or {})):
             f = os.path.join(OUT, old['p'][g]['f'])
             if os.path.exists(f) and not DRY: os.remove(f)
+        if os.path.isdir(CUT) and not DRY:
+            for f in os.listdir(CUT): os.remove(os.path.join(CUT, f))
         if not DRY: json.dump({'at': NOW.date().isoformat(), 'off': True, 'p': {}}, open(CRED, 'w'), indent=0)
         print('player photos are turned off (BFF_PLAYER_PHOTOS); removed', len(old.get('p') or {})); return
     if os.path.exists('ff_data.json'): D = json.load(open('ff_data.json'))
@@ -623,6 +697,7 @@ def main():
     # a player whose picture is no longer free (or gone): his old file goes
     for g, o in (old.get('p') or {}).items():
         if g not in cred and not DRY and os.path.exists(os.path.join(OUT, o['f'])): os.remove(os.path.join(OUT, o['f']))
+    cutouts(cred, old)
     if not DRY: json.dump({'at': NOW.date().isoformat(), 'p': dict(sorted(cred.items()))}, open(CRED, 'w'), indent=0)
     print(f'photos: {len(cred)} in use ({new} new, {kept} unchanged, {skipped} failed; {noface} of them his own picture with no face clear enough to crop to); found by: '
           + ', '.join(f'{k} {v}' for k, v in sorted(via.items())) + '; no photo: ' + ', '.join(f'{k} {v}' for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])[:8]))

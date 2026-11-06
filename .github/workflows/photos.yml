@@ -3,8 +3,8 @@ name: Player photos (Wikimedia Commons, free licenses only)
 # Once a week: finds freely licensed photos of the players BFF shows (Wikidata + Wikimedia Commons: his Wikidata picture,
 # the picture his English Wikipedia article's infobox shows, his own Commons category, and photos found by his name and
 # verified as him alone), uses the most recent one where his face shows clearly (YuNet face detector, models/), and
-# saves small head-and-shoulders crops in photos/ with each one's author and license (photos/credits.json). The site
-# serves them from photos/ as soon as they are saved.
+# saves small head-and-shoulders crops in photos/ with each one's author and license (photos/credits.json), plus a copy
+# with the background taken out for the player card (photos/cut/, U2-Net). The site serves them as soon as they are saved.
 # Set the repository variable BFF_PLAYER_PHOTOS to off to stop using player photos.
 on:
   schedule:
@@ -40,6 +40,16 @@ jobs:
           if python live_now.py --due; then gh workflow run live.yml --ref main && echo "live-scores job started"; fi
       - name: Install the image libraries (face detection checks that a found photo shows one person)
         run: pip install pillow "opencv-python-headless==4.11.0.86"
+      - name: Keep the cut-out model between runs (U2-Net person segmentation, Apache 2.0, 176 MB)
+        uses: actions/cache@v5
+        with:
+          path: models/u2net_human_seg.onnx
+          key: u2net-human-seg-01eb6a29
+      - name: Download the cut-out model if it is not cached (checked against its SHA-256)
+        continue-on-error: true   # (without it, photos keep their backgrounds; nothing else changes)
+        run: |
+          if [ ! -s models/u2net_human_seg.onnx ]; then curl -sSfL --retry 3 -o models/u2net_human_seg.onnx https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_human_seg.onnx; fi
+          echo "01eb6a29a5c4d8edb30b56adad9bb3a2a0535338e480724a213e0acfd2d1c73c  models/u2net_human_seg.onnx" | sha256sum -c - || { rm -f models/u2net_human_seg.onnx; exit 1; }
       - name: Find and save freely licensed player photos
         id: photos
         env:

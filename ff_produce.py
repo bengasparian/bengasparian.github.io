@@ -400,6 +400,7 @@ for pid_,X in PRED.items():
     m_=X['wk']<=17; X['L']=float(np.mean(X['P'][m_])) if m_.any() else float(np.mean(X['P'])); X['PR']=X['P']
 print('projected',len(PRED),'players,',len(U5),'games',flush=True)
 QB_FORM=0.15
+PROVEN=1.0   # running backs and receivers who outscore the projection two seasons running (see below)
 def _recent_form(y,pp1,pp2,pid):
     """recent form with track record: this season's games, half-life 3 games, each game capped at max(1.6 x median, median + 8);
     weighted n/(n+4) against his last seasons (0.7 last, 0.3 the one before; 4+ games each)"""
@@ -444,6 +445,18 @@ for pid in pool:
     if pos=='QB' and len(rows) and len(_raw)>1:
         _rf=_recent_form(rows.fp.values.astype(float),_pp1,_pp2,pid)
         if _rf is not None: _raw=[_raw[0]]+[(1-QB_FORM)*v+QB_FORM*_rf if v>0 else v for v in _raw[1:]]; Pr=np.array([float(np.mean(_raw))])
+    # running backs and receivers who have outscored BFF's projection this season (4+ games) AND last season (4+ games):
+    # the trees (150+ games in a leaf) squeeze the very top toward the middle, so his level moves up by the smaller of the
+    # two gaps, in full once this season's gap is 5+ points a game and last season's 1+ (nothing below 3 and 0), every
+    # game scaled alike. research/bt_toptail.py, 2023-25: the top-24 order better in every season (WR 0.25 -> 0.27,
+    # 0.40 -> 0.42, 0.15 -> 0.29; RB even, better, even), the full order and the error better in 2 of 3 (2023 about even);
+    # not for tight ends (worse in 2023) or quarterbacks (no such squeeze).
+    _pb=None
+    if pos in ('RB','WR') and len(rows)>=4 and pid in _pp1.index and _pp1.loc[pid,'size']>=4 and X['L']>=10:   # (tested on players projected 6+; used for starters, 10+)
+        _g1=float(rows.fp.mean())-X['L']; _g2=float(_pp1.loc[pid,'mean'])-X['L']
+        _d=PROVEN*min(1.0,max(0.0,(_g1-3)/2))*min(1.0,max(0.0,_g2))*max(0.0,min(_g1,_g2))
+        if _d>=0.05:
+            _f=(X['L']+_d)/X['L']; _raw=[v*_f for v in _raw]; proj_next*=_f; Pr=np.array([float(np.mean(_raw))]); _pb=r(_d,1)
     # each game's catches as a share of its PPR points (BFF's stat-by-stat model): the site takes them out for half PPR
     # and standard, scaled with any later change to the points (research/bt_format.py)
     _xr=[(r(min(1.0,float(X['C'][i])/float(X['P'][i])),3) if float(X['P'][i])>.5 else 0.0) for i,w in enumerate(wk_rows) if w[0]<=17] if pos!='QB' else None
@@ -465,7 +478,7 @@ for pid in pool:
       'snap':r(rows.offense_pct.mean(),3) if len(rows) and rows.offense_pct.notna().any() else None,'ts':r(rows.target_share.mean(),3) if len(rows) else None,
       'ays':r(rows.air_yards_share.mean(),3) if len(rows) else None,'wopr':r(rows.wopr.mean(),3) if len(rows) else None,'tpg':r(rows.targets.mean(),1) if len(rows) else None,
       'cpg':r(rows.carries.mean(),1) if len(rows) else None,'cs':r(rows.car_share.mean(),3) if len(rows) else None,'rz':r(rows.rzo.mean(),1) if len(rows) else None,
-      'rpg':r(rec_pg,2),'xr':(r(min(1.0,float(X['C'][0])/float(X['P'][0])),3) if float(X['P'][0])>.5 else 0.0) if pos!='QB' else None,'mx':mix_of(pid,pos),'prev':r(pv,1),'dy':int(idx.loc[pid,'draft_year']) if pid in idx.index and pd.notna(idx.loc[pid,'draft_year']) else None,
+      'rpg':r(rec_pg,2),'pb':_pb,'xr':(r(min(1.0,float(X['C'][0])/float(X['P'][0])),3) if float(X['P'][0])>.5 else 0.0) if pos!='QB' else None,'mx':mix_of(pid,pos),'prev':r(pv,1),'dy':int(idx.loc[pid,'draft_year']) if pid in idx.index and pd.notna(idx.loc[pid,'draft_year']) else None,
       'gl':GL.get(pid,[]),
       'wk':[[int(x.week),r(x.fp,1),r(x.xfp,1),r(x.offense_pct,2),int(x.targets),int(x.carries),x.opponent_team] for x in rows.itertuples()],
       'proj':r(proj_next,1),'nw':int(nxt[0]),'opp':nxt[1],'home':int(nxt[2]) if nxt[2]==nxt[2] else 0,'it':r(nxt[3],1),'rl':r(Pr[0],1),'frm':r(base.get('efp'),1),

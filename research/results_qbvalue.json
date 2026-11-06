@@ -1,0 +1,522 @@
+{
+ "miss_sd": {
+  "QB": 9.937240014674789,
+  "RB": 8.896004725934649,
+  "WR": 9.307463360379035,
+  "TE": 7.95528185827547
+ },
+ "truth (a): 2 QBs a team": {
+  "site: spread 0.5 x R": {
+   "rho": 0.4451,
+   "r2": 0.2629,
+   "dir_pct": 72.2,
+   "qb_wins": 0.465,
+   "qb_n": 1255,
+   "bias": {
+    "QB": -9.7,
+    "RB": 1.9,
+    "WR": -8.6,
+    "TE": -14.0
+   },
+   "top3QB_rank_by_value": 15.4,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "measured spread x0.6": {
+   "rho": 0.4401,
+   "r2": 0.2666,
+   "dir_pct": 72.4,
+   "qb_wins": 0.568,
+   "qb_n": 1234,
+   "bias": {
+    "QB": -2.8,
+    "RB": 1.5,
+    "WR": -9.4,
+    "TE": -16.7
+   },
+   "top3QB_rank_by_value": 19.9,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 1 better": {
+   "rho": 0.4459,
+   "r2": 0.2645,
+   "dir_pct": 72.4,
+   "qb_wins": 0.47,
+   "qb_n": 1282,
+   "bias": {
+    "QB": -8.0,
+    "RB": 1.6,
+    "WR": -8.9,
+    "TE": -14.2
+   },
+   "top3QB_rank_by_value": 16.8,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 2 better": {
+   "rho": 0.4466,
+   "r2": 0.2658,
+   "dir_pct": 72.5,
+   "qb_wins": 0.487,
+   "qb_n": 1262,
+   "bias": {
+    "QB": -6.8,
+    "RB": 1.4,
+    "WR": -9.1,
+    "TE": -14.4
+   },
+   "top3QB_rank_by_value": 18.2,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 3 better": {
+   "rho": 0.4463,
+   "r2": 0.266,
+   "dir_pct": 72.5,
+   "qb_wins": 0.497,
+   "qb_n": 1248,
+   "bias": {
+    "QB": -6.0,
+    "RB": 1.2,
+    "WR": -9.2,
+    "TE": -14.5
+   },
+   "top3QB_rank_by_value": 19.1,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 4 better": {
+   "rho": 0.4458,
+   "r2": 0.2658,
+   "dir_pct": 72.6,
+   "qb_wins": 0.525,
+   "qb_n": 1260,
+   "bias": {
+    "QB": -5.0,
+    "RB": 1.1,
+    "WR": -9.3,
+    "TE": -14.6
+   },
+   "top3QB_rank_by_value": 20.3,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 6 better": {
+   "rho": 0.4467,
+   "r2": 0.2672,
+   "dir_pct": 72.8,
+   "qb_wins": 0.57,
+   "qb_n": 1228,
+   "bias": {
+    "QB": -3.0,
+    "RB": 0.8,
+    "WR": -9.6,
+    "TE": -14.8
+   },
+   "top3QB_rank_by_value": 22.9,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB x0.85": {
+   "rho": 0.4456,
+   "r2": 0.2649,
+   "dir_pct": 72.6,
+   "qb_wins": 0.518,
+   "qb_n": 1268,
+   "bias": {
+    "QB": -4.7,
+    "RB": 1.1,
+    "WR": -9.4,
+    "TE": -14.6
+   },
+   "top3QB_rank_by_value": 22.1,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB x0.7": {
+   "rho": 0.4403,
+   "r2": 0.2621,
+   "dir_pct": 72.7,
+   "qb_wins": 0.621,
+   "qb_n": 1198,
+   "bias": {
+    "QB": 0.8,
+    "RB": 0.5,
+    "WR": -10.0,
+    "TE": -15.0
+   },
+   "top3QB_rank_by_value": 33.5,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB x0.6": {
+   "rho": 0.4328,
+   "r2": 0.2577,
+   "dir_pct": 72.5,
+   "qb_wins": 0.629,
+   "qb_n": 1201,
+   "bias": {
+    "QB": 4.7,
+    "RB": 0.2,
+    "WR": -10.2,
+    "TE": -15.2
+   },
+   "top3QB_rank_by_value": 45.1,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB x0.5": {
+   "rho": 0.4213,
+   "r2": 0.2512,
+   "dir_pct": 72.0,
+   "qb_wins": 0.595,
+   "qb_n": 1070,
+   "bias": {
+    "QB": 8.7,
+    "RB": 0.0,
+    "WR": -10.4,
+    "TE": -15.4
+   },
+   "top3QB_rank_by_value": 59.7,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 6 better, x0.85": {
+   "rho": 0.4411,
+   "r2": 0.2638,
+   "dir_pct": 72.8,
+   "qb_wins": 0.614,
+   "qb_n": 1183,
+   "bias": {
+    "QB": 1.5,
+    "RB": 0.3,
+    "WR": -10.1,
+    "TE": -15.1
+   },
+   "top3QB_rank_by_value": 33.0,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 6 better, x0.75": {
+   "rho": 0.4346,
+   "r2": 0.2598,
+   "dir_pct": 72.5,
+   "qb_wins": 0.636,
+   "qb_n": 1177,
+   "bias": {
+    "QB": 4.6,
+    "RB": 0.1,
+    "WR": -10.3,
+    "TE": -15.3
+   },
+   "top3QB_rank_by_value": 42.1,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 6 better, x0.7": {
+   "rho": 0.4302,
+   "r2": 0.2573,
+   "dir_pct": 72.3,
+   "qb_wins": 0.631,
+   "qb_n": 1155,
+   "bias": {
+    "QB": 6.2,
+    "RB": 0.0,
+    "WR": -10.4,
+    "TE": -15.3
+   },
+   "top3QB_rank_by_value": 47.4,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 8 better, x0.8": {
+   "rho": 0.4305,
+   "r2": 0.2576,
+   "dir_pct": 72.3,
+   "qb_wins": 0.622,
+   "qb_n": 1124,
+   "bias": {
+    "QB": 6.3,
+    "RB": 0.1,
+    "WR": -10.4,
+    "TE": -15.3
+   },
+   "top3QB_rank_by_value": 45.6,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 10 better, x1": {
+   "rho": 0.43,
+   "r2": 0.2584,
+   "dir_pct": 72.3,
+   "qb_wins": 0.614,
+   "qb_n": 1086,
+   "bias": {
+    "QB": 7.3,
+    "RB": -0.1,
+    "WR": -10.5,
+    "TE": -15.4
+   },
+   "top3QB_rank_by_value": 46.6,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "QB replacement 10 better, x0.8": {
+   "rho": 0.4161,
+   "r2": 0.2492,
+   "dir_pct": 71.4,
+   "qb_wins": 0.632,
+   "qb_n": 1027,
+   "bias": {
+    "QB": 11.7,
+    "RB": -0.2,
+    "WR": -10.6,
+    "TE": -15.5
+   },
+   "top3QB_rank_by_value": 62.6,
+   "top3QB_rank_by_truth": 40.4
+  }
+ },
+ "truth (b): real rosters, streaming": {
+  "site: spread 0.5 x R": {
+   "rho": 0.4454,
+   "r2": 0.2625,
+   "dir_pct": 72.5,
+   "qb_wins": 0.438,
+   "qb_n": 1046,
+   "bias": {
+    "QB": -16.3,
+    "RB": 4.2,
+    "WR": -11.4,
+    "TE": -11.1
+   },
+   "top3QB_rank_by_value": 15.4,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "measured spread x0.6": {
+   "rho": 0.4461,
+   "r2": 0.2681,
+   "dir_pct": 72.6,
+   "qb_wins": 0.507,
+   "qb_n": 1041,
+   "bias": {
+    "QB": -9.6,
+    "RB": 3.9,
+    "WR": -12.2,
+    "TE": -13.8
+   },
+   "top3QB_rank_by_value": 19.9,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 1 better": {
+   "rho": 0.4467,
+   "r2": 0.2649,
+   "dir_pct": 72.6,
+   "qb_wins": 0.448,
+   "qb_n": 1014,
+   "bias": {
+    "QB": -14.6,
+    "RB": 3.9,
+    "WR": -11.7,
+    "TE": -11.3
+   },
+   "top3QB_rank_by_value": 16.8,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 2 better": {
+   "rho": 0.4485,
+   "r2": 0.2666,
+   "dir_pct": 72.7,
+   "qb_wins": 0.453,
+   "qb_n": 1046,
+   "bias": {
+    "QB": -13.3,
+    "RB": 3.7,
+    "WR": -11.9,
+    "TE": -11.5
+   },
+   "top3QB_rank_by_value": 18.2,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 3 better": {
+   "rho": 0.4486,
+   "r2": 0.2672,
+   "dir_pct": 72.7,
+   "qb_wins": 0.457,
+   "qb_n": 1034,
+   "bias": {
+    "QB": -12.5,
+    "RB": 3.6,
+    "WR": -12.0,
+    "TE": -11.6
+   },
+   "top3QB_rank_by_value": 19.1,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 4 better": {
+   "rho": 0.449,
+   "r2": 0.2679,
+   "dir_pct": 72.8,
+   "qb_wins": 0.464,
+   "qb_n": 1024,
+   "bias": {
+    "QB": -11.5,
+    "RB": 3.5,
+    "WR": -12.2,
+    "TE": -11.7
+   },
+   "top3QB_rank_by_value": 20.3,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 6 better": {
+   "rho": 0.4508,
+   "r2": 0.2696,
+   "dir_pct": 73.0,
+   "qb_wins": 0.471,
+   "qb_n": 967,
+   "bias": {
+    "QB": -9.3,
+    "RB": 3.2,
+    "WR": -12.5,
+    "TE": -11.9
+   },
+   "top3QB_rank_by_value": 22.9,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB x0.85": {
+   "rho": 0.4485,
+   "r2": 0.2664,
+   "dir_pct": 72.8,
+   "qb_wins": 0.456,
+   "qb_n": 1021,
+   "bias": {
+    "QB": -10.9,
+    "RB": 3.4,
+    "WR": -12.2,
+    "TE": -11.7
+   },
+   "top3QB_rank_by_value": 22.1,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB x0.7": {
+   "rho": 0.447,
+   "r2": 0.2659,
+   "dir_pct": 73.0,
+   "qb_wins": 0.559,
+   "qb_n": 994,
+   "bias": {
+    "QB": -5.1,
+    "RB": 2.8,
+    "WR": -12.8,
+    "TE": -12.2
+   },
+   "top3QB_rank_by_value": 33.5,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB x0.6": {
+   "rho": 0.4427,
+   "r2": 0.2629,
+   "dir_pct": 72.9,
+   "qb_wins": 0.587,
+   "qb_n": 993,
+   "bias": {
+    "QB": -1.0,
+    "RB": 2.5,
+    "WR": -13.1,
+    "TE": -12.4
+   },
+   "top3QB_rank_by_value": 45.1,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB x0.5": {
+   "rho": 0.4351,
+   "r2": 0.2579,
+   "dir_pct": 72.6,
+   "qb_wins": 0.616,
+   "qb_n": 960,
+   "bias": {
+    "QB": 3.3,
+    "RB": 2.3,
+    "WR": -13.3,
+    "TE": -12.6
+   },
+   "top3QB_rank_by_value": 59.7,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 6 better, x0.85": {
+   "rho": 0.4487,
+   "r2": 0.2682,
+   "dir_pct": 73.1,
+   "qb_wins": 0.571,
+   "qb_n": 1012,
+   "bias": {
+    "QB": -4.5,
+    "RB": 2.7,
+    "WR": -12.9,
+    "TE": -12.3
+   },
+   "top3QB_rank_by_value": 33.0,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 6 better, x0.75": {
+   "rho": 0.4449,
+   "r2": 0.2655,
+   "dir_pct": 73.0,
+   "qb_wins": 0.574,
+   "qb_n": 1005,
+   "bias": {
+    "QB": -1.2,
+    "RB": 2.4,
+    "WR": -13.2,
+    "TE": -12.4
+   },
+   "top3QB_rank_by_value": 42.1,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 6 better, x0.7": {
+   "rho": 0.4421,
+   "r2": 0.2636,
+   "dir_pct": 72.9,
+   "qb_wins": 0.598,
+   "qb_n": 988,
+   "bias": {
+    "QB": 0.5,
+    "RB": 2.3,
+    "WR": -13.3,
+    "TE": -12.5
+   },
+   "top3QB_rank_by_value": 47.4,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 8 better, x0.8": {
+   "rho": 0.4424,
+   "r2": 0.2643,
+   "dir_pct": 72.9,
+   "qb_wins": 0.594,
+   "qb_n": 965,
+   "bias": {
+    "QB": 0.5,
+    "RB": 2.3,
+    "WR": -13.3,
+    "TE": -12.5
+   },
+   "top3QB_rank_by_value": 45.6,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 10 better, x1": {
+   "rho": 0.4433,
+   "r2": 0.2647,
+   "dir_pct": 73.1,
+   "qb_wins": 0.617,
+   "qb_n": 959,
+   "bias": {
+    "QB": 1.5,
+    "RB": 2.3,
+    "WR": -13.4,
+    "TE": -12.6
+   },
+   "top3QB_rank_by_value": 46.6,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "QB replacement 10 better, x0.8": {
+   "rho": 0.4336,
+   "r2": 0.2572,
+   "dir_pct": 72.6,
+   "qb_wins": 0.617,
+   "qb_n": 864,
+   "bias": {
+    "QB": 6.2,
+    "RB": 2.1,
+    "WR": -13.5,
+    "TE": -12.7
+   },
+   "top3QB_rank_by_value": 62.6,
+   "top3QB_rank_by_truth": 40.3
+  }
+ }
+}

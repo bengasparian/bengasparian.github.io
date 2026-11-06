@@ -85,7 +85,8 @@ if os.path.exists("articles.json"):
 if os.path.exists("photos/credits.json"):
     try:
         PC = json.load(open("photos/credits.json")).get("p") or {}
-        D["photos"] = {g: {"f": v["f"], "a": v.get("a") or "", "l": v["lic"], "lu": v.get("lu") or "", "s": v["src"], "m": v.get("m") or ""}
+        D["photos"] = {g: {"f": v["f"], "a": v.get("a") or "", "l": v["lic"], "lu": v.get("lu") or "", "s": v["src"], "m": v.get("m") or "",
+                           **({"c": v["cut"]} if v.get("cut") and os.path.exists(os.path.join("photos", v["cut"])) else {})}
                        for g, v in PC.items() if os.path.exists(os.path.join("photos", v["f"]))}
         print("player photos:", len(D["photos"]))
     except Exception as e: print("photos/credits.json could not be read:", e)

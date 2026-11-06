@@ -1,0 +1,218 @@
+{
+ "A 2 QBs a team all": {
+  "site_until_nov6": {
+   "rho": 0.4451,
+   "r2": 0.2629,
+   "dir_pct": 72.2,
+   "bias": {
+    "QB": -9.7,
+    "RB": 1.9,
+    "WR": -8.6,
+    "TE": -14.0
+   },
+   "top3QB_rank_by_value": 15.4,
+   "top3QB_rank_by_truth": 40.4
+  },
+  "new": {
+   "rho": 0.4432,
+   "r2": 0.2674,
+   "dir_pct": 72.9,
+   "bias": {
+    "QB": 2.5,
+    "RB": -1.6,
+    "WR": -8.9,
+    "TE": -14.2
+   },
+   "top3QB_rank_by_value": 35.8
+  }
+ },
+ "A 2 QBs a team 2023": {
+  "site_until_nov6": {
+   "rho": 0.4982,
+   "r2": 0.2867,
+   "dir_pct": 75.2,
+   "bias": {
+    "QB": -14.1,
+    "RB": 0.4,
+    "WR": -3.0,
+    "TE": -9.1
+   },
+   "top3QB_rank_by_value": 17.3,
+   "top3QB_rank_by_truth": 23.8
+  },
+  "new": {
+   "rho": 0.5089,
+   "r2": 0.285,
+   "dir_pct": 76.1,
+   "bias": {
+    "QB": -0.3,
+    "RB": -3.2,
+    "WR": -3.2,
+    "TE": -9.4
+   },
+   "top3QB_rank_by_value": 38.5
+  }
+ },
+ "A 2 QBs a team 2024": {
+  "site_until_nov6": {
+   "rho": 0.4787,
+   "r2": 0.2523,
+   "dir_pct": 73.4,
+   "bias": {
+    "QB": -8.4,
+    "RB": 0.3,
+    "WR": -5.6,
+    "TE": -24.9
+   },
+   "top3QB_rank_by_value": 14.9,
+   "top3QB_rank_by_truth": 30.7
+  },
+  "new": {
+   "rho": 0.4747,
+   "r2": 0.254,
+   "dir_pct": 74.5,
+   "bias": {
+    "QB": 2.3,
+    "RB": -2.8,
+    "WR": -5.8,
+    "TE": -25.0
+   },
+   "top3QB_rank_by_value": 33.5
+  }
+ },
+ "A 2 QBs a team 2025": {
+  "site_until_nov6": {
+   "rho": 0.3583,
+   "r2": 0.2498,
+   "dir_pct": 68.0,
+   "bias": {
+    "QB": -6.6,
+    "RB": 4.9,
+    "WR": -17.2,
+    "TE": -8.0
+   },
+   "top3QB_rank_by_value": 14.0,
+   "top3QB_rank_by_truth": 66.9
+  },
+  "new": {
+   "rho": 0.346,
+   "r2": 0.2633,
+   "dir_pct": 68.2,
+   "bias": {
+    "QB": 5.5,
+    "RB": 1.1,
+    "WR": -17.7,
+    "TE": -8.3
+   },
+   "top3QB_rank_by_value": 35.3
+  }
+ },
+ "B realistic rosters all": {
+  "site_until_nov6": {
+   "rho": 0.4454,
+   "r2": 0.2625,
+   "dir_pct": 72.5,
+   "bias": {
+    "QB": -16.3,
+    "RB": 4.2,
+    "WR": -11.4,
+    "TE": -11.1
+   },
+   "top3QB_rank_by_value": 15.4,
+   "top3QB_rank_by_truth": 40.3
+  },
+  "new": {
+   "rho": 0.4527,
+   "r2": 0.2743,
+   "dir_pct": 73.3,
+   "bias": {
+    "QB": -3.6,
+    "RB": 0.6,
+    "WR": -11.8,
+    "TE": -11.5
+   },
+   "top3QB_rank_by_value": 35.8
+  }
+ },
+ "B realistic rosters 2023": {
+  "site_until_nov6": {
+   "rho": 0.4708,
+   "r2": 0.2547,
+   "dir_pct": 74.0,
+   "bias": {
+    "QB": -18.7,
+    "RB": 4.5,
+    "WR": -4.7,
+    "TE": -6.8
+   },
+   "top3QB_rank_by_value": 17.3,
+   "top3QB_rank_by_truth": 26.4
+  },
+  "new": {
+   "rho": 0.485,
+   "r2": 0.2644,
+   "dir_pct": 74.8,
+   "bias": {
+    "QB": -4.3,
+    "RB": 1.0,
+    "WR": -5.1,
+    "TE": -7.1
+   },
+   "top3QB_rank_by_value": 38.5
+  }
+ },
+ "B realistic rosters 2024": {
+  "site_until_nov6": {
+   "rho": 0.5001,
+   "r2": 0.2737,
+   "dir_pct": 74.4,
+   "bias": {
+    "QB": -4.0,
+    "RB": 2.3,
+    "WR": -9.9,
+    "TE": -22.0
+   },
+   "top3QB_rank_by_value": 14.9,
+   "top3QB_rank_by_truth": 32.4
+  },
+  "new": {
+   "rho": 0.4983,
+   "r2": 0.2713,
+   "dir_pct": 75.2,
+   "bias": {
+    "QB": 7.7,
+    "RB": -0.6,
+    "WR": -9.8,
+    "TE": -21.9
+   },
+   "top3QB_rank_by_value": 33.5
+  }
+ },
+ "B realistic rosters 2025": {
+  "site_until_nov6": {
+   "rho": 0.3654,
+   "r2": 0.2591,
+   "dir_pct": 68.9,
+   "bias": {
+    "QB": -26.2,
+    "RB": 5.9,
+    "WR": -19.7,
+    "TE": -4.6
+   },
+   "top3QB_rank_by_value": 14.0,
+   "top3QB_rank_by_truth": 62.1
+  },
+  "new": {
+   "rho": 0.3747,
+   "r2": 0.2873,
+   "dir_pct": 69.9,
+   "bias": {
+    "QB": -14.2,
+    "RB": 1.6,
+    "WR": -20.6,
+    "TE": -5.4
+   },
+   "top3QB_rank_by_value": 35.3
+  }
+ }
+}
