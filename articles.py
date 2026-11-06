@@ -51,7 +51,18 @@ def page_data():
 def f1(x): return f'{x:.1f}'
 def fnum(x): return str(int(x)) if float(x) == int(x) else f1(x)
 def seed(*a): return int(hashlib.md5('|'.join(map(str, a)).encode()).hexdigest()[:8], 16)
-def pick(opts, *k): return opts[seed(*k) % len(opts)]
+_USED = set()   # the openers already used in the article being written (reset by each writer), so none repeats
+def pick(opts, *k):
+    i = seed(*k) % len(opts)
+    for j in range(len(opts)):   # the seeded choice, or the next one not used yet in this article
+        # the wording without names and numbers ("was the story:" for every player), so two players in one article
+        # never get the same phrase while another is free
+        o = opts[(i + j) % len(opts)]; stem = ' '.join(re.sub(r"[^a-z]", "", x) for x in o.split() if x[:1].islower() and not re.search(r"\d", x))[:28]
+        if not stem or len(opts) == 1: return o
+        if stem not in _USED: _USED.add(stem); return o
+    return opts[i]
+def fresh():
+    _USED.clear()
 def normn(s): return re.sub(r'\b(jr|sr|ii|iii|iv|v)\b', '', re.sub(r"[.'’`-]", '', str(s or '').lower())).strip()
 def last(n): return re.sub(r'\s+(Jr\.?|Sr\.?|II|III|IV|V)$', '', n).split()[-1]
 def poss(n): return n + ("'" if n.endswith('s') else "'s")
@@ -380,8 +391,10 @@ def lede_recap(G, key):
     elif G.upset: s = pick([f"The {W} won outright as {fnum(G.sp)}-point underdogs, beating the {L} {sc}{ot}.", f"Underdogs by {fnum(G.sp)}, the {W} took down the {L} {sc}{ot}."], key, 'up')
     elif G.margin >= 14 and G.half and G.lead_h is not None and G.lead_h <= 7: s = pick([f"The {W} pulled away in the second half to beat the {L} {sc}.", f"It was a game at halftime ({halfscore(G)}), and then it wasn't: the {W} beat the {L} {sc}.", f"The {W} took over after halftime and beat the {L} {sc}."], key, 'pa')
     elif G.margin >= 17: s = pick([f"The {W} rolled past the {L}, {sc}.", f"It was never close: the {W} beat the {L} {sc}.", f"The {W} handled the {L} {sc}."], key, 'bl')
-    elif G.margin <= 3: s = pick([f"The {W} survived the {L}, {sc}{ot}.", f"The {W} edged the {L} {sc}{ot} in a game that came down to the end.", f"The {W} held on to beat the {L} {sc}{ot}."], key, 'cl')
-    else: s = pick([f"The {W} beat the {L} {sc}{ot}.", f"The {W} took care of the {L}, {sc}{ot}.", f"The {W} pulled away from the {L} for {an_n(G.ws)} {sc} win{ot}."], key, 'md')
+    elif G.margin <= 3: s = pick([f"The {W} survived the {L}, {sc}{ot}.", f"The {W} edged the {L} {sc}{ot}.", f"The {W} held on to beat the {L} {sc}{ot}."], key, 'cl')
+    # (no "pulled away" here: the scoring plays, not the final margin, say whether a team pulled away)
+    elif G.margin >= 8: s = pick([f"The {W} beat the {L} {sc}{ot}.", f"The {W} took care of the {L}, {sc}{ot}.", f"The {W} got the better of the {L}, {sc}{ot}."], key, 'md')
+    else: s = pick([f"The {W} beat the {L} {sc}{ot}.", f"The {W} got past the {L}, {sc}{ot}.", f"The {W} came out on top against the {L}, {sc}{ot}."], key, 'md')
     s += ' ' + pick([f"The {W} move to {rw}, while the {L} fall to {rl}.", f"That puts the {W} at {rw}; the {L} drop to {rl}.", f"The {W} are now {rw}, and the {L} slip to {rl}."], key, 'rec')
     if g['ou']:
         diff = G.total - g['ou']
@@ -414,7 +427,17 @@ def flow_paragraph(G, key):
         if w2 - l2 >= 10:
             td2 = [play_txt(x[4]) for x in pl if x[2] == G.win and int(x[0] or 0) >= 3 and ((x[3] or '').upper() == 'TD')][:2]
             out.append(f"After halftime the {tm_name(G.win)} outscored the {tm_name(G.lose)} {w2}-{l2}" + (f", with {andj(td2)}" if td2 else '') + '.')
-    if len(tdl) >= 4 and changes < 2: out.append(pick([f"The offenses traded blows all day: {numw(len(tdl)) if len(tdl) <= 10 else len(tdl)} touchdowns in all, which is exactly what fantasy managers want to see.", f"In all there were {numw(len(tdl)) if len(tdl) <= 10 else len(tdl)} touchdowns, a good day for anyone with a piece of this game."], key, 'td'))
+    margin = abs((g.get('as_') or 0) - (g.get('hs') or 0)); wtd = sum(1 for x in tdl if x[2] == G.win); ltd = len(tdl) - wtd
+    ntd = numw(len(tdl)) if len(tdl) <= 10 else str(len(tdl))
+    if not G.tie and margin >= 17:   # a rout reads like one
+        out.append(pick([f"It was never really close: the {tm_name(G.lose)} managed {cnt(ltd, 'touchdown')} all game." if ltd <= 1 else f"The {tm_name(G.lose)} kept scoring, but never kept pace.",
+                         f"The {tm_name(G.win)} controlled this one, and the {tm_name(G.lose)} found the end zone {('only once' if ltd == 1 else 'just ' + cnt(ltd, 'time')) if ltd else 'not at all'}."], key, 'rout'))
+    elif len(tdl) >= 4 and changes < 2 and wtd >= 2 and ltd >= 2 and margin <= 10:
+        out.append(pick([f"The offenses traded blows: {ntd} touchdowns in all, a good day for anyone with a piece of this game.", f"Both offenses moved the ball, with {ntd} touchdowns between them."], key, 'td'))
+    elif len(tdl) >= 5:
+        out.append(f"In all there were {ntd} touchdowns, {wtd} of them by the {tm_name(G.win)}." if not G.tie else f"In all there were {ntd} touchdowns.")
+    elif len(tdl) <= 2 and (g.get('as_') or 0) + (g.get('hs') or 0) <= 30:
+        out.append(pick([f"Points were hard to come by: {cnt(len(tdl), 'touchdown')} in the whole game.", f"It was a grind, with only {cnt(len(tdl), 'touchdown')} all day."], key, 'low'))
     return ' '.join(out)
 
 
@@ -431,16 +454,24 @@ def player_note(p, r, pts, w, key):
         if run_: line += ', plus ' + andj(run_)
         verb = pick(['went', 'finished', 'was'], key, n, 'qbv')
         core = f"{verb} {line}"
+        # a quarterback filling in (2 or fewer earlier games this season while his team's usual starter sits) is said to be
+        usual = max([q for q in P if q['t'] == p['t'] and q['p'] == 'QB' and q['id'] != p['id']], key=lambda q: q.get('g') or 0, default=None)
+        if len(prev) <= 2 and usual and (usual.get('g') or 0) >= 3 and (usual.get('g') or 0) > len(prev) + 1:
+            core += f", {'in his first start of the season' if not prev else 'in a rare start'} in place of {usual['n']}"
     elif p['p'] == 'RB' or (r.get('ra') or 0) >= 6:
         core = f"carried {cnt(i(r.get('ra')), 'time')} for {yd(i(r.get('ry')))}" + (f" and {one(i(r['rtd']), 'touchdown')}" if r.get('rtd') else '')
         if r.get('rec'): core += f", adding {cnt(i(r['rec']), 'catch', 'catches')} for {yd(i(r.get('ty')))}" + (" and a receiving score" if r.get('rectd') else '')
     else:
         rc, tg = i(r.get('rec')), i(r.get('tg'))
         core = (f"caught all {numw(rc) if rc <= 10 else rc} of his targets" if rc == tg and rc >= 2 else f"caught {numw(rc) if rc <= 10 else rc} of {cnt(tg, 'target')}") + f" for {yd(i(r.get('ty')))}" + (f" and {one(i(r['rectd']), 'touchdown')}" if r.get('rectd') else '')
-    if pj and d >= 8: lead = pick([f"{n} stole the show:", f"{n} was the story:", f"{n} broke out:", f"Nobody did more damage than {n}, who"], key, n, 'big')
+    ratio = pts / pj if pj else 1
+    if pj and d >= 8: lead = pick([f"{n} stole the show:", f"{n} was the story:", f"{n} broke out:", f"Nobody did more damage than {n}, who", f"{n} went off:",
+                                   f"It was a huge day for {n}, who", f"{n} had a monster game:", f"{n} carried his managers:"], key, n, 'big')
     elif pj and d >= 2.5 and pts >= 12: lead = pick([f"{n} delivered:", f"{n} came through:", f"{n} paid off for his managers:"], key, n, 'good')
+    elif pj and d >= 2.5 and ratio >= 1.8: lead = pick([f"{n} doubled a modest projection:", f"{n} made the most of a small role:", f"{n} outplayed his projection by a mile:"], key, n, 'goodx')
     elif pj and d >= 2.5: lead = pick([f"{n} beat a modest projection:", f"{n} did a little more than expected:", f"{n} cleared a low bar:"], key, n, 'goodlo')
-    elif pj and d <= -2.5 and pj >= 8: lead = pick([f"{n} was a letdown:", f"It was a quiet day for {n}, who", f"{n} never got going:"], key, n, 'bad')
+    elif pj and d <= -2.5 and pj >= 8 and ratio < .45: lead = pick([f"{n} never got going:", f"{n} was a nonfactor:", f"{n} all but disappeared:"], key, n, 'awful')
+    elif pj and d <= -2.5 and pj >= 8: lead = pick([f"{n} was a letdown:", f"It was a quiet day for {n}, who", f"{n} came in under expectations:"], key, n, 'bad')
     elif pj and d <= -2.5: lead = pick([f"{n} came up short:", f"{n} gave his managers little:", f"It was a quiet one for {n}, who"], key, n, 'badlo')
     elif pts >= 10: lead = pick([f"{n} did his job:", f"{n} was steady:", f"{n} gave you what you expected:"], key, n, 'flat')
     else: lead = pick([f"{n} had a modest day:", f"{n}"] + ([] if p['p'] == 'QB' else [f"{n} chipped in:"]), key, n, 'flatlo')
@@ -455,6 +486,25 @@ def player_note(p, r, pts, w, key):
     s += ' ' + tail
     if len(prev) >= 2 and pts > max(prev) + .5 and pts >= 12: s = s.rstrip('.') + pick(['; a new season high.', ', his best game of the season.', ', easily his top game of the year.'], key, n, 'hi')
     return s
+
+
+def brief(p, r, pts, key):
+    """one short sentence for a game capsule: what he did (the box score), then his PPR points"""
+    i = lambda v: int(round(float(v or 0))); n = p['n']; td = tds(r)
+    if p['p'] == 'QB' and (r.get('pa') or 0) >= 10:
+        did = f"threw for {yd(i(r.get('py')))}" + (f" and {one(i(r['ptd']), 'touchdown')}" if r.get('ptd') else '')
+        if (r.get('ry') or 0) >= 25: did += f", and ran for {yd(i(r.get('ry')))}" + (f" and {one(i(r['rtd']), 'score')}" if r.get('rtd') else '')
+        elif r.get('rtd'): did += f", plus {one(i(r['rtd']), 'rushing score')}"
+    elif (r.get('ra') or 0) >= 6 and (r.get('ra') or 0) >= (r.get('tg') or 0):
+        did = f"ran for {yd(i(r.get('ry')))} on {cnt(i(r['ra']), 'carry', 'carries')}"
+        if (r.get('rec') or 0) >= 2: did += f" and caught {numw(i(r['rec']))} passes for {yd(i(r.get('ty')))}"
+        if td: did += f", with {one(td, 'touchdown')}"
+    elif r.get('tg'):
+        rc, tg = i(r.get('rec')), i(r.get('tg'))
+        did = (f"caught all {numw(rc) if rc <= 10 else rc} of his targets" if rc == tg and rc >= 2 else f"caught {numw(rc) if rc <= 10 else rc} of {cnt(tg, 'target')}") + f" for {yd(i(r.get('ty')))}" + (f" and {one(td, 'touchdown')}" if td else '')
+    else:
+        return f"{n} added {f1(pts)} points."
+    return pick([f"{n} {did} ({f1(pts)} points).", f"{n} {did}, good for {f1(pts)} points.", f"{n} {did}: {f1(pts)} PPR points."], key, n, 'br')
 
 
 def team_breakdown(G, tm, key):
@@ -493,7 +543,10 @@ def stock_lists(G_list, key):
             td_heavy = td >= 1 and (pts - 6 * td) < pts * .5
             if pts - pj >= 7 and pts >= 14 and NOW > G.g['kick']:
                 why = (f"{plural(r.get('tg', 0), 'target')} is real volume" if (r.get('tg') or 0) >= 8 else f"{r.get('ra', 0)} carries is a featured role" if (r.get('ra') or 0) >= 16
-                       else 'a big arm day' if p['p'] == 'QB' and (r.get('py') or 0) >= 300 else 'the touchdowns did the heavy lifting, so temper expectations' if td_heavy else 'the role is growing')
+                       else 'a big arm day' if p['p'] == 'QB' and (r.get('py') or 0) >= 300 else 'the touchdowns did the heavy lifting, so temper expectations' if td_heavy
+                       else f"but only {plural(vol, 'carry and target', 'carries and targets')}, so big plays did the work" if p['p'] != 'QB' and vol < 8
+                       else f"{plural(vol, 'carry and target', 'carries and targets')} is a solid workload" if p['p'] != 'QB' and vol >= 12
+                       else 'efficient work on modest volume' if p['p'] != 'QB' else 'a strong all-around game')
                 up.append((pts - pj, p, f"{p['n']} ({p['p']}, {t}): {f1(pts)} points" + (f" against {an_n(pj)} {f1(pj)} projection" if pj >= 1 else " out of nowhere") + f"; {why}."))
             elif pj >= 9 and pj - pts >= 6:
                 why = ((f"{plural(r.get('tg', 0), 'target')} but only {r.get('rec', 0)} for {yd(r.get('ty', 0))}" if (r.get('tg') or 0) >= 7 else f"only {plural(r.get('tg', 0), 'target')}") if p['p'] in ('WR', 'TE')
@@ -534,6 +587,7 @@ def recap_title(G_list, label, key):
 
 def write_recap(gs, key, label):
     """an in-depth recap of one game, or a few (Thursday, Sunday night, Monday, other days)"""
+    fresh()
     G_list = [Game(g) for g in gs]; G_list = [G for G in G_list if G.rows]
     if not G_list: return None, None
     body = []; ment = []
@@ -573,6 +627,7 @@ def write_recap(gs, key, label):
 
 def write_window_recap(gs, key, label, still):
     """a slate of games (Sunday afternoon): scores, top performances, game by game, stock, injuries, waivers, what is left"""
+    fresh()
     G_list = [Game(g) for g in gs]; G_list = [G for G in G_list if G.rows]
     if not G_list: return None, None
     w = G_list[0].w; body = [SCORES([G.g for G in G_list])]; ment = []
@@ -590,7 +645,7 @@ def write_window_recap(gs, key, label, still):
     body.append(H_('Game by game'))
     for G in sorted(G_list, key=lambda G: G.g['kick']):
         tps = G.pts[:2]
-        cap_ = lede_recap(G, key) + ' ' + ' '.join(f"{p['n']} posted {f1(pts)} points" + (f" on {plural(r['tg'], 'target')}" if (r.get('tg') or 0) >= 6 else f" on {plural(r['ra'], 'carry', 'carries')}" if (r.get('ra') or 0) >= 12 else '') + '.' for p, r, t, pts in tps)
+        cap_ = lede_recap(G, key) + ' ' + ' '.join(brief(p, r, pts, key) for p, r, t, pts in tps)
         body.append(GH(G.g)); body.append(P_(cap_)); ment += [x[0] for x in tps]
     up, down, wav, sm = stock_lists(G_list, key); ment += sm
     if up: body.append(H_('Stock up')); body.append(UL(up))
@@ -684,6 +739,7 @@ def props_lines(gs, w, n=3):
 
 def write_outlook(gs, key, label):
     """Thursday, Monday or any other day's game(s), in depth"""
+    fresh()
     w = gs[0]['wk']; body = []; ment = []
     g0 = gs[0]
     for g in gs:
@@ -761,6 +817,7 @@ def capsule(g, key):
 
 def write_sunday_outlook(gs, key):
     """the Saturday-morning look at every Sunday game"""
+    fresh()
     w = gs[0]['wk']; body = []; ment = []
     wl = [g for g in gs if g['ou'] is not None]
     hi = max(wl, key=lambda g: g['ou']) if wl else None; lo = min(wl, key=lambda g: g['ou']) if wl else None
@@ -801,6 +858,7 @@ def benefactors(p, n=2):
     L = [q for q in P if q['t'] == p['t'] and q['id'] != p['id'] and q['p'] == p['p'] and proj_wk(q, p.get('nw') or 0) > 0]
     return sorted(L, key=lambda q: -proj_wk(q, p.get('nw') or 0))[:n]
 def write_injury_report(w, gs, key):
+    fresh()
     teams = {t for g in gs for t in (g['home'], g['away'])}
     outs = injured(teams, w, ('Out', 'Doubtful')); irs = [p for p in injured(teams, w, ('IR',)) if (p.get('rl') or 0) >= 10]
     qs = injured(teams, w, ('Questionable',))
@@ -845,6 +903,7 @@ def usage_change(p, w):
     return last2 - before, last2, before
 def write_landscape(w, key):
     """Tuesday: the fantasy landscape after the week"""
+    fresh()
     rows = [(p, x) for p in P for x in (p.get('wk') or []) if x[0] == w and x[1] is not None]
     if len(rows) < 40: return None, None
     body = []; ment = []
@@ -924,10 +983,16 @@ def write_landscape(w, key):
 
 # ---------------------------------------------------------------- breaking news
 BV = 2   # version of the breaking-news keys (2: injury news keyed by week, activations apart from placements)
+POSN = {'QB': 'quarterbacks', 'RB': 'running backs', 'WR': 'wide receivers', 'TE': 'tight ends'}
+def depth(q):
+    """'No. 2 running back on the depth chart' from 'RB2' (the label alone reads like a fantasy tier)"""
+    m = re.match(r'^(QB|RB|WR|TE)(\d)$', q.get('role') or '')
+    return f"No. {m.group(2)} {POSN[m.group(1)][:-1]} on the depth chart" if m else f"{POSN[q['p']][:-1]} depth"
 def teammates(p, n=3):
     L = [q for q in P if q['t'] == p['t'] and q['id'] != p['id'] and q['p'] == p['p'] and (q.get('rl') or 0) > 0]
     return sorted(L, key=lambda q: -(q.get('rl') or 0))[:n]
 def write_breaking(p, ev, key):
+    fresh()
     w = p.get('nw') or D['asof']['next_week']; kind = ev['kind']; n = p['n']; ln = last(n)
     if kind == 'out' and 'for the season' in (p.get('injn') or ''): kind = 'season'   # BFF already has him out for the season
     what = {'season': f"{n} is out for the rest of the season", 'ir': f"{n} has been placed on injured reserve", 'out': f"{n} has been ruled out for week {w}", 'doubtful': f"{n} is doubtful for week {w}",
@@ -949,7 +1014,8 @@ def write_breaking(p, ev, key):
                               'activated': ["Good news for his managers, though first games back often come with a pitch count.", "He is back, but ease him in if you can."]}[kind], key, 'bl'))]
     ur = usual_rank(p); g_ = p.get('g') or 0
     s = f"{ln} has averaged {f1(p.get('fpg') or 0)} PPR points over {cnt(g_, 'game')} this season" if g_ else f"{ln} has not played this season"
-    if ur and ur <= 60: s += f" and ranks as {'an' if p['p'] == 'RB' else 'a'} {p['p']}{ur} in BFF's per-game rest-of-season projection when healthy"
+    # "ranks 2nd among running backs", not "an RB2" (which reads as a tier, the 13th to 24th back)
+    if ur and ur <= 60: s += f" and ranks {ordn(ur)} among {POSN[p['p']]} in BFF's per-game rest-of-season projection when healthy"
     s += '.'
     if kind == 'ir' and p.get('ret'):
         rep = f"; he was {p['injn'][0].lower() + p['injn'][1:]}" if p.get('injs') == 'news' and p.get('injn') else ''
@@ -963,7 +1029,7 @@ def write_breaking(p, ev, key):
         body.append(P_(f"BFF projects {ln} for {f1(pw_)} PPR points in week {w}" + (f", which makes him {'an' if p['p'] == 'RB' else 'a'} {p['p']}{wk_rank(p, w)} for the week" if pw_ > 0 and wk_rank(p, w) else '') + ". First games back from injured reserve can come with a snap count, so the projection leans conservative." if pw_ > 0 else f"BFF does not project {ln} to play in week {w} yet; his projection returns once he is expected to suit up."))
         if tm:
             body.append(H_('Whose role shrinks'))
-            body.append(UL([f"{q['n']} ({q.get('role') or q['p'] + ' depth'}) projects for {f1(proj_wk(q, w))} in week {w}." for q in tm if proj_wk(q, w) > 0] or [f"No {tm_name(p['t'])} {p['p']} projects for meaningful points behind {ln}."]))
+            body.append(UL([f"{q['n']} ({depth(q)}) projects for {f1(proj_wk(q, w))} in week {w}." for q in tm if proj_wk(q, w) > 0] or [f"No {tm_name(p['t'])} {p['p']} projects for meaningful points behind {ln}."]))
         body.append(H_('What to do'))
         body.append(UL([f"Move {ln} out of your IR slot and back into your lineup plans" + (f"; at {f1(pw_)} projected points he is worth starting over most bench options." if pw_ >= 10 else "; give him a week to show his workload if you have a steadier option."),
                         "BFF's projections, rankings and trade values already reflect this, or will after the next data update (every 3 hours)."]))
@@ -971,20 +1037,43 @@ def write_breaking(p, ev, key):
         return dict(kind='breaking', title=title, dek=dek, body=body, players=uniq([p] + tm), teams=[p['t']], wk=w, img={'k': 'player', 'pid': p['id']}, src=[{'s': 'BFF projections and depth charts (nflverse)', 'u': ''}]), None
     if p['p'] == 'QB': tm = [q for q in tm if proj_wk(q, w) > 0 or q.get('qbs')][:1] or tm[:1]
     body.append(H_('Who benefits'))
+    # BFF's numbers still have him playing when the news comes in between data updates (the update shifts his work to the
+    # others): those projections are from before the news, so they are labeled that way and the waiver call uses the
+    # depth chart instead
+    stale = kind in ('out', 'doubtful', 'ir', 'season') and proj_wk(p, w) > 0
+    if any(proj_wk(q, w) > 0 for q in tm): tm = [q for q in tm if proj_wk(q, w) > 0 or not likely_free(q)]   # (a backup BFF has at zero is hurt or inactive himself)
     if tm:
         L = []
         for q in tm:
-            cl = ([f"projects for {f1(proj_wk(q, w))} in week {w}"] if proj_wk(q, w) > 0 else []) + ([f"ranks outside BFF's top {ROST[q['p']]} at {q['p']}, so he is likely on waivers"] if likely_free(q) else [])
-            L.append(f"{q['n']} ({q.get('role') or q['p'] + ' depth'})" + (' ' + andj(cl) if cl else '') + '.')
+            cl = ([f"projected for {f1(proj_wk(q, w))} in week {w} before the news" if stale else f"projects for {f1(proj_wk(q, w))} in week {w}"] if proj_wk(q, w) > 0 else []) + ([f"ranks outside BFF's top {ROST[q['p']]} at {q['p']}, so he is likely on waivers"] if likely_free(q) else [])
+            L.append(f"{q['n']} ({depth(q)})" + (' ' + andj(cl) if cl else '') + '.')
         if p['p'] == 'QB' and tm: L[0] = L[0].rstrip('.') + '; he is the expected starter.'
         body.append(UL(L))
-        free = [q for q in tm if likely_free(q)]
-        body.append(P_(f"Waiver priority: {free[0]['n']} is the add if he is on your wire." if free else f"The {tm_name(p['t'])} depth behind {ln} is mostly rostered, so look for help elsewhere on waivers."))
+        # an add only when he projects like a fantasy starter this week (RB/WR 8+, TE 6+, QB 14+ PPR points); otherwise
+        # the work spreads out and nobody behind him is worth a waiver claim
+        BAR = {'QB': 14, 'RB': 8, 'WR': 8, 'TE': 6}
+        free = sorted([q for q in tm if likely_free(q) and proj_wk(q, w) >= BAR.get(q['p'], 8)], key=lambda q: -proj_wk(q, w))
+        nxt = next((q for q in tm if q.get('role') == p['p'] + '2'), None) if p.get('role') == p['p'] + '1' else None
+        if stale and p['p'] == 'RB' and nxt:
+            body.append(P_(f"Waiver priority: {nxt['n']} is next in line for {poss(n if last(nxt['n']) == ln else ln)} carries" + (", and he is the add if he is on your wire." if likely_free(nxt) else ", though he is likely rostered already.")
+                           + f" BFF's projections give him the extra work with the next data update (within 3 hours)."))
+        elif stale and p['p'] == 'QB' and nxt:
+            body.append(P_(f"{nxt['n']} is next in line to start. He is worth a waiver claim mainly in two-quarterback and superflex leagues; BFF's projections move the starts to him with the next data update (within 3 hours)."))
+        elif stale:
+            body.append(P_(f"{poss(ln)} targets usually spread across several players, so there is no must-add yet; BFF's projections shift them to the other {tm_name(p['t'])} receivers with the next data update (within 3 hours)."))
+        elif free: body.append(P_(f"Waiver priority: {free[0]['n']} is the add if he is on your wire; at {f1(proj_wk(free[0], w))} projected points he is a real option in week {w}."))
+        elif any(likely_free(q) for q in tm): body.append(P_(f"Nobody behind {ln} projects as a must-add: the work likely spreads out, so check BFF's waiver list for the week's best options instead."))
+        else: body.append(P_(f"The {tm_name(p['t'])} depth behind {ln} is mostly rostered, so look for help elsewhere on waivers."))
     else:
         body.append(P_(f"The {tm_name(p['t'])} have no clear replacement at {p['p']} in BFF's data, so expect a committee."))
     if p['p'] in ('WR', 'TE'):
         qb = qb_of(p['t'])
-        if qb: body.append(P_(f"For {qb['n']}, losing a top target lowers the ceiling; BFF's projections already shift those targets to the receivers still active."))
+        # his season points per game, not the rest-of-season projection, which drops to zero once he is ruled out
+        ts = p.get('ts') or 0; top = max((q.get('fpg') or 0 for q in P if q['t'] == p['t'] and q['p'] in ('WR', 'TE') and q['id'] != p['id'] and (q.get('g') or 0) >= 3), default=0)
+        best = (p.get('g') or 0) >= 3 and (p.get('fpg') or 0) > top
+        if qb and (ts >= .18 or best):   # only when he really is a top target
+            body.append(P_(f"For {qb['n']}, losing " + (f"a receiver who draws {round(ts * 100)}% of the targets" if ts >= .18 else "his best receiver") + " lowers the ceiling"
+                           + ("." if stale else "; BFF's projections already shift those targets to the receivers still active.")))
     body.append(H_('What to do'))
     body.append(UL([{'season': f"In redraft leagues {ln} can go to an IR slot if your league has one, or be dropped for a player who can help this year; in dynasty leagues, hold him for next season.",
                      'ir': f"Move {ln} to an IR slot if your league has one; do not drop him unless you need the roster spot for a starter.",
@@ -1035,7 +1124,7 @@ def breaking_events():
         if h.get('st') not in ('out', 'doubtful'): continue
         hl = h.get('h', '')
         if INGAME_RE.search(hl) and not re.search(r'season', hl, re.I): continue   # hurt during a game: not a status for the next one
-        if SPEC_RE.search(hl): continue   # "could miss the season": wait for the confirmation
+        if SPEC_RE.search(hl) or NOTOUT_RE.search(hl): continue   # "could miss the season": wait for the confirmation
         nh = {k: h[k] for k in ('h', 'd', 's', 'u', 'p', 'so', 'sd', 'sk') if k in h}   # the report, kept with the story
         # only the player the "out" is about ("Saquon Barkley set to play, DeVonta Smith ruled out": Smith); "doubtful" is
         # its own status ("Emeka Egbuka considered doubtful": not ruled out)
@@ -1087,6 +1176,7 @@ def boxed(gs):
     """every game has a box score (live, or the official stats the morning after)"""
     return all(box_rows(g) for g in gs)
 SPEC_RE = re.compile(r"\b(could|may|might|if|would|possibly|potentially|considering|weighing|fears?|feared)\b", re.I)   # not confirmed yet
+NOTOUT_RE = re.compile(r"\b(not|n't|never)( yet)?( been)? ruled out|\bnot expected to miss", re.I)   # "not ruled out yet" is not ruled out
 INGAME_RE = re.compile(r"\b(remainder|rest of (the )?(game|day|contest|half)|won't return|will not return|(questionable|doubtful|unlikely) to return|ruled out (of|for) (the |today's |sunday's |monday's |thursday's )?game)", re.I)   # hurt during a game
 
 
@@ -1120,7 +1210,8 @@ def correct_breaking():
         if not why and kind == 'out' and h:
             mw = re.search(r'\bweek (\d+)', hl, re.I)
             g_ = next((y for y in (D.get('sched') or {}).get(p['t']) or [] if at and pub and len(y) > 5 and y[5] and pdt(y[5]) and at - datetime.timedelta(hours=8) <= pdt(y[5]) <= max(pub, at)), None)
-            if 'so' in h and p['id'] not in (h.get('so') or []):
+            if NOTOUT_RE.search(hl): why = f"the report it was based on ({src}) said {p['n']} had not been ruled out"
+            elif 'so' in h and p['id'] not in (h.get('so') or []):
                 why = f"the report it was based on ({src}) said {p['n']} was doubtful, not ruled out" if p['id'] in (h.get('sd') or []) else f"the report it was based on ({src}) did not say {p['n']} was out"
             elif mw and int(mw.group(1)) != w: why = f"the report it was based on ({src}) was about week {mw.group(1)}, not week {w}"
             elif g_ and g_[0] != w: why = f"the report it was based on ({src}) was about his week {g_[0]} game against the {tm_name(g_[1])}, not week {w}"

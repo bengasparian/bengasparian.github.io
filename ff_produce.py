@@ -157,13 +157,21 @@ if SC26.pts.isna().sum()==0: print('Regular season complete: no unplayed games, 
 NEXT=int(SC26[SC26.pts.isna()].week.min()); byes={}   # current NFL week = earliest week with an unplayed game
 for t in SC26.team.unique():
     wk=set(SC26[SC26.team==t].week); byes[t]=[w for w in range(1,19) if w not in wk] if SCHED_KNOWN else []
+IDT={'GBP':'GB','JAC':'JAX','KCC':'KC','LVR':'LV','NEP':'NE','NOS':'NO','SFO':'SF','TBB':'TB','LAR':'LA','RAM':'LA','WSH':'WAS'}
 RET={}; AIR=[.12,.24,.30,.35,.42,.47,.50,.52]
+# injured reserve is at least 4 GAMES, so a bye in between moves the return a week (Nov 2026: weeks + 4 had a player
+# placed on IR in week 8 with a week-10 bye back for week 12, after only 3 games)
+TWK={t_:sorted(int(w_) for w_ in SC26[SC26.team==t_].week.unique()) for t_ in SC26.team.unique()}
+def ir_back(tm_,w_,n_=4):
+    """the week he can play again after missing n_ of his team's games from week w_ on (99: not this season)"""
+    G_=[x_ for x_ in TWK.get(tm_,[]) if x_>=w_]
+    return G_[n_] if len(G_)>n_ else 99
 for pid_,G_ in wr[wr.gsis_id.isin(set(cur[cur.status=='RES'].index))].groupby('gsis_id'):
     G_=G_.sort_values('week'); st_=list(G_.status); wk_=list(G_.week); i_=len(st_)-1
     while i_>0 and st_[i_-1]=='RES': i_-=1
-    RET[pid_]=max(NEXT+1,int(wk_[i_])+4)   # still on the list now, so next week at the earliest
+    tm_=IDT.get(G_.team.iloc[-1],G_.team.iloc[-1]) if 'team' in G_.columns else None
+    RET[pid_]=max(NEXT+1,ir_back(tm_,int(wk_[i_])) if tm_ in TWK else int(wk_[i_])+4)   # still on the list now, so next week at the earliest
 RSV={pid_:('PUP' if str(x).startswith('P') else 'NFI' if str(x).startswith('N') else 'Suspended' if str(x).startswith('S') else 'IR') for pid_,x in cur[cur.status=='RES'].get('status_description_abbr',pd.Series(dtype=str)).items()}
-IDT={'GBP':'GB','JAC':'JAX','KCC':'KC','LVR':'LV','NEP':'NE','NOS':'NO','SFO':'SF','TBB':'TB','LAR':'LA','RAM':'LA','WSH':'WAS'}
 def team_of(pid):
     if pid in cur.index and cur.loc[pid,'status'] in ('ACT','RES','INA','DEV','EXE'): return cur.loc[pid,'team'],cur.loc[pid,'status']
     if pid in role.index: return role.loc[pid,'team'],'ACT'
@@ -289,7 +297,7 @@ try:
         if pid_ not in cur.index or (STATUS.get(pid_) or {}).get('src')=='report': continue
         tm_=IDT.get(cur.at[pid_,'team'],cur.at[pid_,'team'])
         if tm_ not in NXW: continue
-        w0_=_ret_week(tm_,(d_+pd.Timedelta(days=1)).strftime('%Y-%m-%d')); rw_=99 if n_>=99 else (w0_ or 99)+n_
+        w0_=_ret_week(tm_,(d_+pd.Timedelta(days=1)).strftime('%Y-%m-%d')); rw_=99 if n_>=99 else ir_back(tm_,w0_) if kd_=='ir' and w0_ and w0_<99 else (w0_ or 99)+n_
         if sp_ or kd_=='ind': rw_=min(rw_,(w0_ or 99)+1)   # a guess, or no timeline: about his next game only
         if rw_<=NXW[tm_]: continue
         _when=f"{s_}, {d_.strftime('%b')} {d_.day}"; _span=f'{n_}-{hi_} weeks' if hi_ and hi_>n_ else f'{n_} week'+('s' if n_>1 else '')
@@ -304,6 +312,40 @@ try:
         STATUS[pid_]={'s':'Out','src':'news','d':(STATUS.get(pid_) or {}).get('d'),'rw':rw_,'n':f"Reported {'headed' if kd_=='ir' else 'out'} {_what} ({_when})"}; NEWS_TL+=1
     for pid_,(d_,s_) in _RI.items():   # reinstated: available again (tagged until the roster catches up)
         STATUS[pid_]={'s':'Questionable','src':'news','d':None,'n':f"Reinstated from the exempt list (reported by {s_}, {d_.strftime('%b')} {d_.day})"}; NEWS_TL+=1
+    # 3b. "ruled out" (or "doubtful") for his next game in the news, before the official report has a game status (Nov 2026:
+    #     "Sam Darnold Ruled Out vs. Cardinals With Quad Injury" came on a Wednesday; the official report gives game
+    #     statuses on Friday, so BFF still had him starting and Drew Lock as a backup). The same rules as the breaking-news
+    #     stories (articles.py): only the player the status is about (tags 'so'/'sd'); never a guess ("could", "may"), an
+    #     in-game ruling ("rest of the game") or a report from during one of his games (the 8 hours after its kickoff); a
+    #     "week N" in the headline must be his next game. It never softens a status, and a game status on the official
+    #     report wins unless the news came after the day before kickoff (Friday's report for a Sunday game)
+    from zoneinfo import ZoneInfo
+    _ING=_re.compile(r"\b(remainder|rest of (the )?(game|day|contest|half)|won't return|will not return|(questionable|doubtful|unlikely) to return|ruled out (of|for) (the |today's |sunday's |monday's |thursday's )?game)",_re.I)
+    _KT={}
+    for _g in gm[gm.season==SEASON].itertuples():
+        if isinstance(_g.gametime,str) and isinstance(_g.gameday,str):
+            _k=pd.Timestamp(datetime.datetime.strptime(f"{_g.gameday} {_g.gametime}","%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo('America/New_York')))
+            for _t in (_g.home_team,_g.away_team): _KT[(_t,int(_g.week))]=_k
+    _SEV={'Questionable':1,'Doubtful':2,'Out':3}; NEWS_GS=0
+    for it_ in sorted(_nj.get('items') or [],key=lambda x:str(x.get('d') or '')):
+        if it_.get('st') not in ('out','doubtful'): continue
+        h_=str(it_.get('h') or ''); d_=pd.to_datetime(it_.get('d'),utc=True,errors='coerce')
+        if pd.isna(d_) or _now-d_>pd.Timedelta(days=8) or _SPEC.search(h_) or _ING.search(h_) or _TLS.search(h_) or _re.search(r"\b(not|n't|never)( yet)?( been)? ruled out|\bnot expected to miss",h_,_re.I): continue
+        who_=[(x,'Out') for x in it_.get('so') or []]+[(x,'Doubtful') for x in it_.get('sd') or []] if 'so' in it_ else ([(it_['p'][0],'Out')] if len(it_.get('p') or [])==1 and it_.get('st')=='out' else [])
+        for pid_,s_ in who_:
+            if pid_ not in cur.index: continue
+            tm_=IDT.get(cur.at[pid_,'team'],cur.at[pid_,'team'])
+            if tm_ not in NXW: continue
+            nw_=NXW[tm_]; k_=_KT.get((tm_,nw_))
+            if k_ is None or not d_<k_ or _now>=k_: continue   # after his next kickoff: about that game
+            if any(d_-pd.Timedelta(hours=8)<=kk_<=_now for (tt_,ww_),kk_ in _KT.items() if tt_==tm_): continue   # from during a game
+            mw_=_re.search(r"\bweek (\d+)",h_,_re.I)
+            if mw_ and int(mw_.group(1))!=nw_: continue
+            old_=STATUS.get(pid_) or {}
+            if _SEV.get(old_.get('s'),0)>=_SEV[s_]: continue
+            if old_.get('src')=='report' and d_<k_-pd.Timedelta(hours=44): continue
+            STATUS[pid_]={'s':s_,'src':'news','d':old_.get('d'),'n':f"Reported {'ruled out' if s_=='Out' else 'doubtful'} for week {nw_} ({it_.get('s') or 'news'}, {d_.strftime('%b')} {d_.day})"}; NEWS_GS+=1
+    if NEWS_GS: print('injuries: next-game statuses from the news for',NEWS_GS,'players')
     if NEWS_TL: print('injuries: timelines from the news for',NEWS_TL,'players')
 except Exception as _e: print('news timelines unavailable:',_e)
 try:

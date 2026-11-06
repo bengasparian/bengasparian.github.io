@@ -115,7 +115,10 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   1999, draft one of that team's real fantasy scorers into an open spot (QB, RB, RB, WR, WR, TE, FLEX), and build the
   highest-scoring lineup in seven spins, with two re-spins. The end screen shows your total, how close you came to the
   best lineup your spins allowed, your best score, and a result to copy and share. **Daily challenge** gives everyone the
-  same spins that day; PPR, half PPR or standard. Points are each player's regular-season total for that team that
+  same spins that day, with a theme in an 8-day rotation: throwback seasons (1999-2005), the 2010s, the 2020s, one
+  division, one conference, one franchise, one season, or no re-spins (divisions and conferences are today's); it shows
+  the theme, that the first finished game counts for the leaderboard, and when the next one starts (midnight Eastern).
+  PPR, half PPR or standard. Points are each player's regular-season total for that team that
   season from nflverse's weekly stats, with the franchise named as it was then. Checked: every weekly row of every
   season re-adds to its points with the stated rules, and famous seasons match their published totals (Cooper Kupp
   2021: 439.5 PPR; Christian McCaffrey 2023: 391.3). `game.json` is rebuilt only when a season finishes.
@@ -257,7 +260,14 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   report that only says what could happen ("could miss the rest of the season") is shown as questionable, "not
   confirmed", and does not change his projection. These timelines are kept in `news_state.json`, because a story
   leaves the news feed within a day or two; a later report that he is playing ends one. A headline that says he is
-  playing is never read as an absence.
+  playing is never read as an absence. A report that he has been **ruled out (or is doubtful) for his next game** counts
+  before the official report has game statuses (they come on Friday for a Sunday game): Nov 4, 2026, RotoBaller had
+  "Sam Darnold Ruled Out vs. Cardinals", but BFF still projected him to start until Friday's report; now he is Out
+  ("Reported ruled out for week 9") and Drew Lock is Seattle's expected starter. Only the player the status is about
+  counts, never a guess, an in-game ruling ("rest of the game"), a report from during one of his games, or a report
+  naming another week; it never softens a status, and an official game status wins unless the news came after the day
+  before kickoff. A negated ruling ("Deshaun Watson not ruled out yet") is not a ruling, for the projections, the
+  headline tags and BFF Originals.
 - **Who is in the player pool:** players on an NFL team (active, reserve, inactive, practice squad or exempt on the
   newest weekly roster, then the season roster, then the depth charts), plus this year's rookies picked in the top 100.
   A player on the **commissioner's exempt list** is projected 0 and shown as "not allowed to play", until a news report
@@ -395,7 +405,18 @@ recaps still in their window.
   "doubtful" is its own status (never written as "ruled out"), a "ruled out" from during a game is about that game (not
   the next one), a report that names another week is about that week, a report that only says what could happen waits
   for confirmation, news counts only if it is under 48 hours old and first seen in the last 6 hours, at most 3 breaking
-  stories a run and 12 a day.
+  stories a run and 12 a day. A negated ruling ("not ruled out yet") is never written up.
+- **What the breaking story says:** who benefits (each teammate's place on the depth chart, "No. 2 running back", and
+  whether he is likely on waivers), and a waiver call only when it means something: a teammate who projects as a starter
+  that week (RB or WR 8+ points, TE 6+, QB 14+); when the news comes in between data updates (his projection still has
+  him playing), the teammates' projections are labeled "before the news", the next running back on the depth chart is
+  named as next in line for the carries, and a receiver's targets are said to spread out (no must-add) until the next
+  update moves his work to them. The "it lowers the quarterback's ceiling" line runs only for a receiver with 18%+ of the
+  targets or the team's best receiver. Ranks read "ranks 2nd among running backs" (not "RB2", which reads like a tier).
+- **Wording:** phrases are not repeated within an article (the same verdict for two players, "was the story", picks
+  another), game capsules say what each player did ("ran for 170 yards on 27 carries, with a touchdown"), "pulled away"
+  is used only when the scoring says so, and a stock-up reason matches his volume ("only 6 carries and targets, so big
+  plays did the work").
 - **Corrections:** a breaking story that turns out wrong (a player "ruled out" for a week he then played, "done for the
   season" before he played again, or a story the checks above would now stop) is replaced by a correction under the
   same link, saying what was wrong. In November 2026 this corrected the stories written before the checks existed (the
@@ -417,6 +438,12 @@ recaps still in their window.
   would start for you), **Looking for** (lineup fit, or a QB, RB, WR or TE), the package math, the fairness checks, your
   starting lineup's change week by week, the other team's change, the roster spots each side must open or can fill,
   startable depth by position, and the single additions that would make an unfair offer fair.
+- **Trade ideas (My League > Trades):** they show up on their own when the tab opens (no button needed; they are found
+  again when a roster or your settings change). Each one is fair by BFF value and the projection check, puts every
+  player in the lineup of the team that gets him, raises your rest-of-season lineup by more than 2 points without
+  costing theirs more than 1, and comes with **Why it works**: the lineup points a week you add (at your thinnest spot,
+  or how often he would start for you) and what the other team gets (lineup points, or the need it fills). Ideas that
+  fill your own need or theirs rank higher, and one player you send appears in at most 3 ideas.
 - **Waivers:** every target shows its BFF value, the value of the player you would drop, and a FAAB guide based on the
   lineup points he adds the rest of the season (30+ points: 25-40% of your budget; 15-30: 12-25%; 8-15: 5-12%;
   3-8: 1-5%; less: a minimum bid). Targets need a real role. With your league linked, "free" means not on a roster in
@@ -542,14 +569,18 @@ on game days do not depend on it (see **Scores**), but everything else does. `cr
 Worker that starts the scores job every 15 minutes and the data update every 3 hours, on time (it first checks that no
 data job is already waiting its turn; the workflows' own timers stay on as a backup):
 1. GitHub: **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**: name it
-   `BFF timer`, **Repository access: Only select repositories** > this repository, **Permissions > Actions: Read and
-   write** (nothing else), and generate it. Copy it (it is shown once).
+   `BFF timer`, **Expiration: Custom** (up to a year; GitHub advises against "No expiration"), **Repository access: Only
+   select repositories** > this repository, then under **Permissions** click **Add permissions** > **Actions** and set it
+   to **Read and write** (GitHub adds **Metadata: Read-only** by itself; nothing else), and generate it. Copy it (it is
+   shown once).
 2. [dash.cloudflare.com](https://dash.cloudflare.com) (a free account, no card): **Workers & Pages > Create > Worker**,
    name it `bff-timer`, **Deploy**, then **Edit code**: replace the code with `cron/worker.js` and **Deploy**.
 3. The Worker's **Settings > Variables and Secrets > Add**: type **Secret**, name `GH_TOKEN`, paste the token, **Deploy**.
 4. **Settings > Trigger events > Add > Cron Triggers**: add `*/15 * * * *` and `23 */3 * * *`.
 5. When the token expires (GitHub sets an expiry date), make a new one and replace the secret.
-The Worker's own log (**Logs**) shows each run ("scores.yml: started" or why it waited).
+The Worker's own log (**Logs**) shows each run ("scores.yml: started" or why it waited). Set up on this site Nov 6, 2026
+(the first run started the scores job at 23:30 UTC); the token lasts until the expiry date picked when it was made
+(the form was set to Nov 6, 2027), and GitHub emails a reminder before it runs out.
 
 ## Runs by itself all year
 - **Seasons roll over on their own.** `fetch_data.py` reads the NFL schedule to decide the season: in progress, about

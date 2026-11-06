@@ -2068,3 +2068,13 @@ main h2:not(.artbody h2):not(.cvh),aside h2,.gsh h2{font-family:var(--hand)!impo
 .phimg.nophoto{place-items:end center;overflow:visible}
 .phimg.nophoto .bigjr{position:relative;z-index:1;margin:8px 0 0;animation:none}
 .phimg.nophoto .bigjr svg.stencil{width:min(250px,86%);height:auto;filter:drop-shadow(0 14px 18px rgba(0,0,0,.5))}
+
+/* v42 Spin Draft daily theme */
+.sdtheme{display:flex;flex-direction:column;gap:4px;margin:0 0 12px;padding:10px 12px;border:2px dashed var(--pink,#ff4fa3);border-radius:12px;background:color-mix(in srgb,var(--pink,#ff4fa3) 8%,transparent)}
+.sdtheme b{font:400 1.25rem var(--hand,inherit);letter-spacing:.02em;color:var(--pink,#ff4fa3)}
+.sdtheme span{font-size:.9rem;line-height:1.4}
+.sdtheme.sm{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:8px;padding:6px 10px;margin-bottom:8px}
+.sdtheme.sm b{font-size:1.05rem}.sdtheme.sm span{font-size:.82rem;opacity:.85}
+.trade .trwhy{margin-top:6px;line-height:1.45}.trade .trwhy b{color:var(--acc)}
+/* My League offers stack (the 3-column .trade grid is for the give / arrow / get rows elsewhere) */
+.trade.lgoffer{display:block}
