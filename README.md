@@ -535,6 +535,22 @@ data. The free plan allows 50,000 reads and 20,000 writes a day, far more than a
 their account and its data from the account panel. The Terms of Use and Privacy Policy are a plain-language starting
 point, not legal advice: have a lawyer review them if the site grows.
 
+## On-time timer (optional; free Cloudflare Worker, about 5 minutes)
+GitHub starts scheduled jobs late or skips them when it is busy (in the first week of Nov 2026 only about 1 in 12 of the
+scores job's every-30-minutes runs ran), so news, BFF Originals and final scores could show up hours late. Live scores
+on game days do not depend on it (see **Scores**), but everything else does. `cron/worker.js` is a tiny Cloudflare
+Worker that starts the scores job every 15 minutes and the data update every 3 hours, on time (it first checks that no
+data job is already waiting its turn; the workflows' own timers stay on as a backup):
+1. GitHub: **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**: name it
+   `BFF timer`, **Repository access: Only select repositories** > this repository, **Permissions > Actions: Read and
+   write** (nothing else), and generate it. Copy it (it is shown once).
+2. [dash.cloudflare.com](https://dash.cloudflare.com) (a free account, no card): **Workers & Pages > Create > Worker**,
+   name it `bff-timer`, **Deploy**, then **Edit code**: replace the code with `cron/worker.js` and **Deploy**.
+3. The Worker's **Settings > Variables and Secrets > Add**: type **Secret**, name `GH_TOKEN`, paste the token, **Deploy**.
+4. **Settings > Trigger events > Add > Cron Triggers**: add `*/15 * * * *` and `23 */3 * * *`.
+5. When the token expires (GitHub sets an expiry date), make a new one and replace the secret.
+The Worker's own log (**Logs**) shows each run ("scores.yml: started" or why it waited).
+
 ## Runs by itself all year
 - **Seasons roll over on their own.** `fetch_data.py` reads the NFL schedule to decide the season: in progress, about
   to start, or (after the last regular-season game) the next one. The model always learns from the 13 latest completed
