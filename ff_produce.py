@@ -149,6 +149,41 @@ if PHASE=='season' and 'week' in wr.columns and len(wr) and int(wr.week.max())>0
         if not ok_: FREE.add(pid_)
     pool-=FREE
 print(f'player pool: {len(pool)} ({len(_extra)} injured or reserve players added back, {len(_rosp)} rookies or returning starters from the season roster, {len(FREE)} on no NFL roster left out)')
+# players away from their team on a reserve list who are in the news (Nov 2026: Brandon Aiyuk, on the 49ers' reserve list
+# since December 2025, applied for reinstatement on Nov 4; this season's roster files leave such players out, so he was
+# not on the site at all). A player counts when his last roster entry is a reserve list with a team, this season's
+# rosters do not list him, he was a fantasy regular in one of the last 3 seasons (6+ games, 9+ PPR points a game) and a
+# headline in the last 14 days names him. He stays on that team's reserve list, projected 0 for every week, until a
+# roster lists him again ("not eligible until reinstated").
+IDT={'GBP':'GB','JAC':'JAX','KCC':'KC','LVR':'LV','NEP':'NE','NOS':'NO','SFO':'SF','TBB':'TB','LAR':'LA','RAM':'LA','WSH':'WAS'}
+AWAY={}
+try:
+    import re as _rea
+    _r26=globals().get('_R26'); _seen=set(cur.index)|(set(_r26.index) if _r26 is not None else set())
+    _nh=[(str(it_.get('h') or ''),pd.to_datetime(it_.get('d'),utc=True,errors='coerce'),it_.get('s') or 'news') for it_ in ((json.load(open('news.json')) if os.path.exists('news.json') else {}).get('items') or [])]
+    _nowa=pd.Timestamp.now(tz='UTC'); _nh=[x for x in _nh if not pd.isna(x[1]) and _nowa-x[1]<=pd.Timedelta(days=14)]
+    _reg=st[st.season.between(SEASON-3,SEASON-1)].groupby(['player_id','season']).fantasy_points_ppr.agg(['mean','size']).reset_index()
+    _best={pid_:G_.sort_values('mean').iloc[-1] for pid_,G_ in _reg[_reg['size']>=6].groupby('player_id')}
+    for _y in (SEASON-1,SEASON-2):
+        _wp=local_or(f'roster_weekly_{_y}.parquet')
+        if _wp is None or not len(_wp): continue
+        _wp=_wp.dropna(subset=['gsis_id']).sort_values('week').groupby('gsis_id').tail(1)
+        for _x in _wp[(_wp.status=='RES')&_wp.position.isin(POS)].itertuples():
+            pid_=_x.gsis_id
+            if pid_ in _seen or pid_ in pool or pid_ in AWAY or pid_ not in _best or _best[pid_]['mean']<9: continue
+            nm_=str(_x.full_name or '')
+            if len(nm_.split())<2: continue
+            rx_=_rea.compile(r'(?<![\w])'+_rea.escape(nm_)+r'(?![\w])',_rea.I)
+            hit_=sorted([x for x in _nh if rx_.search(x[0])],key=lambda x:x[1])
+            if not hit_: continue
+            row_=_wp[_wp.gsis_id==pid_].iloc[-1].copy(); row_['season']=SEASON; row_['week']=int(cur.week.max()) if len(cur) else 0; row_['status']='RES'; row_['status_description_abbr']='AWY'
+            _lg=st[st.player_id==pid_].sort_values(['season','week']).tail(1)
+            AWAY[pid_]={'t':IDT.get(_x.team,_x.team),'n':nm_,'h':hit_[-1][0],'d':hit_[-1][1].isoformat(),'s':hit_[-1][2],'y':int(_best[pid_]['season']),'ppg':round(float(_best[pid_]['mean']),1),'g':int(_best[pid_]['size']),
+                        'last':[int(_lg.season.iloc[0]),int(_lg.week.iloc[0])] if len(_lg) else None}
+            cur.loc[pid_]=row_.drop(labels=['gsis_id'],errors='ignore').reindex(cur.columns)
+            pool.add(pid_)
+    if AWAY: print('away from their team on a reserve list, in the news:',', '.join(f"{v['n']} ({v['t']})" for v in AWAY.values()))
+except Exception as _e: print('reserve-list players in the news unavailable:',_e); AWAY={}
 SC26=SC[SC.season==SEASON]; SCHED_KNOWN=len(SC26)>0
 if not SCHED_KNOWN:   # offseason before the schedule is out: 17 games against opponents still to be announced
     _tm=sorted(SC[SC.season==SEASON-1].team.unique())
@@ -157,7 +192,6 @@ if SC26.pts.isna().sum()==0: print('Regular season complete: no unplayed games, 
 NEXT=int(SC26[SC26.pts.isna()].week.min()); byes={}   # current NFL week = earliest week with an unplayed game
 for t in SC26.team.unique():
     wk=set(SC26[SC26.team==t].week); byes[t]=[w for w in range(1,19) if w not in wk] if SCHED_KNOWN else []
-IDT={'GBP':'GB','JAC':'JAX','KCC':'KC','LVR':'LV','NEP':'NE','NOS':'NO','SFO':'SF','TBB':'TB','LAR':'LA','RAM':'LA','WSH':'WAS'}
 RET={}; AIR=[.12,.24,.30,.35,.42,.47,.50,.52]
 # injured reserve is at least 4 GAMES, so a bye in between moves the return a week (Nov 2026: weeks + 4 had a player
 # placed on IR in week 8 with a week-10 bye back for week 12, after only 3 games)
@@ -172,6 +206,7 @@ for pid_,G_ in wr[wr.gsis_id.isin(set(cur[cur.status=='RES'].index))].groupby('g
     tm_=IDT.get(G_.team.iloc[-1],G_.team.iloc[-1]) if 'team' in G_.columns else None
     RET[pid_]=max(NEXT+1,ir_back(tm_,int(wk_[i_])) if tm_ in TWK else int(wk_[i_])+4)   # still on the list now, so next week at the earliest
 RSV={pid_:('PUP' if str(x).startswith('P') else 'NFI' if str(x).startswith('N') else 'Suspended' if str(x).startswith('S') else 'IR') for pid_,x in cur[cur.status=='RES'].get('status_description_abbr',pd.Series(dtype=str)).items()}
+for pid_ in AWAY: RSV[pid_]='away'; RET[pid_]=99   # (see AWAY above)
 def team_of(pid):
     if pid in cur.index and cur.loc[pid,'status'] in ('ACT','RES','INA','DEV','EXE'): return cur.loc[pid,'team'],cur.loc[pid,'status']
     if pid in role.index: return role.loc[pid,'team'],'ACT'
@@ -472,7 +507,8 @@ for pid in pool:
     tm,status,pos,name=_ID[pid]; X=PRED[pid]
     rows=S26[S26.player_id==pid].sort_values('week')
     pv=prev_pg.get((pid,SEASON),np.nan)
-    if (pv is None or pv!=pv) and pid in _pp2.index and _pp2.loc[pid,'size']>=6: pv=0.9*float(_pp2.loc[pid,'mean'])   # missed last season: use the season before
+    pvy=None
+    if (pv is None or pv!=pv) and pid in _pp2.index and _pp2.loc[pid,'size']>=6: pv=0.9*float(_pp2.loc[pid,'mean']); pvy=[SEASON-2,r(float(_pp2.loc[pid,'mean']),1)]   # missed last season: use the season before (the card names that season)
     G_=_GM[pid]; wk_rows=[(g_[0],g_[2],g_[3],g_[4],{'dvp':float(X['dvp'][i_]) if X['dvp'][i_]==X['dvp'][i_] else None,'bump':float(X['bump'][i_])}) for i_,g_ in enumerate(G_)]
     P=X['P']; PR=X['PR']; Pr=np.array([X['L']]); Pm,Pv,Pt=X['Pm'],X['Pv'],X['Pt']; base={'efp':X['efp']}
     S_=STATUS.get(pid,{}); out=S_.get('s'); ir=status=='RES'
@@ -529,17 +565,21 @@ for pid in pool:
         # signed to the practice squad two weeks ago)
         if not (_h.status=='RES').any() and (((_h.team==tm)&_h.status.isin(['ACT','INA','DEV'])).sum()>=3 or status=='DEV'): NOU[pid]=NOUSE[pos]
     players.append({'id':pid,'n':name,'p':pos,'t':tm,'bio':bio_of(pid),'age':r(idx.loc[pid,'age'],1) if pid in idx.index and 'age' in idx.columns else None,
+      'away':({k_:v_ for k_,v_ in AWAY[pid].items() if k_ in ('y','ppg','g','d','s','last')} if pid in AWAY else None),
       'role':f"{rl['pg']}{int(rl['pos_rank'])}" if rl is not None and rl['team']==tm else None,'inj':('IR' if ir else out),'ret':ret_,'bmp':[[int(w[0]),r(w[4]['bump'],2)] for w in wk_rows[:2]],'rsv':(RSV.get(pid,'IR') if ir else None),
       'num':int(cur.loc[pid,'jersey_number']) if pid in cur.index and pd.notna(cur.loc[pid,'jersey_number']) else None,'g':int(len(rows)),'fp':r(rows.fp.sum(),1),'fpg':r(rows.fp.mean(),1) if len(rows) else None,'xfpg':r(rows.xfp.mean(),1) if len(rows) else None,
       'snap':r(rows.offense_pct.mean(),3) if len(rows) and rows.offense_pct.notna().any() else None,'ts':r(rows.target_share.mean(),3) if len(rows) else None,
       'ays':r(rows.air_yards_share.mean(),3) if len(rows) else None,'wopr':r(rows.wopr.mean(),3) if len(rows) else None,'tpg':r(rows.targets.mean(),1) if len(rows) else None,
       'cpg':r(rows.carries.mean(),1) if len(rows) else None,'cs':r(rows.car_share.mean(),3) if len(rows) else None,'rz':r(rows.rzo.mean(),1) if len(rows) else None,
-      'rpg':r(rec_pg,2),'pb':_pb,'xr':(r(min(1.0,float(X['C'][0])/float(X['P'][0])),3) if float(X['P'][0])>.5 else 0.0) if pos!='QB' else None,'mx':mix_of(pid,pos),'prev':r(pv,1),'dy':int(idx.loc[pid,'draft_year']) if pid in idx.index and pd.notna(idx.loc[pid,'draft_year']) else None,
+      'rpg':r(rec_pg,2),'pb':_pb,'xr':(r(min(1.0,float(X['C'][0])/float(X['P'][0])),3) if float(X['P'][0])>.5 else 0.0) if pos!='QB' else None,'mx':mix_of(pid,pos),'prev':r(pv,1),'pvy':pvy,'dy':int(idx.loc[pid,'draft_year']) if pid in idx.index and pd.notna(idx.loc[pid,'draft_year']) else None,
       'gl':GL.get(pid,[]),
       'wk':[[int(x.week),r(x.fp,1),r(x.xfp,1),r(x.offense_pct,2),int(x.targets),int(x.carries),x.opponent_team] for x in rows.itertuples()],
       'proj':r(proj_next,1),'nw':int(nxt[0]),'opp':nxt[1],'home':int(nxt[2]) if nxt[2]==nxt[2] else 0,'it':r(nxt[3],1),'rl':r(Pr[0],1),'frm':r(base.get('efp'),1),
       'dvp':r(nxt[4]['dvp'],3) if nxt[4]['dvp'] is not None else None,'xl':X.get('xl'),'adjm':r(P[0]-Pm,1),'adjv':r(P[0]-Pv,1),'adjt':(0.0 if (out in ('Out','Doubtful') or ir) else r(P[0]-Pt,1)),'injd':S_.get('d'),'injn':None if ir and S_.get('src')=='expected' else S_.get('n'),'injs':None if ir and S_.get('src')=='expected' else S_.get('src'),'pj0':r(float(P[0]),1) if (out in ('Out','Doubtful') or S_.get('k')) and not ir else None,'tmo':[n for n in (SIT.get(tm,{}).get('next',{}).get('names') or []) if n!=name][:4],'qbo':(lambda q:q if q and q!=name else None)(SIT.get(tm,{}).get('next',{}).get('qbname')),'prac':PRAC.get(pid),'tpl':r(TV.pl.get(tm,np.nan),1),'tpr':r(TV.pr.get(tm,np.nan),3),'ros':ros,'bye':(byes.get(tm) or [None])[0],
       'pfr':idx.loc[pid,'pfr_id'] if pid in idx.index and isinstance(idx.loc[pid,'pfr_id'],str) else None})
+for _p in players:
+    if _p.get('away') is None: _p.pop('away',None)
+    else: _p['rl']=0.0; _p['role']=None; _p['pb']=None   # away from the team: no level, no depth-chart place until a roster lists him
 # ---- quarterbacks: only the expected starter is projected (a backup rarely takes a snap). Starter of record = the best
 # quarterback on the depth chart who is not on injured reserve; expected starter = the best one not Out/Doubtful/IR. A
 # fill-in keeps next week and, later, the chance the starter is still out; every other quarterback is projected for 0.

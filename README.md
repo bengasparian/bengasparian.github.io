@@ -276,6 +276,11 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   (his later weeks stay); only when the name comes right before the words ("Sanders gets nod", "Lock to start").
 - **Who is in the player pool:** players on an NFL team (active, reserve, inactive, practice squad or exempt on the
   newest weekly roster, then the season roster, then the depth charts), plus this year's rookies picked in the top 100.
+  Also a player **away from his team on a reserve list** who is in the news (this season's roster files leave such
+  players out): his last roster entry is a reserve list with a team, he was a fantasy regular in one of the last 3
+  seasons (6+ games, 9+ PPR points a game) and a headline in the last 14 days names him (Nov 2026: Brandon Aiyuk, on the
+  49ers' reserve list, applied for reinstatement). He shows as "away from the team", projected 0 for every week, until a
+  roster lists him again; a breaking story covers it when he applies for reinstatement or is reinstated.
   A player on the **commissioner's exempt list** is projected 0 and shown as "not allowed to play", until a news report
   says he has been reinstated (kept in `news_state.json` until the roster catches up).
 - **No usage this season:** a running back, receiver or tight end who has been on his team at least 3 weeks, never on a

@@ -995,6 +995,7 @@ def write_breaking(p, ev, key):
     fresh()
     w = p.get('nw') or D['asof']['next_week']; kind = ev['kind']; n = p['n']; ln = last(n)
     if kind == 'out' and 'for the season' in (p.get('injn') or ''): kind = 'season'   # BFF already has him out for the season
+    if kind in ('reinstate', 'reinstated'): return write_reinstate(p, ev, key, kind)
     what = {'season': f"{n} is out for the rest of the season", 'ir': f"{n} has been placed on injured reserve", 'out': f"{n} has been ruled out for week {w}", 'doubtful': f"{n} is doubtful for week {w}",
             'traded': f"{n} has been traded", 'released': f"{n} has been released", 'activated': f"{n} has been activated from injured reserve"}[kind]
     title = pick({'season': [f"{n} out for the season: the fantasy fallout", f"Season over for {n}: who steps up", f"Fantasy fallout: {n} is done for the season"],
@@ -1087,6 +1088,29 @@ def write_breaking(p, ev, key):
     return art, None
 
 
+def write_reinstate(p, ev, key, kind):
+    """a player away from his team on a reserve list who applies for (or gets) reinstatement: BFF's data only (his last
+    game, his last season as a regular), what has to happen before he can play, and what to do"""
+    n = p['n']; ln = last(n); a = p.get('away') or {}; tm = tm_name(p['t']); src = ev.get('src') or 'news reports'
+    title = pick([f"{n} applies for reinstatement: what it means for fantasy", f"{n} seeks a return: the fantasy outlook"] if kind == 'reinstate'
+                 else [f"{n} reinstated: what it means for fantasy", f"{n} is back: the fantasy outlook"], key)
+    body = [P_((f"{n} has applied for reinstatement, according to {src}. He is on a reserve list, away from the {tm}, so he can't play until the league reinstates him and a team has him on its roster."
+                if kind == 'reinstate' else f"{n} has been reinstated, according to {src}. He still has to be on a team's active roster to play; the {tm} hold his rights and can keep, trade or release him."))]
+    L = ([f"{ln} last played in week {a['last'][1]} of the {a['last'][0]} season."] if a.get('last') else []) + \
+        ([f"In {a['y']}, his last season as a fantasy regular, he averaged {f1(a['ppg'])} PPR points over {cnt(a['g'], 'game')}."] if a.get('y') else [])
+    if L: body.append(P_(' '.join(L)))
+    body.append(H_('What it means for fantasy'))
+    body.append(UL([("BFF projects him for 0 until a team has him on its active roster; then his projection, ranking and trade value come back with the next data update (every 3 hours)."
+                     if kind == 'reinstate' else "Once he is on a team's active roster, BFF projects him again with the next data update (every 3 hours)."),
+                    "Redraft leagues: he is a stash only if you have an open bench spot" + (f"; he has not played since {a['last'][0]} and has no role on a team yet." if a.get('last') else "; he has no role on a team yet."),
+                    "Dynasty leagues: hold him if you have him; his value depends on where he plays next."]))
+    dek = f"{n} {'has applied for reinstatement' if kind == 'reinstate' else 'has been reinstated'}. What has to happen before he can play, and what to do with him in your league."
+    src_ = ([{'s': ev['src'], 'u': ev['url']}] if ev.get('url') else []) + [{'s': 'BFF data (nflverse)', 'u': ''}]
+    art = dict(kind='breaking', title=title, dek=dek, body=body, players=[p['id']], teams=[p['t']], wk=p.get('nw') or D['asof']['next_week'], img={'k': 'player', 'pid': p['id']}, src=src_)
+    if ev.get('nh'): art['nh'] = ev['nh']
+    return art, None
+
+
 SEASON_RE = re.compile(r"\b(out for (the )?((rest|remainder) of (the )?)?(season|year)|season[- ]ending|(miss|misses|missing|sit out) (the )?((rest|remainder) of (the )?)?(season|year)(?!\s*(opener|finale|debut))|done for the (season|year))\b", re.I)
 DIAG_RE = re.compile(r"\b(with|after|due to|suffers|suffered|has) (an? )?((torn|broken|fractured|ruptured|dislocated|separated|sprained|high[- ]ankle|lisfranc|acl|mcl|achilles)[^,.;:!?]{0,40})", re.I)
 def breaking_events():
@@ -1140,8 +1164,17 @@ def breaking_events():
                     if mw and int(mw.group(1)) != p.get('nw'): continue   # "ruled out against the Dolphins in week 7": not his next game
                 dx = DIAG_RE.search(hl)
                 E.append(dict(p=p, kind=k, why=dx.group(3).strip() if dx else None, src=h.get('s') or 'news reports', url=h.get('u') or '', at=pdt(h.get('d')) or NOW, nh=nh))
+    # a player away from his team on a reserve list (no roster, projected 0) who applies for or gets reinstatement (Nov
+    # 2026: Brandon Aiyuk); matched by his full name, since the headline tags only know players with a projection
+    for p in [q for q in P if q.get('rsv') == 'away']:
+        rx = re.compile(r'(?<![\w])' + re.escape(p['n']) + r'(?![\w])', re.I)
+        for h in NEWS.get('items') or []:
+            hl = h.get('h', '')
+            if not rx.search(hl) or NOTREIN_RE.search(hl): continue
+            k = 'reinstated' if REINSTATED_RE.search(hl) else 'reinstate' if REINAPP_RE.search(hl) else None
+            if k: E.append(dict(p=p, kind=k, why=None, src=h.get('s') or 'news reports', url=h.get('u') or '', at=pdt(h.get('d')) or NOW, nh={x: h[x] for x in ('h', 'd', 's', 'u') if x in h}))
     E = [e for e in E if e['at'] and NOW - e['at'] < datetime.timedelta(hours=48)]
-    rank = {'season': -1, 'ir': 0, 'traded': 1, 'released': 2, 'out': 3, 'doubtful': 4, 'activated': 5}; best = {}
+    rank = {'season': -1, 'ir': 0, 'reinstated': 0, 'reinstate': 1, 'traded': 1, 'released': 2, 'out': 3, 'doubtful': 4, 'activated': 5}; best = {}
     for e in E:
         pid = e['p']['id']
         if pid not in best or rank[e['kind']] < rank[best[pid]['kind']]: best[pid] = e
@@ -1176,6 +1209,9 @@ def boxed(gs):
     """every game has a box score (live, or the official stats the morning after)"""
     return all(box_rows(g) for g in gs)
 SPEC_RE = re.compile(r"\b(could|may|might|if|would|possibly|potentially|considering|weighing|fears?|feared)\b", re.I)   # not confirmed yet
+REINAPP_RE = re.compile(r"\b(appl(y|ies|ied)|fil(e|es|ed|ing)|seek(s|ing)?|looking to get|request(s|ed)?|petition(s|ed)?)\b[^.;:]{0,40}\breinstat", re.I)   # applied for reinstatement
+REINSTATED_RE = re.compile(r"\b((has been|was|is|gets|got|officially|been)\s+reinstated|reinstated by|(nfl|league) reinstates)\b", re.I)
+NOTREIN_RE = re.compile(r"\b(not|n't|never)( yet)?( been)? reinstat|\bwon't (apply|seek)|\bnot (apply|seek)", re.I)   # "NFL has not yet reinstated"
 NOTOUT_RE = re.compile(r"\b(not|n't|never)( yet)?( been)? ruled out|\bnot expected to miss", re.I)   # "not ruled out yet" is not ruled out
 INGAME_RE = re.compile(r"\b(remainder|rest of (the )?(game|day|contest|half)|won't return|will not return|(questionable|doubtful|unlikely) to return|ruled out (of|for) (the |today's |sunday's |monday's |thursday's )?game)", re.I)   # hurt during a game
 
