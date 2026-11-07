@@ -37,7 +37,7 @@
 <section id="players" class="pane" hidden>
 <div id="plist"><div class="welcome" id="welcome" hidden><div><b style="font:800 1.2rem var(--cond);text-transform:uppercase;letter-spacing:.05em">New here? Start in three steps</b><ol><li>Pick your scoring above (PPR, half, standard, or custom for TE premium and other rules).</li><li>Use <b>This week</b> for lineups, <b>Trade values</b> for trades, and the Quick hits for news and trends.</li><li>Link your league under <b>My League</b> for your best lineup, trade ideas, and waiver targets.</li></ol></div><button class="ghost" id="welx" type="button">Got it</button></div><div class="vh hvh"><div><div class="h2kick"><span class="wkpill">Week <b id="hwk"></b></span><span class="h2dates" id="hdates"></span><span class="livechip" id="hlivechip" hidden><i></i>Live now</span></div><h1 class="h2title" id="h2title">Win your week.</h1><p class="m hsub">Rankings, trade values, start/sit calls and scores, built for your league.</p></div><div class="pills" id="pview"><button class="on" data-p="rank">This week</button><button data-p="values">Trade values</button><button data-p="cheat">Start/sit<span class="pvx"> cheat sheet</span></button><button data-p="favs"><svg class="ic" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="currentColor"/></svg> Favorites <span id="favn" class="favn"></span></button></div></div>
 <div id="homeextra"><div class="tstories homenew" id="home_new"></div><div class="gstrip" id="gstrip"></div><div class="dash hdash" id="dash"></div><div class="adwrap" data-adw="home"></div></div>
-<div id="pvals" hidden><div class="panel"><h2>Rest-of-season trade values</h2><p class="m">BFF value (0-100): the starting-lineup points each player should add from now through week 17 over the best player at his position who would not start in your league, from BFF's own projections. In 1-QB leagues a quarterback is measured against the middle starting quarterback and counts 85%, because anyone can stream one by matchup; running backs count 10% more, because good ones are scarce and injuries hit them most. Use it for trades, drops and waiver claims; use <b>This week</b> for lineups.</p><p class="m" id="valnote"></p>
+<div id="pvals" hidden><div class="panel"><h2>Rest-of-season trade values</h2><p class="m">BFF value (0-100): the starting-lineup points each player should add from now through week 17 over the best player at his position who would not start in your league, from BFF's own projections. In 1-QB leagues a quarterback is measured against the middle starting quarterback and counts 85%, because anyone can stream one by matchup; running backs count 10% more, because good ones are scarce and injuries hit them most; the 3 best tight ends count 10% more and the rest 5% less, because elite ones are rare. Use it for trades, drops and waiver claims; use <b>This week</b> for lineups.</p><p class="m" id="valnote"></p>
 <div class="bar"><div class="pills" id="vpos"><button class="on" data-p="ALL">All</button><button data-p="QB">QB</button><button data-p="RB">RB</button><button data-p="WR">WR</button><button data-p="TE">TE</button><button data-p="FLEX">Flex</button></div><input id="vsearch" placeholder="Filter by name or team" aria-label="Filter trade values" style="max-width:230px"></div>
 <div class="vhead" aria-hidden="true"><span>#</span><span>Player</span><span>BFF value</span><span>Points · position rank</span></div><div id="vallist"></div><button class="ghost" id="valmore" type="button" style="margin-top:8px">Show more players</button></div></div>
 <div id="pfavs" hidden><div class="panel"><h2>Your favorites</h2><p class="m">Players you star show up here with this week's outlook, his points once his game is final, injury status, prop lines and news. Tap the star on any player to add or remove him. Favorites are saved in this browser.</p><div id="favlist"></div></div></div>
@@ -46,7 +46,7 @@
 <div id="cmpwrap"></div>
 <div class="bar"><div class="pills" id="wpos"><button class="on" data-p="ALL">All</button><button data-p="QB">QB</button><button data-p="RB">RB</button><button data-p="WR">WR</button><button data-p="TE">TE</button><button data-p="FLEX">Flex</button><button data-p="K">K</button><button data-p="DST">D/ST</button></div>
 <input id="wsearch" placeholder="Filter by name or team" aria-label="Filter rankings" style="max-width:230px"><label class="chk"><input type="checkbox" id="onlymine"> My roster only</label><label class="chk"><input type="checkbox" id="hideout" checked> Hide players ruled out</label></div>
-<p class="m whint">Tap a name for the full scouting card, <b>Why?</b> for what drives the projection, or tick the box to compare. The bar under each projection is the realistic range <span class="tip" tabindex="0" data-tip="10th to 90th percentile outcome: one week in ten he scores below the left end, one in ten above the right end.">i</span></p>
+<p class="m whint">Ranked by <b>projected points this week</b> (quarterbacks score the most points, so they lead the All list; for who is worth more in a trade, see <a href="#" data-goto="players:values">Trade values</a>). Tap a name for the full scouting card, <b>Why?</b> for what drives the projection, or tick the box to compare. The bar under each projection is the realistic range <span class="tip" tabindex="0" data-tip="10th to 90th percentile outcome: one week in ten he scores below the left end, one in ten above the right end.">i</span></p>
 <div id="wlist"></div><button class="ghost" id="wmore" type="button" style="margin-top:8px">Show more players</button></div></div>
 <div id="pdetail" hidden><button class="ghost" id="pback" type="button" style="margin:18px 0 4px">&larr; All players</button><div id="pcard"></div></div>
 <div class="tray" id="tray" hidden><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span><b style="font:800 1.1rem var(--cond);text-transform:uppercase;letter-spacing:.05em">Comparing</b> <span id="traynames" class="m"></span></span><span style="display:flex;gap:8px"><button class="btn" id="trayview" type="button">View comparison</button><button class="ghost" id="trayx" type="button">Clear</button></span></div></div>
@@ -575,7 +575,7 @@ const photoImg=(ph,cls)=>'';
 // On your own site: email + password accounts with Google Firebase (free plan; switched on by the site owner, see README).
 // On claude.ai: your Claude sign-in is the account, saved with this page's own storage.
 // Everything also stays saved on the device, so the site works the same with or without an account.
-const TERMS_V='2026-11-05',ACC_KEYS=['ff_league','ff_mine','ff_favs','ff_fmt','ff_score','ff_theme','ff_photos','ff_opp','ff_lv'];
+const TERMS_V='2026-11-07',ACC_KEYS=['ff_league','ff_mine','ff_favs','ff_fmt','ff_score','ff_theme','ff_photos','ff_opp','ff_lv'];
 const ACFG=D.auth||{},FBC=ACFG.firebase&&ACFG.firebase.apiKey&&ACFG.firebase.projectId?ACFG.firebase:null;
 const ACC={mode:ON_CLAUDE?'claude':FBC?'firebase':'none',user:null,view:'main',msg:'',err:'',busy:false,at:null,needTerms:false,cl:null};
 const accLS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}};
@@ -622,7 +622,10 @@ async function accSync(first){const o=await ACCB.load();
  await accPush()}
 async function accStart(){
  try{const n=sessionStorage.getItem('ff_acc_note');if(n){sessionStorage.removeItem('ff_acc_note');setTimeout(()=>toast(esc(n),'ok'),600)}setTimeout(()=>{try{sessionStorage.removeItem('ff_acc_rl')}catch(e){}},4000)}catch(e){}
- if(ACC.mode==='firebase'){const s=accSess();if(s&&s.rt){ACC.user={email:s.email,name:s.name||'',uid:s.uid};accPaint();try{await accSync(true);await profLoad();emailCheck().then(()=>socialPaint())}catch(e){ACC.err=fbMsg(e);if(!accSess())ACC.user=null;accPaint()}}else accPaint();return}
+ if(ACC.mode==='firebase'){const s=accSess();if(s&&s.rt){ACC.user={email:s.email,name:s.name||'',uid:s.uid};accPaint();// (the profile loads even if syncing saved data fails: before, a sync error left the username unloaded, so finished
+ // games never reached the leaderboard and nothing said why)
+ let se=null;try{await accSync(true)}catch(e){se=e;ACC.err=fbMsg(e);if(!accSess()){ACC.user=null;accPaint();return}accPaint()}
+ try{await profLoad();emailCheck().then(()=>socialPaint())}catch(e){if(!se){ACC.err=fbMsg(e);accPaint()}}}else accPaint();return}
  if(ACC.mode==='claude'){accPaint();try{const C_=window.claude;if(!C_||!C_.use)return;const [u,db]=await Promise.all([C_.use('user'),C_.use('db')]);if(!u||!db){ACC.mode='none';return accPaint()}
   const me=await u.me();if(!me||!me.id){ACC.mode='none';return accPaint()}ACC.cl={doc:db.doc('data/users/'+me.id+'/profile'),me};
   // the saved data is only read on a device that has used the account before, or when the account panel is opened
@@ -640,7 +643,7 @@ async function accDo(act,f){if(ACC.busy)return;ACC.busy=true;ACC.err='';ACC.msg=
    await ACCB.save(accSnap());ACC.at=new Date();try{await profCreate(un)}catch(e){ACC.view='username';throw new Error('UNAME:Your account is made, but that username could not be saved ('+fsErr(e)+'). Pick it again.')}
    try{await emailSend()}catch(e){}wallDone();ACC.view='main';ACC.msg='Account created. Check your email for a link to verify it (needed to post in the Community tab).';toast('Account created','ok');socialPaint()}
   else if(act==='uname'){const un=String(f.uname||'').trim(),nf=await nameFree(un);if(nf)throw new Error('UNAME:'+nf);await profCreate(un);ACC.view='main';ACC.msg='Username saved.';socialPaint()}
-  else if(act==='signin'){const j=await fbId('signInWithPassword',{email:f.email.trim(),password:f.pw,returnSecureToken:true});const s=fbKeep(j);ACC.user={email:s.email,name:s.name||'',uid:s.uid};ACC.view='main';wallDone();await accSync(true);if(!ACC.needTerms){ACC.msg='Signed in.';toast('Signed in','ok')}await profLoad();emailCheck().then(()=>socialPaint())}
+  else if(act==='signin'){const j=await fbId('signInWithPassword',{email:f.email.trim(),password:f.pw,returnSecureToken:true});const s=fbKeep(j);ACC.user={email:s.email,name:s.name||'',uid:s.uid};ACC.view='main';wallDone();try{await accSync(true)}catch(e){console.warn('sync',e);toast('Signed in, but your saved data could not sync ('+esc(fbMsg(e))+')','warn')}if(!ACC.needTerms){ACC.msg='Signed in.';toast('Signed in','ok')}await profLoad();emailCheck().then(()=>socialPaint())}
   else if(act==='reset'){const em=f.email.trim();if(!/^\S+@\S+\.\S+$/.test(em))throw new Error('INVALID_EMAIL');await fbId('sendOobCode',{requestType:'PASSWORD_RESET',email:em}).catch(e=>{if(!/EMAIL_NOT_FOUND/.test(e.message))throw e});ACC.msg='If that email has an account, a reset link is on its way.';ACC.view='signin'}
   else if(act==='claude-join'){ACC.user={name:ACC.cl.me.name||'',avatar:ACC.cl.me.avatarUrl,claude:true,termsAt:new Date().toISOString()};accLS('ff_acc_off',null);accLS('ff_acc_cl','1');ACC.needTerms=false;await ACCB.save(accSnap());ACC.at=new Date();ACC.view='main';ACC.msg='Account created. Your leagues, favorites and settings now save to it.';toast('Account created','ok')}
   else if(act==='accept'){ACC.user.termsAt=new Date().toISOString();ACC.needTerms=false;const o=await ACCB.load();if(o&&accApply(o)&&accReload('Terms accepted. Your saved data is loaded.'))return;await ACCB.save(accSnap());ACC.at=new Date();ACC.view='main'}
@@ -744,6 +747,7 @@ const fsErr=e=>{const m=String((e&&e.message)||e);return m==='NET'?FBERR.NET:/PE
 // --- profiles
 const PROF={me:null,cache:new Map()};
 async function profLoad(){if(!MEMBERS()||!ACC.user||!ACC.user.uid)return null;try{PROF.me=await fsGet('profiles/'+ACC.user.uid)}catch(e){PROF.me=null;return null}
+ if(PROF.me)setTimeout(()=>lbFlush(false).then(()=>lbRender(true)).catch(()=>{}),0);
  if(PROF.me){ACC.user.name=PROF.me.username;PROF.cache.set(ACC.user.uid,PROF.me)}else if(!ACC.needTerms){ACC.view='username'}accPaint();socialPaint();return PROF.me}
 async function nameFree(n){const u=n.toLowerCase();if(!/^[a-z0-9_]{3,20}$/.test(u))return'Use 3 to 20 letters, numbers or underscores.';const c=modCheck(n,true);if(!c.ok)return c.why;try{const x=await fsGet('usernames/'+u);return x?'That username is taken.':''}catch(e){return fsErr(e)}}
 async function profCreate(username,av){const uid=accSess().uid,uname=username.toLowerCase();
@@ -781,11 +785,21 @@ function openWall(){ACC.wall=true;openAcc('main');const b=g('accbox');if(b)b.cla
 function wallDone(){if(!ACC.wall)return;ACC.wall=false;const b=g('accbox');if(b)b.classList.remove('wall')}
 if(MEMBERS()&&!ISBOT){setInterval(wallTick,15000);if(+(accLS('ff_used')||0)>=WALL_MS)setTimeout(()=>{if(!ACC.user&&!accSess())openWall()},1500)}
 // --- Spin Draft leaderboard (members only): today's daily challenge (first try counts) and best ever, per scoring
-async function lbSubmit(){if(!MEMBERS()||!ACC.user||!PROF.me||!SD||!SD.done)return;const tot=Math.round(sdTotal()),f=SD.fmt,uid=ACC.user.uid,me=PROF.me,W=[];
- try{const cur=await fsGet('scores/'+uid);if(!cur||(cur['best_'+f]||0)<tot)W.push(wUp('scores/'+uid,{username:me.username,av:me.av,['best_'+f]:tot},{mask:['username','av','best_'+f],now:['at']}));
-  if(SD.mode==='daily'){const ex=await fsGet(`daily/${SD.day}_${f}/scores/${uid}`);if(!ex)W.push(wUp(`daily/${SD.day}_${f}/scores/${uid}`,{username:me.username,av:me.av,score:tot},{create:true,now:['at']}))}
-  if(W.length){await fsCommit(W);toast(SD.mode==='daily'?'Your score is on today\'s leaderboard':'New best on the leaderboard','ok')}}catch(e){console.warn('leaderboard',e)}
- lbRender(true)}
+// the leaderboard. A finished game's score is saved as "pending" first, so a game played before signing in (or before
+// picking a username) still reaches the board once you do (the daily one only that same day); a save that fails says
+// why instead of failing silently (Nov 2026: the board was empty and nothing said why)
+function lbPend(){if(!SD||!SD.done||SD.practice)return;ls('ff_lbpend',JSON.stringify({m:SD.mode,d:SD.day,f:SD.fmt,s:Math.round(sdTotal())}))}
+async function lbSubmit(){lbPend();await lbFlush(true);lbRender(true)}
+async function lbFlush(loud){let pd=null;try{pd=JSON.parse(ls('ff_lbpend')||'null')}catch(e){}if(!pd||!MEMBERS())return;
+ if(!ACC.user){if(loud)toast('Sign in to put this score on the leaderboard: it is saved until you do'+(pd.m==='daily'?' (today only)':''),'info');return}
+ if(!PROF.me){if(loud)toast('Pick a username to put this score on the leaderboard','info');return}
+ if(pd.m==='daily'&&pd.d!==sdDay()){ls('ff_lbpend','');return}   // yesterday's daily: too late for its board
+ const tot=pd.s,f=pd.f,uid=ACC.user.uid,me=PROF.me,W=[];
+ try{const cur=await fsGet('scores/'+uid);if(!cur||(cur['best_'+f]||0)<tot)W.push(wUp('scores/'+uid,{username:me.username,av:me.av||'',['best_'+f]:tot},{mask:['username','av','best_'+f],now:['at']}));
+  let dl=false;if(pd.m==='daily'){const ex=await fsGet(`daily/${pd.d}_${f}/scores/${uid}`);if(!ex){W.push(wUp(`daily/${pd.d}_${f}/scores/${uid}`,{username:me.username,av:me.av||'',score:tot},{create:true,now:['at']}));dl=true}}
+  if(W.length)await fsCommit(W);ls('ff_lbpend','');
+  toast(dl?'Your score is on today\'s leaderboard':W.length?'New best on the leaderboard':pd.m==='daily'?'Your first game today is already on the leaderboard (replays don\'t count)':'On the leaderboard (not a new best)','ok')}
+ catch(e){console.warn('leaderboard',e);toast('The leaderboard did not save your score ('+(/PERMISSION/.test(e.message)?'not allowed: sign out and back in, then try again':/NET/.test(e.message)?'no connection: it is kept and tried again later':esc(e.message))+')','warn')}}
 const LB={tab:'daily',rows:null,at:0,key:''};
 async function lbRender(force){const els=[g('sd_lb'),g('cm_lbout')].filter(Boolean);if(!els.length)return;const f=(SD&&SD.fmt)||ls('ff_sdfmt')||'ppr',day=sdDay(),key=LB.tab+f+day;
  if(!MEMBERS()){els.forEach(el=>el.innerHTML='');return}
@@ -894,9 +908,9 @@ function privacyHtml(){const fb=ACC.mode==='firebase'||ACC.mode==='none';return 
 <h3>What an account stores</h3><p>${ACC.mode==='claude'?'On this claude.ai copy: an anonymous account id from your Claude sign-in (your display name is shown to you but not stored)':'Your email address (private), a securely hashed password (handled by Google Firebase Authentication; BFF never sees it), your username and picture (public), whether your email is verified'}, plus what you save in BFF: linked leagues and your team in them, favorite players, scoring format, theme and display settings, the date you accepted these terms and when your data was last saved.</p>
 <h3>What is public</h3><p>${ACC.mode==='claude'?'Nothing on this claude.ai copy.':'Your username, your picture (once approved), your Community posts and pictures, and your Spin Draft leaderboard scores can be seen by anyone. Your email address is never shown. Pictures you upload are shrunk and stored with your profile or post in Google Firebase; the site owner sees them to approve them.'}</p>
 <h3>What it is used for</h3><p>Only to sign you in and give your saved data back to you on any device. BFF does not sell or rent your account information or share it except with the service providers that run accounts (${fb?'Google Firebase':'Anthropic’s claude.ai'}) or when the law requires it.</p>
-<h3>On your device</h3><p>The site saves your settings in your browser's local storage so it works without an account. Signing in also keeps a sign-in token there. BFF itself uses no tracking cookies. Fonts load from Google Fonts, and tools you choose to use (screenshot reading, BFF's AI) load from jsDelivr; those providers may log the requests under their own policies.</p>
+<h3>On your device</h3><p>The site saves your settings in your browser's local storage so it works without an account. Signing in also keeps a sign-in token there. BFF itself uses no tracking cookies. Fonts load from Google Fonts, and tools you choose to use (screenshot reading, the on-device version of BFF's AI) load from jsDelivr; those providers may log the requests under their own policies.</p>
 <h3>Advertising</h3><p>${(D.ads||{}).client?'BFF shows ads served by Google AdSense.':'BFF does not show ads right now. When it does, they are served by Google AdSense and this section applies.'} Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites. Google's use of advertising cookies enables it and its partners to serve ads to users based on their visit to this site and/or other sites on the Internet. You may opt out of personalized advertising by visiting <a href="https://myadcenter.google.com/" target="_blank" rel="noopener">Google's My Ad Center (Ads Settings)</a>, and you can opt out of some third-party vendors' use of cookies for personalized advertising at <a href="https://www.aboutads.info/choices" target="_blank" rel="noopener">www.aboutads.info</a>. Google explains how it uses information from sites that show its ads <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">here</a>. Where the law requires consent for these cookies (for example in the European Economic Area, the UK and Switzerland), Google's consent message asks you first, and you can change your choice at any time.</p>
-<h3>Ask BFF's AI</h3><p>BFF's AI runs entirely on your device. If you download it, your browser fetches the AI model once (the code from jsDelivr, the model files from Hugging Face and GitHub) and keeps it in your browser's storage; after that it answers on your device, and the questions you type in Ask BFF are never sent to BFF or anyone else. You can remove it from your device, or choose quick answers only, in Ask BFF's AI settings.</p>
+<h3>Ask BFF's AI</h3><p>Ask BFF's AI answers from BFF's own server: an open AI model (Qwen3 30B) that BFF runs on Cloudflare Workers AI. When you ask a question, the question, the facts from BFF's data that it needs and your last few messages in Ask BFF are sent there to write the answer; BFF does not store them, and Cloudflare processes them only to answer (see Cloudflare's privacy policy). Don't type personal information into Ask BFF. You can turn the AI off (quick answers only) in Ask BFF's AI settings. You can also run BFF's AI entirely on your device instead: if you download it, your browser fetches the AI model once (the code from jsDelivr, the model files from Hugging Face and GitHub) and keeps it in your browser's storage; after that it answers on your device, and the questions you type in Ask BFF are never sent to BFF or anyone else. You can remove it from your device, or choose quick answers only, in Ask BFF's AI settings.</p>
 <h3>Children</h3><p>Accounts are not for children under 13, and we do not knowingly keep data about them. If you believe a child under 13 has an account, contact us and we will delete it.</p>
 <h3>Your choices</h3><p>You can see your saved data on the site, change it any time, delete any of your posts, and delete your account from the account menu: that deletes its saved data, your profile and picture, your posts and your leaderboard scores. You can also sign out and remove the copy on a device. To ask anything about your data, contact us through ${CONTACT}.</p>
 <h3>Security and changes</h3><p>Sign-in and storage are handled by ${fb?'Google Firebase over encrypted connections, with rules that let each account change only its own data':'claude.ai, where each person’s saved data is private to them'}. No system is perfectly secure. If this policy changes, the version date changes and you will be asked to accept it again.</p>`}
@@ -1653,7 +1667,7 @@ function waivers(me){const R=rostered(),full=leagueComplete(),weeks=[];for(let w
 // Both together, realistic rosters (half the teams hold one quarterback and stream): lopsided trades called right
 // 72.5% -> 73.3% (better in every season, and with 2 quarterbacks a team too), rank 0.445 -> 0.453, R2 0.263 -> 0.274,
 // position bias QB -16% -> -4%, RB +4% -> +1% (research/results_qbvalue_final.json).
-const VAL={s:.5,a0:.98,dec:.985,w:{ppr:.6,half:.5,std:.4},pk:[1,.8,.6,.45,.35],now:.5,vorp:.15,fit:.35,qbk:.5,qbm:.85,rbm:1.1};
+const VAL={s:.5,a0:.98,dec:.985,w:{ppr:.6,half:.5,std:.4},pk:[1,.8,.6,.45,.35],now:.5,vorp:.15,fit:.35,qbk:.5,qbm:.85,rbm:1.1,tek:3,tem:1.1,ter:.95};
 // injured reserve: share of games such players really played in the weeks after their estimated return (2023-25); the weekly
 // projections already include it, so values divide it back out and apply it as (chance he plays) x (value if he plays)
 const AIR=[.12,.24,.30,.35,.42,.47,.50,.52],irA=(p,w)=>p.inj==='IR'&&p.ret&&w>=p.ret?AIR[Math.min(AIR.length-1,w-p.ret)]:1;
@@ -1678,11 +1692,15 @@ function tvCache(){const S=slots(),n=leagueN(),key=[FW,fmtKey(),n,S.QB,S.RB,S.WR
  if(one&&by.QB.length){Rv.QB=Rwv.QB=mb[by.QB[Math.max(0,Math.min(by.QB.length-1,cnt.QB-Math.round(n*VAL.qbk)))].id]}
  const valOver=(p,base,dc)=>{const r=base[p.p],s=Math.max(.5,VAL.s*R[p.p]);let v=0;for(const[w,mu0]of W[p.id]){const mu=Math.max(0,mu0-(dc||0));if(mu>0){const a=irA(p,w);v+=VAL.a0*Math.pow(VAL.dec,w-FW)*a*posPart(mu/a-r,s)}}return v*pm(p.p)};
  const vs={},vw={},vorp={};P.forEach(p=>{vs[p.id]=valOver(p,Rv);vw[p.id]=valOver(p,Rwv);let x=0;for(const[w,mu]of W[p.id])if(mu>0)x+=mu-irA(p,w)*Rw[p.p];vorp[p.id]=x});   // (shown as real points over the waiver wire)
+ // tight ends (Nov 2026, research/bt_tevalue.py): the few elite ones are scarcer than their points say and the rest worth
+ // a little less, so the best VAL.tek by value (3 in a 12-team league) x1.1 and the others x0.95 (all tight ends x1.1
+ // tested less accurate; this tested more accurate overall and in 2 of 3 seasons, on both simulated-league truths)
+ const TEM={};P.filter(p=>p.p==='TE').sort((a,b)=>vs[b.id]-vs[a.id]).forEach((p,i)=>{TEM[p.id]=i<Math.max(1,Math.round(n*VAL.tek/12))?VAL.tem:VAL.ter;vs[p.id]*=TEM[p.id];vw[p.id]*=TEM[p.id]});
  const t3=o=>{const v=Object.values(o).sort((a,b)=>b-a);return Math.max(1e-6,(v[0]+v[1]+v[2])/3)},kW=t3(vs)/t3(vw);
  // BFF's own value: 85% over the replacement starter, 15% over the waiver wire (VORP)
  const mix=(a,b)=>(1-VAL.vorp)*a+VAL.vorp*b*kW,vm={};P.forEach(p=>vm[p.id]=mix(vs[p.id],vw[p.id]));
  // what our value was before the games played since the consensus was taken (p.dc: change in his per-game level since then)
- const vth={};P.forEach(p=>{vth[p.id]=p.dc?mix(valOver(p,Rv,p.dc),valOver(p,Rwv,p.dc)):vm[p.id]});
+ const vth={};P.forEach(p=>{vth[p.id]=p.dc?mix(valOver(p,Rv,p.dc),valOver(p,Rwv,p.dc))*(TEM[p.id]||1):vm[p.id]});
  // consensus on our curve, position by position; unranked players get at most the value just below the last ranked one
  const ve={},has=P.some(p=>p.ecp);if(has)POS.forEach(q=>{const curve=P.filter(p=>p.p===q).map(p=>vm[p.id]).sort((a,b)=>b-a),rk=P.filter(p=>p.p===q&&p.ecp).sort((a,b)=>a.ecp-b.ecp);
   rk.forEach((p,i)=>ve[p.id]=curve[Math.min(i,curve.length-1)]||0);const fl=curve[Math.min(rk.length,curve.length-1)]||0;P.forEach(p=>{if(p.p===q&&ve[p.id]==null)ve[p.id]=Math.min(vm[p.id],fl)})});
@@ -1864,7 +1882,7 @@ const sdTotal=()=>SD.slots.reduce((s,z)=>s+(z.p?z.p.pts:0),0);
 // the best lineup the same spins could have made: each drafted spin gives one player to one slot (all 7! orders tried)
 function sdBest(){const S=SD.spins.filter(x=>x.drafted),SL=SD.slots.map(z=>z.s);if(S.length!==SL.length)return null;let best=-1e9;const perm=(a,k)=>{if(k===a.length){let tot=0;const used=new Set();for(let i=0;i<a.length;i++){const sl=SL[a[i]],L=S[i].list.filter(c=>(sl===c.pos||(sl==='FLEX'&&c.pos!=='QB'))&&!used.has(c.id));if(!L.length)return;const c=L.reduce((m,x)=>x.pts>m.pts?x:m);used.add(c.id);tot+=c.pts}if(tot>best)best=tot;return}for(let j=k;j<a.length;j++){[a[k],a[j]]=[a[j],a[k]];perm(a,k+1);[a[k],a[j]]=[a[j],a[k]]}};perm(SL.map((_,i)=>i),0);return best}
 function sdFinish(){const tot=sdTotal(),best=sdBest(),key=`ff_sdbest_${SD.fmt}`,pb=+(ls(key)||0);SD.best=best;SD.pb=pb;if(tot>pb){ls(key,String(Math.round(tot*10)/10));SD.newpb=true}
- if(SD.mode==='daily'&&!SD.practice)ls('ff_sdday_'+SD.fmt,JSON.stringify({d:SD.day,s:Math.round(tot*10)/10}));if(!SD.practice)try{lbSubmit()}catch(e){console.warn('leaderboard',e)}}
+ if(SD.mode==='daily'&&!SD.practice)ls('ff_sdday_'+SD.fmt,JSON.stringify({d:SD.day,s:Math.round(tot*10)/10}));if(!SD.practice)try{lbSubmit()}catch(e){console.warn('leaderboard',e)}else toast('Practice round finished: it doesn\'t count for the leaderboard (your first game of the day does)','info')}
 function sdShare(){const tot=sdTotal(),pct=SD.best?Math.round(tot/SD.best*100):null;return `BFF Spin Draft${SD.mode==='daily'?` (daily ${SD.day}${SD.theme?`, ${SD.theme.lab}`:''}${SD.practice?', practice':''})`:''}: ${f1(tot)} ${SDFMT[SD.fmt]} points${pct!=null?`, ${pct}% of the best lineup my spins allowed`:''}. ${SD.slots.map(z=>`${z.s} ${z.p.n} ${sdTeam(z.p.t,z.p.y)[0]} ${z.p.y}`).join(' · ')}`}
 function sdReels(y,t,anim){const G=sdData(),ys=[];for(let k=G.first;k<=G.last;k++)ys.push(k);const tms=Object.keys(SDFULL);const tt=t?sdTeam(t,y):null;
  const reel=(vals,fin,cls)=>`<div class="sdreel ${cls}"><div class="sdstrip${anim?' spin':''}">${anim?vals.map(v=>`<span>${esc(String(v))}</span>`).join(''):''}<span class="sdfin">${esc(String(fin))}</span></div></div>`;
@@ -2161,7 +2179,7 @@ function featList(){const R_=(D.lines||{}).real,A=R_&&R_.gap,dst=KDL.filter(x=>x
  return [{k:'spin',tag:'New',ic:'🎰',t:'Spin Draft',x:`Spin for a team and season since 1999 and draft its real fantasy stars. ${pb?`Your best: ${f1(pb)}.`:'Daily challenge included.'}`},
   {k:'kd',tag:'New',ic:'🛡️',t:'Kickers & D/ST',x:`Weekly ranks, points after each game and league lineups${dst?`. Top D/ST this week: ${esc(dst.n.replace(' D/ST',''))} (${f1(dst.proj)})`:''}.`},
   {k:'lines',tag:'Updated',ic:'🎯',t:'Prop lines from BFF\'s own numbers',x:A?`About ${A.ty[1]} receiving yards from the sportsbooks' real lines on average; every line with its chance and fair odds.`:'BFF\'s predicted lines, each with its chance and fair odds.'},
-  {k:'bot',tag:'Only here',ic:'💬',t:'Ask BFF',x:"A football brain built on BFF's own numbers, with BFF's own AI running on your device. No outside chatbot."},
+  {k:'bot',tag:'Only here',ic:'💬',t:'Ask BFF',x:"Ask anything football in your own words: BFF's own AI (an open model on BFF's server) answers from BFF's numbers and checks every number."},
   {k:'link',tag:'Easy',ic:'🔗',t:'Bring in any league',x:'From any site or app: copy the rosters or take screenshots, and BFF reads them in your browser.'},
   {k:'calls',tag:'Receipts',ic:'🧾',t:'Weekly calls, graded',x:'Every buy-low and sell-high call, kept and scored in public.'},
   {k:'sim',tag:'Pro',ic:'⚔️',t:'Matchup simulator',x:'Thousands of simulated games against this week\'s opponent.'},
@@ -2683,7 +2701,7 @@ function botHandcuffs(p0){const R=t=>P.filter(x=>x.t===t&&x.p==='RB'),role=x=>{c
  return{html:`<p>Handcuffs behind the most valuable starting running backs (a handcuff matters most when the starter carries a big share of the work):</p><ul>${T_.map(x=>`<li>${bchip(x.b)} ${esc(x.b.t)} · backup to ${esc(x.s.n)} · ${f1(rosTot(x.b,FW))} rest-of-season points now</li>`).join('')}</ul>`,ok:true,intent:'handcuff'}}
 function botTradeTargets(Q){const L_=P.filter(p=>p.p===Q&&!out(p)&&p.inj!=='IR').sort((a,b)=>tradeVal(b)-tradeVal(a)).slice(0,8);
  return{html:`<p>Most valuable ${Q}s to trade for, by BFF value (rest of season, your league settings):</p><ul>${L_.map(p=>`<li>${bchip(p)} ${esc(p.t)} · <b>${f1(tradeVal(p))}</b>${botSig(p).length?` · ${botSig(p)[0].replace(/<\/?b>/g,'')}`:''}</li>`).join('')}</ul><p class="m">Players marked buy low are scoring less than their usage is worth, so they often cost less than they should.</p>${bgo('help:mta','Find trades')}`,ok:true,intent:'trade_targets'}}
-const BOTAI='<p>Yep, I\'m a bot, but a homemade one. Ben built me and taught me how he talks football, so I sound like him, but I\'m not a real person. Projections come from BFF\'s own machine-learning model: gradient-boosted decision trees trained on 13 seasons of NFL games. Ask BFF runs <b>BFF Brain</b>: a question model trained on thousands of example questions sorts what you ask (start/sit, trades, injuries, rules and more), a football knowledge base covers rules, history and strategy, and the answers come from BFF\'s own numbers. If you download <b>BFF\'s AI</b> (an open Qwen3.5 model), it writes the replies right on your device, and every number it uses is checked against BFF\'s data. It all runs in your browser: no outside chatbot (not ChatGPT, not Claude) sees your questions.</p>';
+const BOTAI='<p>Yep, I\'m a bot, but a homemade one. Ben built me and taught me how he talks football, so I sound like him, but I\'m not a real person. Projections come from BFF\'s own machine-learning model: gradient-boosted decision trees trained on 13 seasons of NFL games. Ask BFF runs <b>BFF Brain</b>: a question model trained on thousands of example questions sorts what you ask (start/sit, trades, injuries, rules and more), a football knowledge base covers rules, history and strategy, and the answers come from BFF\'s own numbers. <b>BFF\'s AI</b> (an open Qwen3 model on BFF\'s own server, or a Qwen3.5 model you can download to run on your device) reads your question in your own words and writes the reply from BFF\'s numbers, and every number it uses is checked against BFF\'s data. It all runs in your browser: no outside chatbot (not ChatGPT, not Claude) sees your questions.</p>';
 // ---- standings (divisions are stable since 2002), awards and future Super Bowls
 const DIVS={'AFC East':['BUF','MIA','NE','NYJ'],'AFC North':['BAL','CIN','CLE','PIT'],'AFC South':['HOU','IND','JAX','TEN'],'AFC West':['DEN','KC','LV','LAC'],
  'NFC East':['DAL','NYG','PHI','WAS'],'NFC North':['CHI','DET','GB','MIN'],'NFC South':['ATL','CAR','NO','TB'],'NFC West':['ARI','LA','SF','SEA']};
@@ -2843,7 +2861,7 @@ const BOTHELP=[
  [/usage|expected points|xfp|wopr|target share|snap|carry share/i,()=>`<p><b>Usage worth</b> (expected points) is what a player's targets and carries usually score, based on how deep the throw is and where on the field it happens, learned from ${TRS} play-by-play. When a player scores far more or less than his usage, it usually evens out, which is where buy lows and sell highs come from. <b>Target share</b> and <b>snap share</b> are his share of the team's targets and plays; WOPR blends targets and air yards.</p>`,'help:trends/use','Usage trends'],
  [/matchup|defen[cs]e vs|dvp|strength of schedule|schedule/i,()=>`<p><b>Matchup grades</b> compare the fantasy points each defense allows to a position with the league average (Great, Good, Neutral, Tough, Very tough). Schedules average those grades over the next 4 weeks, the rest of the season and the playoffs (weeks 15-17).</p>`,'help:matchups/week','Open Matchups'],
  [/prop|parlay|odds|\bline|betting|bet\b/i,()=>{const R_=(D.lines||{}).real,A=R_&&R_.gap;return `<p>BFF predicts where apps and books will set prop lines from its own numbers only: expected volume times efficiency, adjusted for the Vegas team total and the defense, with passing and receiving yards stepped to how books post them${A?` (against real week-7 lines: about ${A.ty[1]} receiving yards, ${A.ry[1]} rushing, ${A.rec[1]} receptions and ${A.py[1]} passing yards from the books' on Sunday)`:''}. They update with each data run and are pulled when a player is ruled out. Each line shows its over chance and fair odds to compare with your app, and Ask BFF builds parlays and best bets from the likeliest outcomes. For entertainment, 21+ where legal.</p>`},'help:bet','Open Betting'],
- [/bff value|trade value|value (work|calculat|mean)|trade analy|find trades|fair trade/i,()=>`<p><b>BFF value</b> is the lineup points a player should add from now to week 17 over the best player at his position who would not start in your league (byes, injuries and injured reserve included), from BFF's own projections. In 1-QB leagues a quarterback is measured against the middle starting quarterback and counts 85%: anyone can stream one by matchup, so even the best quarterback is worth about what a top-12 receiver is. Running backs count 10% more: good ones are scarcer and injuries hit them most. In a package the best player counts fully and extras count 80%, 60%, 45%. A trade is fair when the two sides' BFF values are within 10%. The trade analyzer's <b>Find trades</b> suggests fair offers for any players you add.</p>`,'help:mta','Open Trade analyzer'],
+ [/bff value|trade value|value (work|calculat|mean)|trade analy|find trades|fair trade/i,()=>`<p><b>BFF value</b> is the lineup points a player should add from now to week 17 over the best player at his position who would not start in your league (byes, injuries and injured reserve included), from BFF's own projections. In 1-QB leagues a quarterback is measured against the middle starting quarterback and counts 85%: anyone can stream one by matchup, so even the best quarterback is worth about what a top-12 receiver is. Running backs count 10% more: good ones are scarcer and injuries hit them most. The 3 best tight ends count 10% more and the other tight ends 5% less: an elite tight end is rare, the rest are close to what the waiver wire offers. In a package the best player counts fully and extras count 80%, 60%, 45%. A trade is fair when the two sides' BFF values are within 10%. The trade analyzer's <b>Find trades</b> suggests fair offers for any players you add.</p>`,'help:mta','Open Trade analyzer'],
  [/waiver|pick ?up|free agent|stream/i,()=>`<p>Waiver targets are players usually unrostered in 12-team leagues, ranked by rest-of-season value, recent usage and the next 4 weeks of schedule. Link your league to see players actually available to you.</p>`,'help:tg','Open Waivers & trades'],
  [/link|import|connect|sleeper|espn league|yahoo/i,()=>`<p>Open <b>My League</b> → Link or update your league. It works with any league site or app: copy each team's roster page (select all, copy, paste) or upload screenshots, and BFF reads the teams and players right in your browser (it never connects to your league's site). Then pick your team to unlock your best lineup, waiver targets and trade ideas.</p>`,'league:set','Link a league'],
  [/favorite|star/i,()=>`<p>Tap the star next to any player (rankings, cheat sheet, news or his card). Starred players show up in <b>Home → Favorites</b> with this week's outlook, points after his game, status, prop lines and news, and on Home. Favorites are saved in your browser.</p>`,'players:favs','Open Favorites'],
@@ -3079,6 +3097,7 @@ function botAdd(who,html){const L=g('botlog');const d=document.createElement('di
 function botOpen(o=true){const b=g('bot');if(!b)return;BOT.open=o;b.hidden=!o;g('botfab').setAttribute('aria-expanded',o);document.body.classList.toggle('boton',o);
  if(o){if(!g('botlog').children.length){botAdd('bot',`<p>${(VOX&&VOX.intro)||"<b>Hey, it's Ben.</b> Ask me anything football: who to start, whether a trade is fair, who to pick up, a player, a team, the rules, or how BFF works."}</p>`);g('botsug').innerHTML=BOTSUG().map(q=>`<button type="button" data-botq="${esc(q)}">${esc(q)}</button>`).join('');
   aiDevCheck().then(c=>{const f=(g('botlog')||{}).firstElementChild;if(!f||!aiOn()||f.querySelector('.aisetup,.ainote'))return;
+   if(AISRV)return aiPaint();
    if(c.ok&&!AIM.dev&&!AIM.loading&&!ls('ff_aidev'))f.insertAdjacentHTML('beforeend',aiOffer(c));else if(!c.ok)f.insertAdjacentHTML('beforeend',`<p class="m ainote">${esc(c.why)} You'll get BFF's quick answers.</p>`);aiPaint();botScroll()})}
   botHead();aiPaint();aiAuto();setTimeout(()=>g('botin').focus(),50)}}
 // ---------- BFF's AI (Nov 2026): Ask BFF's conversational brain, run entirely on the visitor's device.
@@ -3114,6 +3133,12 @@ const AI_STOP=[248044,248046];   // Qwen3.5's <|endoftext|> and <|im_end|> (its 
 const AIM={dev:null,id:null,size:null,ctx:4096,loading:null,pct:0,txt:'',err:'',tps:0,check:null,lib:null,crash:false,gone:false,have:false,note:''};
 const AIPROP=SNAME;
 const aiOn=()=>ls('ff_ai')!=='0';
+// BFF's AI server (ai/worker.js: a free Cloudflare Worker running an open model, Qwen3 30B, Apache 2.0): every visitor
+// gets BFF's AI with no download. The question, the facts BFF looks up for it and the last few messages are sent to
+// answer it; nothing is stored. Off on copies with no server address (and the claude.ai copy), and for the rest of the
+// visit once the server is out of answers for the day. A downloaded on-device AI, when loaded, answers instead.
+const AISRV=HOSTED&&D.auth&&D.auth.ai?String(D.auth.ai):'';
+const aiSrvOn=()=>!!AISRV&&aiOn()&&!AIM.srvOff;
 const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
 const aiErr=(code,why)=>Object.assign(new Error(why||code),{code});
 const aiFmt=()=>FMT==='ppr'?'PPR':FMT==='half'?'half-PPR':FMT==='std'?'standard':"the league's custom";
@@ -3222,6 +3247,20 @@ function aiCheck(ans,known){const K=aiNums(known).map(x=>x.v),bad=[];
   if(!K.some(k=>x.dec?Math.abs(k-v)<=.051:Math.abs(k-v)<=.5)&&!bad.includes(x.s))bad.push(x.s)});return bad}
 // ---- calling BFF's AI: the reply streams in; while the model thinks (hard questions on fast devices) only a status shows
 const aiVis=t=>{const s=String(t||''),i=s.search(/<\/think>/i);if(i>=0)return{text:s.slice(i+8),thinking:false};if(/^\s*<think>/i.test(s))return{text:'',thinking:true};return{text:s,thinking:false}};
+async function aiSrvCall(msgs,onTok,think){let r;const last=msgs[msgs.length-1],M=msgs.slice(0,-1).concat([{role:last.role,content:last.content+(think?'':'\n/no_think')}]);
+ const ac=typeof AbortController==='function'?new AbortController():null;let tm=setTimeout(()=>ac&&ac.abort(),AIM.srvWait||25000);   // no first word in 25 s, or a reply still going after 90 s: the quick answer
+ try{r=await fetch(AISRV,{method:'POST',headers:{'Content-Type':'application/json'},signal:ac?ac.signal:undefined,body:JSON.stringify({system:AISYS.replace("running on the user's own device","running on BFF's server"),messages:M,max_tokens:think?1400:700,temperature:think?.6:.4})})}catch(e){clearTimeout(tm);throw aiErr('srv')}
+ try{return await aiSrvRead(r,onTok)}catch(e){throw e&&typeof e.code==='string'?e:aiErr('srv')}finally{clearTimeout(tm)}
+ function aiSrvRead(r,onTok){return (async()=>{
+ if(r.status===429)throw aiErr('busy');
+ if(!r.ok||!r.body){let j={};try{j=await r.json()}catch(e){}if(/neuron|quota|daily|limit|exceed|4006/i.test(String(j.detail||'')))AIM.srvOff=true;throw aiErr(AIM.srvOff?'quota':'srv')}
+ const rd=r.body.getReader(),dec=new TextDecoder(),t0=Date.now();let buf='',t='',n=0;
+ for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+  while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line.startsWith('data:'))continue;const d=line.slice(5).trim();if(!d||d==='[DONE]')continue;
+   let j;try{j=JSON.parse(d)}catch(e){continue}const c0=j.choices&&j.choices[0],piece=j.response!=null?String(j.response):c0?String((c0.delta&&c0.delta.content)||c0.text||''):'';
+   if(piece){if(!n++){clearTimeout(tm);tm=setTimeout(()=>ac&&ac.abort(),90000)}t+=piece;if(onTok){const v=aiVis(t);onTok(v.text,v.thinking,(Date.now()-t0)/1e3)}}}}
+ if(!n)throw aiErr('srv');
+ return aiClean(t)})()}}
 const aiClean=t=>{let s=String(t||'');const i=s.search(/<\/think>/i);if(i>=0)s=s.slice(i+8);return s.replace(/<think>[\s\S]*$/i,'').replace(/^\s*(assistant|ask bff)\s*:\s*/i,'').trim()};
 async function aiDevCall(msgs,onTok,think){const E=AIM.dev;if(!E)throw aiErr('nodev');
  const it=await E.chat.completions.create({messages:[{role:'system',content:AISYS}].concat(msgs),temperature:think?.6:.4,top_p:think?.95:.9,max_tokens:think?1400:520,stream:true,stop:['<|im_start|>'],extra_body:{enable_thinking:!!think}});
@@ -3244,11 +3283,11 @@ function aiVerdict(a,C,q){if(!C||C.intent!=='compare')return'';const m=/<b>((?:S
 // each), or the quick answer
 async function aiAnswer(q,C,onTok){
  const hard=['compare','trade','keep_drop','trade_value'].includes(C&&C.intent)||/\bwhy\b|explain|which (one|is better)|should i (trade|accept|drop)/i.test(q),mode=ls('ff_aithink')||'auto';
- const think=aiOn()&&(mode==='on'||(mode==='auto'&&hard&&!['lite','mini'].includes(AIM.size)&&(AIM.tps||0)>=18));
+ const dev=!!AIM.dev,think=dev&&aiOn()&&(mode==='on'||(mode==='auto'&&hard&&!['lite','mini'].includes(AIM.size)&&(AIM.tps||0)>=18));
  const hist=BOT.turns.slice(-4).map(m=>({role:m.role,content:String(m.content).slice(0,500)})),hl=hist.reduce((s,m)=>s+m.content.length,0);
- const F=aiFacts(q,C,Math.max(1200,aiBudget(think)-hl-q.length-300));
+ const F=aiFacts(q,C,dev?Math.max(1200,aiBudget(think)-hl-q.length-300):11000);
  let facts=F.txt,known=facts+'\n'+q+'\n'+BOT.turns.map(m=>m.content).join('\n'),thought=think;
- const ask=async(msgs,th)=>{try{return await aiDevCall(msgs,onTok,th)}catch(e){if(th&&e.code==='think'){thought=false;return aiDevCall(msgs,onTok,false)}throw e}};
+ const call=dev?aiDevCall:aiSrvCall,ask=async(msgs,th)=>{try{return await call(msgs,onTok,th)}catch(e){if(th&&e.code==='think'){thought=false;return call(msgs,onTok,false)}throw e}};
  const fix=(msgs,a,say)=>msgs.concat([{role:'assistant',content:String(a).slice(0,900)},{role:'user',content:say}]);
  let msgs=hist.concat([{role:'user',content:`FACTS:\n${facts}\n\nQUESTION: ${q}`}]),a=await ask(msgs,think),looked=false;
  const lk=/^\s*LOOKUP:\s*(.+)$/im.exec(a);
@@ -3262,15 +3301,15 @@ async function aiAnswer(q,C,onTok){
  if(bad.length||!a.trim())throw aiErr('unchecked',bad.join(', '));
  const vc=aiVerdict(a,C,q);
  if(vc){msgs=fix(msgs,a,`BFF's call is: ${vc}. Rewrite the answer so its verdict agrees with BFF's call, with the reasons from the FACTS.`);a=await ask(msgs,false);if(!a.trim()||aiVerdict(a,C,q)||aiCheck(a,known).length)throw aiErr('verdict')}
- return{a,ents:F.L,looked,thought}}
+ return{a,ents:F.L,looked,thought,srv:!dev}}
 // ---- the reply on screen: escaped text, **bold**, "- " lists, and a chip for every player it names
 function aiHtml(t,ents){const lines=esc(String(t).trim()).replace(/\*\*([^*\n]{1,140})\*\*/g,'<b>$1</b>').split('\n');let h='',ul=false;
  lines.forEach(l=>{const m=/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/.exec(l);if(m){if(!ul){h+='<ul>';ul=true}h+=`<li>${m[1]}</li>`}else{if(ul){h+='</ul>';ul=false}if(l.trim())h+=`<p>${l.trim()}</p>`}});if(ul)h+='</ul>';
  const named=P.filter(p=>p.n.length>5&&h.includes(esc(p.n))).sort((a,b)=>b.n.length-a.n.length).slice(0,8),ids=[...new Set(ents.map(p=>p.id).concat(named.map(p=>p.id)))].map(id=>PI[id]).filter(p=>h.includes(esc(p.n)));
  const tok=[];ids.forEach((p,i)=>{const k=`\u0001${i}\u0001`,n=esc(p.n),j=h.indexOf(n);if(j>=0){h=h.slice(0,j)+k+h.slice(j+n.length);tok.push([k,p])}});tok.forEach(([k,p])=>{h=h.replace(k,bchip(p))});
  return h}
-function aiTag(R){return `<span class="aitag">BFF's AI · ${esc(aiModelName(AIM.id))} on this device${R&&R.thought?' · thought it through':''} · checked against BFF's numbers</span>`}
-const AIWHY={nodev:'',nofacts:'',unchecked:"BFF's AI couldn't back its reply with BFF's numbers, so here is the quick answer:",verdict:"BFF's AI disagreed with BFF's numbers, so here is the quick answer:",
+function aiTag(R){if(R&&R.srv)return `<span class="aitag">BFF's AI · on BFF's server · checked against BFF's numbers</span>`;return `<span class="aitag">BFF's AI · ${esc(aiModelName(AIM.id))} on this device${R&&R.thought?' · thought it through':''} · checked against BFF's numbers</span>`}
+const AIWHY={nodev:'',nofacts:'',srv:"BFF's AI couldn't be reached just now, so here is the quick answer:",quota:"BFF's AI has answered all it can for today, so here are quick answers until tomorrow:",unchecked:"BFF's AI couldn't back its reply with BFF's numbers, so here is the quick answer:",verdict:"BFF's AI disagreed with BFF's numbers, so here is the quick answer:",
  lost:"BFF's AI stopped (this device ran out of graphics memory), so here is the quick answer:",busy:"BFF's AI had trouble with that one, so here is the quick answer:"};
 function aiWhy(e){const c=e&&e.code||'busy',w=AIWHY[c]!=null?AIWHY[c]:AIWHY.busy;return w?`<p class="m ainote">${esc(w)}</p>`:''}
 // ---- the device: can it run BFF's AI, and which size fits
@@ -3330,8 +3369,9 @@ function aiPaint(){const el=g('aiopt'),st=g('botst'),c=AIM.check;
    h+=`<p class="aiset"><span>Think first</span><select data-aithink aria-label="When BFF's AI thinks before answering">${[['auto','Auto: hard questions on fast devices'],['on','Always (slower, sharper)'],['off','Never (fastest)']].map(([v,l])=>`<option value="${v}" ${(ls('ff_aithink')||'auto')===v?'selected':''}>${l}</option>`).join('')}</select></p>`;
    if(AIM.dev||ls('ff_aidev')==='1')h+=`<p><button type="button" class="linkbtn" data-aidel>Remove BFF's AI from this device</button> <span class="m">(frees the space)</span></p>`}
   if(AIM.note)h+=`<p class="m">${esc(AIM.note)}</p>`;
+  if(AISRV)h=`<p><b>BFF's AI:</b> ${aiOn()?(AIM.dev?'running on this device (BFF\'s server is the backup)':AIM.srvOff?'out of answers for today on BFF\'s server; quick answers until tomorrow':'on, from BFF\'s server: no download needed'):'off'}. Your question, the facts BFF looks up for it and your last few messages are sent to answer it; nothing is stored. Downloading it to run on this device instead is optional.</p>`+h;
   el.querySelector('.aibody').innerHTML=h+`<label class="aichk"><input type="checkbox" data-aiclassic ${aiOn()?'':'checked'}> Quick answers only (no AI)</label><p class="m">BFF's AI writes from BFF's numbers and every number in a reply is checked against BFF's data, but it can still word things wrong. Projections are estimates, not guarantees.</p>`}
- if(st)st.innerHTML=`<i class="botdot"></i>${AIM.dev&&aiOn()?`BFF's AI · ${esc(aiModelName(AIM.id))} on this device`:AIM.loading?`Getting BFF's AI ready… ${Math.round(AIM.pct*100)}%`:esc((VOX&&VOX.status)||"Ben's football brain · quick answers")}`;
+ if(st)st.innerHTML=`<i class="botdot"></i>${AIM.dev&&aiOn()?`BFF's AI · ${esc(aiModelName(AIM.id))} on this device`:aiSrvOn()?"BFF's AI · understands any question":AIM.loading?`Getting BFF's AI ready… ${Math.round(AIM.pct*100)}%`:esc((VOX&&VOX.status)||"Ben's football brain · quick answers")}`;
  const of=document.querySelector('#botlog .aisetup');if(of&&(AIM.dev||AIM.loading||!aiOn()))of.remove()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-aidev]');if(!b)return;
  if(b.dataset.aidev==='on'){AIM.err='';AIM.crash=false;AIM.gone=false;AIM.note='';if(!aiOn())ls('ff_ai','1');aiDevLoad().catch(()=>{});aiPaint()}
@@ -3347,12 +3387,13 @@ function botSend(q){q=String(q||'').trim();if(!q||BOT.busy)return;g('botin').val
  const r=botVoice(brainAnswer(q),q);
  if(r.intent&&r.intent!=='clarify')BOT.ctx.it=r.intent;
  if(aiOn()&&AIM.dev&&r.intent!=='clarify'){botAI(q,r);return}
+ if(aiSrvOn()){botAI(q,r);return}
  const bubble=botAdd('bot','');bubble.innerHTML=r.html+(AIM.loading&&aiOn()?`<p class="m ainote">BFF's AI is still getting ready (${Math.round(AIM.pct*100)}%), so this is the quick answer.</p>`:'');
  BOT.turns.push({role:'user',content:q},{role:'assistant',content:bubble.textContent.slice(0,600)})}
 // an AI reply: thinking dots (a status while it thinks things through), the draft as it is written, then the checked
 // reply; if it fails, the quick answer with the reason
 async function botAI(q,C){BOT.busy=true;const sb=g('botsend');if(sb)sb.disabled=true;
- const bubble=botAdd('bot',`<p class="aithink" role="status"><i></i><i></i><i></i> Thinking on this device…</p>`);
+ const bubble=botAdd('bot',`<p class="aithink" role="status"><i></i><i></i><i></i> ${AIM.dev?'Thinking on this device…':'Thinking…'}</p>`);
  const onTok=(t,thinking,secs)=>{bubble.innerHTML=thinking?`<p class="aithink" role="status"><i></i><i></i><i></i> Thinking it through… ${Math.round(secs)}s</p>`:`<div class="aidraft">${aiHtml(aiClean(t),[])}</div>`;botScroll()};
  try{const R=await aiAnswer(q,C,onTok);bubble.innerHTML=aiHtml(R.a,R.ents)+aiTag(R);if(R.ents.length)BOT.ctx.ids=R.ents.slice(0,4).map(p=>p.id);BOT.turns.push({role:'user',content:q},{role:'assistant',content:R.a.slice(0,700)})}
  catch(e){let err=e;if(!e.code){const lost=/device (was )?lost|out of memory|GPUOutOfMemory|OOM/i.test(String(e&&e.message||e));err=aiErr(lost?'lost':'busy');if(lost){AIM.dev=null;AIM.err="BFF's AI stopped: this device ran out of graphics memory. Try again, or pick a smaller size."}}

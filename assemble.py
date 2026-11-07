@@ -34,6 +34,10 @@ def accounts():
     # the site owner's account id(s): approve pictures, review reports (firestore.rules checks the same ids)
     adm = [str(x) for x in (cfg.get("admins") or []) if re.fullmatch(r"[A-Za-z0-9]{20,40}", str(x))][:5]
     if adm and "firebase" in out: out["admins"] = adm
+    # BFF's AI server (ai/worker.js, a free Cloudflare Worker): Ask BFF's AI for every visitor, no download
+    ai = str(os.environ.get("BFF_AI_URL") or cfg.get("ai") or "").strip()
+    if re.fullmatch(r"https://[a-z0-9.\-]+\.workers\.dev/?|https://[a-z0-9.\-]+/[A-Za-z0-9_\-/]*", ai): out["ai"] = ai.rstrip("/")
+    elif ai: print("accounts.json: ai is not an https address; BFF's AI server stays off")
     return out
 
 

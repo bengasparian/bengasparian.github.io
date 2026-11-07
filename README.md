@@ -181,14 +181,13 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
 - **Points by every name:** once a game's official stats are out, the home page's This week list and the start/sit
   cheat sheet show each player's fantasy points for it in a badge by his name ("Final"), scored with your scoring.
 - **BFF's AI (Ask BFF):** Ask BFF talks like a person: any wording, follow-ups ("what about him next week?"),
-  comparisons, "why", small talk, all from BFF's numbers. The AI runs **entirely on the visitor's device**: an open
-  model (Qwen3.5, Apache 2.0) that the browser downloads once and runs with WebGPU through WebLLM, sized to the device
-  (Standard 4B, 2.4 GB, on computers; Lite 2B, 1.1 GB, on phones; Max 9B, 5.1 GB, for strong computers; Mini 0.8B as a
-  fallback). Nothing typed into Ask BFF leaves the device, and there is nothing for the site owner to set up or pay.
-  The page hands the model the facts for the question, and **every number in a reply is checked against those facts**
-  before it shows (a made-up number gets one retry, then the quick answer); on start/sit questions the verdict must
-  also match BFF's call. Until a visitor downloads it, on devices that can't run it, or with "Quick answers only", the
-  classic Ask BFF answers.
+  comparisons, "why", small talk, all from BFF's numbers. Since Nov 7, 2026 it answers through **BFF's AI server** (an
+  open model, Qwen3 30B, on a free Cloudflare Worker; see **BFF's AI** below), so it works on every phone and computer
+  with nothing to download. The page hands the model the facts for the question, and **every number in a reply is
+  checked against those facts** before it shows (a made-up number gets one retry, then the quick answer); on start/sit
+  questions the verdict must also match BFF's call. When the day's free answers run out, when the server can't be
+  reached, or with "Quick answers only", the classic Ask BFF answers. A visitor can instead run an AI entirely on their
+  own device (Qwen3.5 through WebLLM, downloaded once; needs WebGPU), and then nothing typed leaves the device.
 - **Classic Ask BFF, powered by BFF Brain, in Ben's voice:** BFF's own question model, trained here and running inside
   the page (no outside AI and no key): a logistic-regression intent model over words, word pairs and letter groups (so
   typos still work), trained on about 16,200 football questions (`research/brain/`), that sorts a question into 28
@@ -345,6 +344,14 @@ right when the starter comes back. BFF checks for that and a few other things, a
     agree: in Nov 2026 (12-team PPR 1QB) the best quarterback sat about where the 11th-best receiver did.
   - **Running backs count 10% more:** good ones are scarcer and injuries hit them most, so teams need more of them than
     their lineup slots say; they were the one position valued below what they added.
+  - **Tight ends: the best three count 10% more, the others 5% less** (Nov 2026, `research/bt_tevalue.py`; "three" is
+    for 12 teams and scales with league size). Elite tight ends are scarce, but tight ends as a group were already
+    valued a little high: in the backtest the three best added about 20% more than their value said, and tight ends 4-12
+    about 20% less. Raising every tight end (x1.05 to x1.3) made every measure worse, so it is not used. The kept rule
+    was more accurate overall on both simulated-league truths (rank 0.443 -> 0.445 and 0.453 -> 0.454; R² 0.267 ->
+    0.269 and 0.274 -> 0.276; lopsided trades 72.9% -> 73.0% and 73.3% unchanged), better in 2024 and 2025 and about
+    even in 2023 (`research/results_tevalue.json`). On Nov 7, 2026 it moved Trey McBride 60.4 -> 63.2, Brock Bowers
+    39.7 -> 42.3 and George Kittle 38.4 -> 40.2. What still holds Bowers back is his projection, not his position.
 
   Both together, with realistic rosters (half the teams hold one quarterback and stream): lopsided trades called right
   72.5% -> 73.3% (better in every season, and with two quarterbacks a team too), rank 0.445 -> 0.453, R² 0.263 ->
@@ -560,7 +567,9 @@ server code, no card on file.
   explicit content, hate slogans, phone numbers, email addresses and links to unknown sites. One post every 20 seconds
   at most; three reports hide a post until the site owner reviews it; the author or the site owner deletes.
 - **Spin Draft leaderboard:** members' best score ever and today's daily challenge (the first try counts), by scoring
-  format, in the Spin Draft and the Community tab, under their usernames.
+  format, in the Spin Draft and the Community tab, under their usernames. A score that could not be saved (signed out,
+  offline, no username yet) waits on the device and is sent at the next sign-in; the game says when a score is saved
+  or why it is waiting.
 - **Sign-up prompt:** after 5 minutes of use without an account, BFF asks the visitor to create one (or sign in); the
   prompt cannot be closed without an account. Search engines, ad crawlers and automated browsers never see it, so
   search listings and ads keep working.
@@ -668,18 +677,32 @@ Gambling Helpline.
 - **To follow real sportsbook lines directly**, a licensed odds feed is needed (for example The Odds API, with a free
   tier and your own key); BFF does not scrape sportsbooks.
 
-## BFF's AI (nothing to set up)
-Ask BFF's AI runs on each visitor's own device, so there is no server, account, key or bill. In Ask BFF a visitor taps
-**Download BFF's AI**; the browser downloads WebLLM (from jsDelivr), the model's engine (GitHub) and its files (Hugging
-Face) once, keeps them in the browser's storage, and from then on loads it from the device when Ask BFF opens (it never
-downloads on its own). It needs WebGPU: recent Chrome or Edge on a computer, Chrome on Android, or Safari 26 and later.
-- **Sizes** (Qwen3.5, WebLLM 0.2.86's prebuilt models): Max 9B (5.1 GB; needs 16 GB of memory or an 8 GB graphics
-  card), Standard 4B (2.4 GB, the pick for computers), Lite 2B (1.1 GB, the pick for phones and devices reporting under
-  8 GB of memory) and Mini 0.8B (0.45 GB, if Lite can't run). "Remove BFF's AI from this device" frees the space.
-- **How it answers:** BFF's rules and playbook, the facts for the question, up to two recent exchanges, then the reply,
-  streamed. Every number is checked against the facts and a start/sit verdict against BFF's call (one retry each, then
-  the quick answer).
-- Tested: `tests/aitest.py` (the page with a stand-in engine). The real model answers only in a visitor's browser.
+## BFF's AI (a free Cloudflare Worker, about 5 minutes)
+Ask BFF understands questions in any wording through **BFF's AI server**, `ai/worker.js`: a Cloudflare Worker that runs
+an open model, Qwen3 30B-A3B (Apache 2.0, `@cf/qwen/qwen3-30b-a3b-fp8`), on Cloudflare Workers AI. The page sends BFF's
+rules, the facts for the question (BFF's numbers, calls and news for the players, teams and games it names) and the
+last few messages; the reply streams back.
+- **Checked against BFF:** every number in a reply must be in the facts and a start/sit verdict must match BFF's call
+  (one retry each, then BFF's quick answer with the reason). If it needs a player the question did not name, it asks
+  for him (LOOKUP) and gets his facts.
+- **Free:** the free plan includes 10,000 Neurons a day (Cloudflare's pricing, Nov 2026: 4,625 Neurons per million
+  tokens read and 30,475 per million written for this model), roughly 300 answers a day. Past that, Workers AI refuses
+  requests until 00:00 UTC (on the free plan it never bills), and Ask BFF gives its quick answers with a note until
+  then. More needs the Workers Paid plan ($0.011 per 1,000 Neurons over the allowance).
+- **Limits:** only `https://bengasparian.github.io` pages may call it (browsers enforce this; a script can fake it, and
+  the most it can do is use up the day's allowance), requests and replies are capped, and one visitor gets about 20
+  questions in 10 minutes (counted on each Cloudflare server, so it is a rough cap).
+- **Privacy:** the Worker stores nothing and logs no questions; Cloudflare does not train models on Workers AI content
+  or keep it after answering ([Cloudflare: data usage](https://developers.cloudflare.com/workers-ai/platform/data-usage/)).
+  The site's privacy policy and Ask BFF's settings say what is sent. A visitor can choose **Quick answers only**.
+- **Setup:** [dash.cloudflare.com](https://dash.cloudflare.com) > **Workers & Pages > Create >
+  Worker**, name it `bff-ai`, **Deploy**; **Settings > Bindings > Add > Workers AI**, name `AI`; **Edit code**: replace
+  the code with `ai/worker.js`, **Deploy**. Put its address in `accounts.json` as `"ai"`. Opening the address in a browser
+  shows `BFF AI: alive`.
+- Without an address (a copy of the site, or the claude.ai copy) Ask BFF gives quick answers, and a visitor with a
+  capable device can still download an on-device AI (WebLLM; Qwen3.5 0.8B to 9B, 0.45 to 5.1 GB once, needs WebGPU).
+- Tested: `tests/aisrvtest.py` (a stand-in for the server: what is sent, streaming, the checks, LOOKUP, follow-ups,
+  out of answers, unreachable, quick answers only, copies without a server) and `tests/aitest.py` (the on-device AI).
 
 ## Updating an existing site to this version
 If Claude has access to your repository it pushes updates itself. To do it by hand, upload (replace) these files:
