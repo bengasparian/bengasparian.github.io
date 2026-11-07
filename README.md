@@ -695,7 +695,7 @@ last few messages; the reply streams back.
 - **Privacy:** the Worker stores nothing and logs no questions; Cloudflare does not train models on Workers AI content
   or keep it after answering ([Cloudflare: data usage](https://developers.cloudflare.com/workers-ai/platform/data-usage/)).
   The site's privacy policy and Ask BFF's settings say what is sent. A visitor can choose **Quick answers only**.
-- **Setup:** [dash.cloudflare.com](https://dash.cloudflare.com) > **Workers & Pages > Create >
+- **Setup** (done Nov 7, 2026; the first live test answered in 0.3 s): [dash.cloudflare.com](https://dash.cloudflare.com) > **Workers & Pages > Create >
   Worker**, name it `bff-ai`, **Deploy**; **Settings > Bindings > Add > Workers AI**, name `AI`; **Edit code**: replace
   the code with `ai/worker.js`, **Deploy**. Put its address in `accounts.json` as `"ai"`. Opening the address in a browser
   shows `BFF AI: alive`.

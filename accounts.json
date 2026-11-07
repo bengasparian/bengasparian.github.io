@@ -1,1 +1,10 @@
-{"firebase": {"apiKey": "AIzaSyDWZMIho2tUlmbHcy9ZS6iJSx0KzPjBBCI", "projectId": "bff-accounts"}, "admins": ["O1iKoNpqRmTKsUHFt3rzhArUwBt2"]}
+{
+ "firebase": {
+  "apiKey": "AIzaSyDWZMIho2tUlmbHcy9ZS6iJSx0KzPjBBCI",
+  "projectId": "bff-accounts"
+ },
+ "admins": [
+  "O1iKoNpqRmTKsUHFt3rzhArUwBt2"
+ ],
+ "ai": "https://bff-ai.ben-gasparian.workers.dev"
+}
