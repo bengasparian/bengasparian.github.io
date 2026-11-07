@@ -265,7 +265,7 @@ _RI={pid_:(pd.Timestamp(v_['d']),v_['s']) for pid_,v_ in (_NST.get('reinstated')
 _SPEC=_re.compile(r"\b(could|may|might|if|would|possibly|potentially|considering|weighing|fears?|feared)\b",_re.I)
 _TLIR=_re.compile(r"\b(placed on|land(?:s|ing)? on|go(?:es|ing)? on|head(?:s|ed|ing)? to|to) (?:the )?(?:ir|injured reserve)\b",_re.I)
 _TLIND=_re.compile(r"\b(out indefinitely|(?:miss|misses|missing) (?:an? )?(?:extended|significant|extensive|lengthy) (?:period|time|stretch|amount)|extended absence)\b",_re.I)
-NEWS_TL=0
+NEWS_TL=0; _GS={}
 _now=pd.Timestamp.now(tz='UTC'); _TL={}
 for pid_,v_ in (_NST.get('tl') or {}).items():
     try:
@@ -326,11 +326,19 @@ try:
         if isinstance(_g.gametime,str) and isinstance(_g.gameday,str):
             _k=pd.Timestamp(datetime.datetime.strptime(f"{_g.gameday} {_g.gametime}","%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo('America/New_York')))
             for _t in (_g.home_team,_g.away_team): _KT[(_t,int(_g.week))]=_k
+    # (kept in news_state.json ('gs') until that game, because a story leaves the news feed within about two days: Nov 6,
+    # "Sam Darnold Ruled Out vs. Cardinals" (Nov 4) had left the feed before the Friday data update read it)
     _SEV={'Questionable':1,'Doubtful':2,'Out':3}; NEWS_GS=0
+    for pid_,v_ in (_NST.get('gs') or {}).items():
+        try: _GS[pid_]=(v_['s'],pd.Timestamp(v_['d']),v_.get('src') or 'news',int(v_['wk']))
+        except Exception: pass
     for it_ in sorted(_nj.get('items') or [],key=lambda x:str(x.get('d') or '')):
-        if it_.get('st') not in ('out','doubtful'): continue
         h_=str(it_.get('h') or ''); d_=pd.to_datetime(it_.get('d'),utc=True,errors='coerce')
-        if pd.isna(d_) or _now-d_>pd.Timedelta(days=8) or _SPEC.search(h_) or _ING.search(h_) or _TLS.search(h_) or _re.search(r"\b(not|n't|never)( yet)?( been)? ruled out|\bnot expected to miss",h_,_re.I): continue
+        if pd.isna(d_): continue
+        for pid_ in (it_.get('sk') or []) if it_.get('st')=='ok' else []:   # a later "set to play" ends a kept ruling
+            if pid_ in _GS and d_>_GS[pid_][1]: _GS.pop(pid_,None)
+        if it_.get('st') not in ('out','doubtful'): continue
+        if _now-d_>pd.Timedelta(days=8) or _SPEC.search(h_) or _ING.search(h_) or _TLS.search(h_) or _re.search(r"\b(not|n't|never)( yet)?( been)? ruled out|\bnot expected to miss",h_,_re.I): continue
         who_=[(x,'Out') for x in it_.get('so') or []]+[(x,'Doubtful') for x in it_.get('sd') or []] if 'so' in it_ else ([(it_['p'][0],'Out')] if len(it_.get('p') or [])==1 and it_.get('st')=='out' else [])
         for pid_,s_ in who_:
             if pid_ not in cur.index: continue
@@ -341,16 +349,22 @@ try:
             if any(d_-pd.Timedelta(hours=8)<=kk_<=_now for (tt_,ww_),kk_ in _KT.items() if tt_==tm_): continue   # from during a game
             mw_=_re.search(r"\bweek (\d+)",h_,_re.I)
             if mw_ and int(mw_.group(1))!=nw_: continue
-            old_=STATUS.get(pid_) or {}
-            if _SEV.get(old_.get('s'),0)>=_SEV[s_]: continue
-            if old_.get('src')=='report' and d_<k_-pd.Timedelta(hours=44): continue
-            STATUS[pid_]={'s':s_,'src':'news','d':old_.get('d'),'n':f"Reported {'ruled out' if s_=='Out' else 'doubtful'} for week {nw_} ({it_.get('s') or 'news'}, {d_.strftime('%b')} {d_.day})"}; NEWS_GS+=1
+            if pid_ not in _GS or d_>=_GS[pid_][1]: _GS[pid_]=(s_,d_,it_.get('s') or 'news',nw_)
+    for pid_,(s_,d_,src_,wk_) in list(_GS.items()):
+        tm_=IDT.get(cur.at[pid_,'team'],cur.at[pid_,'team']) if pid_ in cur.index else None; k_=_KT.get((tm_,wk_))
+        if tm_ not in NXW or NXW[tm_]!=wk_ or k_ is None or _now>=k_: _GS.pop(pid_,None); continue   # that game is over (or he moved)
+        old_=STATUS.get(pid_) or {}
+        if _SEV.get(old_.get('s'),0)>=_SEV[s_]: continue
+        if old_.get('src')=='report' and d_<k_-pd.Timedelta(hours=44): continue
+        STATUS[pid_]={'s':s_,'src':'news','d':old_.get('d'),'n':f"Reported {'ruled out' if s_=='Out' else 'doubtful'} for week {wk_} ({src_}, {d_.strftime('%b')} {d_.day})"}; NEWS_GS+=1
     if NEWS_GS: print('injuries: next-game statuses from the news for',NEWS_GS,'players')
     if NEWS_TL: print('injuries: timelines from the news for',NEWS_TL,'players')
 except Exception as _e: print('news timelines unavailable:',_e)
 try:
     json.dump({'reinstated':{pid_:{'d':d_.isoformat(),'s':s_} for pid_,(d_,s_) in sorted(_RI.items())},
-               'tl':{pid_:{'n':n_,'d':d_.isoformat(),'s':s_,'hi':hi_,'k':kd_,'spec':int(sp_)} for pid_,(n_,d_,s_,hi_,kd_,sp_) in sorted(_TL.items())}},open('news_state.json','w'),indent=1)
+               'tl':{pid_:{'n':n_,'d':d_.isoformat(),'s':s_,'hi':hi_,'k':kd_,'spec':int(sp_)} for pid_,(n_,d_,s_,hi_,kd_,sp_) in sorted(_TL.items())},
+               'gs':{pid_:{'s':s_,'d':d_.isoformat(),'src':src_,'wk':wk_} for pid_,(s_,d_,src_,wk_) in sorted(_GS.items())},
+               'qs':_NST.get('qs') or {}},open('news_state.json','w'),indent=1)
     if _RI: print('reinstated from the exempt list (kept until the roster catches up):',', '.join(sorted(str(cur.at[p_,'full_name']) if p_ in cur.index and 'full_name' in cur.columns else p_ for p_ in _RI)))
 except Exception as _e: print('news state not saved:',_e)
 print('injury status:',sum(v['s']=='Out' for v in STATUS.values()),'out,',sum(v['s']=='Doubtful' for v in STATUS.values()),'doubtful,',sum(v['s']=='Questionable' for v in STATUS.values()),'questionable,',sum(v['src']=='expected' for v in STATUS.values()),'of them expected from the report')
@@ -532,9 +546,59 @@ for pid in pool:
 import re as _re
 def _qrk(p):
     m_=_re.match(r'QB(\d+)$',p.get('role') or ''); return int(m_.group(1)) if m_ else 9
+# a quarterback named the starter for his team's next game in the news ("Browns name starting QB for Week 9 game vs.
+# Saints: Shedeur Sanders gets nod over Deshaun Watson", Nov 6 2026: BFF still had Watson starting): that week he is the
+# expected starter and the depth chart's starter is projected 0 for it (later weeks stay as they were). Only when the
+# name comes right before the words ("Sanders gets nod", "Lock to start"), never a negated one or one from during a
+# game, and a "week N" must be the next game. Kept in news_state.json ('qs') until that game.
+_STR=_re.compile(r"\b(gets?|got|earns?|earned|given|draws?|making|makes?) (the |another |his first |a |his )?(nod|start)\b|\b(will|to|set to|expected to|slated to|in line to|poised to|would) start\b|\bnamed (the )?(starter|starting (qb|quarterback))\b|\bwill be (the )?starter\b|\bstarting (at qb|at quarterback)\b",_re.I)
+NQS={}
+try:
+    from zoneinfo import ZoneInfo
+    _QN={p['id']:p for p in players if p['p']=='QB'}; _KQ={}
+    for _g in gm[gm.season==SEASON].itertuples():
+        if isinstance(_g.gametime,str) and isinstance(_g.gameday,str):
+            _k=pd.Timestamp(datetime.datetime.strptime(f"{_g.gameday} {_g.gametime}","%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo('America/New_York')))
+            for _t in (_g.home_team,_g.away_team): _KQ[(_t,int(_g.week))]=_k
+    for tm_,v_ in ((_NST.get('qs') if isinstance(_NST,dict) else None) or {}).items():
+        try: NQS[tm_]=(v_['pid'],pd.Timestamp(v_['d']),v_.get('src') or 'news',int(v_['wk']))
+        except Exception: pass
+    _nq=json.load(open('news.json')) if os.path.exists('news.json') else {}
+    _nowq=pd.Timestamp.now(tz='UTC')
+    for it_ in sorted(_nq.get('items') or [],key=lambda x:str(x.get('d') or '')):
+        h_=str(it_.get('h') or ''); d_=pd.to_datetime(it_.get('d'),utc=True,errors='coerce')
+        if pd.isna(d_) or _nowq-d_>pd.Timedelta(days=8) or not _STR.search(h_): continue
+        for pid_ in it_.get('p') or []:
+            q_=_QN.get(pid_)
+            if not q_: continue
+            nm_=_re.search(_re.escape(q_['n']),h_,_re.I)
+            if not nm_ or not any(0<=m_.start()-nm_.end()<=2 for m_ in _STR.finditer(h_)): continue
+            tm_=q_['t']; nw_=q_.get('nw'); k_=_KQ.get((tm_,nw_))
+            if k_ is None or not d_<k_ or _nowq>=k_: continue
+            if any(d_-pd.Timedelta(hours=8)<=kk_<=_nowq for (tt_,ww_),kk_ in _KQ.items() if tt_==tm_): continue
+            mw_=_re.search(r"\bweek (\d+)",h_,_re.I)
+            if mw_ and int(mw_.group(1))!=nw_: continue
+            if tm_ not in NQS or d_>=NQS[tm_][1]: NQS[tm_]=(pid_,d_,it_.get('s') or 'news',nw_)
+    for tm_,(pid_,d_,src_,wk_) in list(NQS.items()):
+        q_=_QN.get(pid_); k_=_KQ.get((tm_,wk_))
+        if not q_ or q_['t']!=tm_ or q_.get('nw')!=wk_ or k_ is None or _nowq>=k_: NQS.pop(tm_,None)
+    if NQS: print('quarterbacks: named starters from the news:',', '.join(f"{tm_} {_QN[v_[0]]['n']}" for tm_,v_ in sorted(NQS.items())))
+    _st=json.load(open('news_state.json')) if os.path.exists('news_state.json') else {}
+    _st['qs']={tm_:{'pid':pid_,'d':d_.isoformat(),'src':src_,'wk':wk_} for tm_,(pid_,d_,src_,wk_) in sorted(NQS.items())}
+    json.dump(_st,open('news_state.json','w'),indent=1)
+except Exception as _e: print('named starters unavailable:',_e); NQS={}
 for tm_ in sorted({p['t'] for p in players if p['p']=='QB'}):
     Q_=sorted([p for p in players if p['t']==tm_ and p['p']=='QB'],key=lambda p:(_qrk(p),-sum(g_[2] for g_ in p.get('gl') or [])))
     sor=next((p for p in Q_ if p.get('inj')!='IR'),None); ns=next((p for p in Q_ if p.get('inj') not in ('Out','Doubtful','IR')),None)
+    nmd=next((p for p in Q_ if tm_ in NQS and p['id']==NQS[tm_][0] and p.get('inj') not in ('Out','Doubtful','IR')),None)
+    if nmd is not None and nmd is not ns:   # named the starter in the news: he starts the next game, the other one sits
+        old_ns=ns; ns=nmd
+        if old_ns is not None and old_ns is not sor: old_ns['proj']=0.0; old_ns['qbb']=1
+        if sor is not None and sor is not ns:
+            if (sor.get('proj') or 0)>0 and sor.get('pj0') is None: sor['pj0']=sor['proj']
+            sor['proj']=0.0; sor['adjt']=0.0; sor['qbn']=1
+            for row in sor['ros']:
+                if row[0]==sor['nw']: row[2]=0.0
     for p in Q_:
         if p is sor or p is ns: continue
         if (p.get('proj') or 0)>0 and p.get('pj0') is None: p['pj0']=p['proj']   # kept so the page can promote him if the starter is ruled out later

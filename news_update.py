@@ -28,7 +28,7 @@ ON = (os.environ.get('BFF_NEWS_LINKS') or 'on').strip().lower() not in ('off', '
 COLLEGE = re.compile(r'\b(college football|cfb|ncaa|heisman|big ten|big 12|\bsec\b|\bacc\b|cfp|recruit|bowl game|draft prospect|mock draft 20\d\d|top 25)\b', re.I)
 # (Nov 2026: "Todd Monken: Deshaun Watson not ruled out yet, but Shedeur Sanders preparing to start" was tagged as Watson
 # ruled out: a negated "ruled out" / "expected to miss" is not a status)
-OUT_RE = re.compile(r"((?<!not )(?<!n't )(?<!not been )(?<!n't been )(?<!not yet )(?<!never )(?<!not yet been )ruled out|(?<!n't )(?<!not )(?<!cannot )\brules? out\b|won't play|will not play|will miss|(?<!not )(?<!n't )expected to miss|out for (the )?(season|year|week|game|\w+ weeks?)|out indefinitely|season[- ]ending|"
+OUT_RE = re.compile(r"((?<!not )(?<!n't )(?<!not been )(?<!n't been )(?<!not yet )(?<!never )(?<!not yet been )ruled out|(?<!n't )(?<!not )(?<!cannot )\brules? out\b|won't play|will not play|will miss|(?<!not )(?<!n't )expected to miss|out for (the )?(season|year|week|game|\w+ weeks?)|\bout for (the )?[\w.]+( [\w.]+)? (in|for) week \d+|out indefinitely|season[- ]ending|"
                     r"(miss|misses|missing|out for) (the )?(rest|remainder) of (the )?(season|year)|done for the (season|year)|"
                     r"placed on (ir|injured reserve)|lands on (ir|injured reserve)|to (ir|injured reserve)\b|inactive for)", re.I)
 DOUBT_RE = re.compile(r"\bdoubtful\b(?!\s+to return)", re.I)

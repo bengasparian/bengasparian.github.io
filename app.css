@@ -2078,3 +2078,4 @@ main h2:not(.artbody h2):not(.cvh),aside h2,.gsh h2{font-family:var(--hand)!impo
 .trade .trwhy{margin-top:6px;line-height:1.45}.trade .trwhy b{color:var(--acc)}
 /* My League offers stack (the 3-column .trade grid is for the give / arrow / get rows elsewhere) */
 .trade.lgoffer{display:block}
+.sheettiles button:last-child:nth-child(odd){grid-column:1/-1}

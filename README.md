@@ -115,10 +115,13 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   1999, draft one of that team's real fantasy scorers into an open spot (QB, RB, RB, WR, WR, TE, FLEX), and build the
   highest-scoring lineup in seven spins, with two re-spins. The end screen shows your total, how close you came to the
   best lineup your spins allowed, your best score, and a result to copy and share. **Daily challenge** gives everyone the
-  same spins that day, with a theme in an 8-day rotation: throwback seasons (1999-2005), the 2010s, the 2020s, one
-  division, one conference, one franchise, one season, or no re-spins (divisions and conferences are today's); it shows
-  the theme, that the first finished game counts for the leaderboard, and when the next one starts (midnight Eastern).
-  PPR, half PPR or standard. Points are each player's regular-season total for that team that
+  same spins that day under its own rule, in a 12-day rotation: running backs only (seven RB spots), air raid (a QB,
+  four receivers, two tight ends), two quarterbacks, rookie seasons only, one franchise, one division, one conference,
+  one season, the oldest seasons (1999-2004: the game's stats start in 1999), the 2010s, the 2020s, or no re-spins
+  (divisions and conferences are today's). Your first game that day gets the day's spins and counts for the
+  leaderboard; once you have started it, replays are practice with new spins under the same rule (so they never show
+  the same teams in the same order). It shows the rule and when the next one starts (midnight Eastern). PPR, half PPR
+  or standard. Points are each player's regular-season total for that team that
   season from nflverse's weekly stats, with the franchise named as it was then. Checked: every weekly row of every
   season re-adds to its points with the stated rules, and famous seasons match their published totals (Cooper Kupp
   2021: 439.5 PPR; Christian McCaffrey 2023: 391.3). `game.json` is rebuilt only when a season finishes.
@@ -267,7 +270,10 @@ The Terms of Use (section 5a) and Privacy Policy (Advertising) already describe 
   counts, never a guess, an in-game ruling ("rest of the game"), a report from during one of his games, or a report
   naming another week; it never softens a status, and an official game status wins unless the news came after the day
   before kickoff. A negated ruling ("Deshaun Watson not ruled out yet") is not a ruling, for the projections, the
-  headline tags and BFF Originals.
+  headline tags and BFF Originals. These rulings are kept in `news_state.json` until that game (a story leaves the
+  news feed within about two days). A quarterback **named the starter** for the next game in the news ("Shedeur Sanders
+  gets nod over Deshaun Watson") is the expected starter for it and the depth chart's starter is projected 0 that week
+  (his later weeks stay); only when the name comes right before the words ("Sanders gets nod", "Lock to start").
 - **Who is in the player pool:** players on an NFL team (active, reserve, inactive, practice squad or exempt on the
   newest weekly roster, then the season roster, then the depth charts), plus this year's rookies picked in the top 100.
   A player on the **commissioner's exempt list** is projected 0 and shown as "not allowed to play", until a news report
