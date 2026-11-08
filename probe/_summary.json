@@ -1,0 +1,268 @@
+{
+ "nba_scoreboard": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
+  "code": 200,
+  "bytes": 137483,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_teams": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams",
+  "code": 200,
+  "bytes": 134851,
+  "acao": null,
+  "ctype": "application/json"
+ },
+ "nba_team": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13",
+  "code": 200,
+  "bytes": 20911,
+  "acao": null,
+  "ctype": "application/json"
+ },
+ "nba_roster": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+  "code": 200,
+  "bytes": 92825,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_teamstats": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/statistics",
+  "code": 200,
+  "bytes": 12417,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_schedule": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/schedule",
+  "code": 200,
+  "bytes": 900580,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_news_team": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/news?team=13",
+  "code": 200,
+  "bytes": 25708,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_news": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/news",
+  "code": 200,
+  "bytes": 31779,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_injuries": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries",
+  "code": 200,
+  "bytes": 993858,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_standings": {
+  "url": "https://site.api.espn.com/apis/v2/sports/basketball/nba/standings",
+  "code": 200,
+  "bytes": 164633,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_athlete": {
+  "url": "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/1966",
+  "code": 200,
+  "bytes": 142786,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_athlete_stats": {
+  "url": "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/1966/stats",
+  "code": 200,
+  "bytes": 48572,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_athlete_overview": {
+  "url": "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/1966/overview",
+  "code": 200,
+  "bytes": 218576,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_athlete_gamelog": {
+  "url": "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/1966/gamelog",
+  "code": 200,
+  "bytes": 99857,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "nba_powerindex": {
+  "url": "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/seasons/2027/powerindex",
+  "code": 200,
+  "bytes": 322350,
+  "acao": "*",
+  "ctype": "application/json;charset=utf-8"
+ },
+ "nba_draft": {
+  "url": "https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/draft",
+  "code": 200,
+  "bytes": 14178,
+  "acao": null,
+  "ctype": "application/json"
+ },
+ "cbb_scoreboard": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
+  "code": 200,
+  "bytes": 48252,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "cbb_teams": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams?limit=500",
+  "code": 200,
+  "bytes": 1484842,
+  "acao": null,
+  "ctype": "application/json"
+ },
+ "cbb_team": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/150",
+  "code": 200,
+  "bytes": 16891,
+  "acao": null,
+  "ctype": "application/json"
+ },
+ "cbb_roster": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/150/roster",
+  "code": 200,
+  "bytes": 59303,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "cbb_teamstats": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/150/statistics",
+  "code": 200,
+  "bytes": 10822,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "cbb_schedule": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/150/schedule",
+  "code": 200,
+  "bytes": 314905,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "cbb_rankings": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/rankings",
+  "code": 200,
+  "bytes": 301236,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "cbb_standings": {
+  "url": "https://site.api.espn.com/apis/v2/sports/basketball/mens-college-basketball/standings?group=2",
+  "code": 200,
+  "bytes": 317973,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "cbb_news": {
+  "url": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/news",
+  "code": 200,
+  "bytes": 35840,
+  "acao": "*",
+  "ctype": "application/json;charset=UTF-8"
+ },
+ "cbb_powerindex": {
+  "url": "https://sports.core.api.espn.com/v2/sports/basketball/leagues/mens-college-basketball/seasons/2027/powerindex",
+  "code": 200,
+  "bytes": 247172,
+  "acao": "*",
+  "ctype": "application/json;charset=utf-8"
+ },
+ "torvik_players_2026": {
+  "url": "https://barttorvik.com/getadvstats.php?year=2026&csv=1",
+  "code": 403,
+  "bytes": 919,
+  "acao": null,
+  "ctype": "text/html"
+ },
+ "torvik_players_2027": {
+  "url": "https://barttorvik.com/getadvstats.php?year=2027&csv=1",
+  "code": 403,
+  "bytes": 919,
+  "acao": null,
+  "ctype": "text/html"
+ },
+ "torvik_teams_2027": {
+  "url": "https://barttorvik.com/2027_team_results.json",
+  "code": 403,
+  "bytes": 919,
+  "acao": null,
+  "ctype": "text/html"
+ },
+ "torvik_trank": {
+  "url": "https://barttorvik.com/trank.php?year=2027&json=1",
+  "code": 403,
+  "bytes": 919,
+  "acao": null,
+  "ctype": "text/html"
+ },
+ "r247_2026": {
+  "url": "https://247sports.com/season/2026-basketball/compositerecruitrankings/",
+  "code": 406,
+  "bytes": 0,
+  "acao": "https://bengasparian.github.io",
+  "ctype": null
+ },
+ "r247_2025": {
+  "url": "https://247sports.com/season/2025-basketball/compositerecruitrankings/?ViewPath=~%2FViews%2FSkyNet%2FPlayerSportRanking%2F_SimpleSetForSeason.ascx&Page=2",
+  "code": 406,
+  "bytes": 0,
+  "acao": "https://bengasparian.github.io",
+  "ctype": null
+ },
+ "tank_mock": {
+  "url": "https://www.tankathon.com/mock_draft",
+  "code": 200,
+  "bytes": 193299,
+  "acao": null,
+  "ctype": "text/html; charset=utf-8"
+ },
+ "tank_board": {
+  "url": "https://www.tankathon.com/big_board",
+  "code": 200,
+  "bytes": 688132,
+  "acao": null,
+  "ctype": "text/html; charset=utf-8"
+ },
+ "ncaa_net": {
+  "url": "https://ncaa-api.henrygd.me/rankings/basketball-men/d1/ncaa-mens-basketball-net-rankings",
+  "code": 200,
+  "bytes": 74438,
+  "acao": null,
+  "ctype": "application/json"
+ },
+ "wiki_parse": {
+  "url": "https://en.wikipedia.org/w/api.php?action=parse&page=LeBron_James&prop=wikitext&section=0&format=json&origin=*",
+  "code": 200,
+  "bytes": 14893,
+  "acao": "*",
+  "ctype": null
+ },
+ "wiki_summary": {
+  "url": "https://en.wikipedia.org/api/rest_v1/page/summary/Duke_Blue_Devils_men%27s_basketball",
+  "code": 200,
+  "bytes": 2557,
+  "acao": "*",
+  "ctype": null
+ },
+ "nbadraftnet": {
+  "url": "https://www.nbadraft.net/ranking/bigboard/",
+  "code": 200,
+  "bytes": 189720,
+  "acao": null,
+  "ctype": "text/html; charset=UTF-8"
+ }
+}
