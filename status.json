@@ -1,8 +1,8 @@
 {
  "date": "2026-11-08",
- "failing_since": null,
+ "failing_since": "2026-11-08",
  "last_good": "2026-11-08",
- "ok": true,
+ "ok": false,
  "season": {
   "asof": "2026-11-08",
   "phase": "season",
@@ -10,15 +10,15 @@
   "season": 2026
  },
  "steps": {
-  "articles": "success",
-  "calls": "success",
-  "check": "success",
-  "fetch": "success",
-  "game": "success",
-  "kdst": "success",
-  "lines": "success",
-  "page": "success",
-  "produce": "success",
-  "save": "success"
+  "articles": "skipped",
+  "calls": "skipped",
+  "check": "skipped",
+  "fetch": "failure",
+  "game": "skipped",
+  "kdst": "skipped",
+  "lines": "skipped",
+  "page": "skipped",
+  "produce": "skipped",
+  "save": "skipped"
  }
 }
