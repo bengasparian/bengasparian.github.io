@@ -1,5 +1,5 @@
 {
-"at": "2026-11-04",
+"at": "2026-11-10",
 "p": {
 "00-0023459": {
 "f": "00-0023459.webp",
@@ -11,7 +11,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.416,
 0.076,
@@ -31,7 +31,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.33,
 0.119,
@@ -40,6 +40,26 @@
 ],
 "sv": 2,
 "cut": "cut/00-0026158.webp"
+},
+"00-0026300": {
+"f": "00-0026300.webp",
+"a": "All-Pro Reels",
+"lic": "CC BY-SA 4.0",
+"lu": "https://creativecommons.org/licenses/by-sa/4.0",
+"src": "https://commons.wikimedia.org/wiki/File:Commanders_Training_Camp_-_54752501999.jpg",
+"ts": "2025-08-29 23:48:56",
+"m": "cropped and resized, CC BY-SA",
+"via": "wikidata",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": [
+0.405,
+0.129,
+0.176,
+0.155
+],
+"sv": 2,
+"cut": "cut/00-0026300.webp"
 },
 "00-0026498": {
 "f": "00-0026498.webp",
@@ -51,7 +71,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.358,
 0.149,
@@ -71,7 +91,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.448,
 0.084,
@@ -91,7 +111,7 @@
 "m": "cropped and resized",
 "via": "category",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.374,
 0.307,
@@ -111,7 +131,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.142,
 0.174,
@@ -131,7 +151,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.207,
 0.089,
@@ -151,7 +171,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.259,
 0.129,
@@ -171,7 +191,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.351,
 0.072,
@@ -191,7 +211,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.315,
 0.115,
@@ -211,7 +231,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.381,
 0.122,
@@ -231,7 +251,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.246,
 0.074,
@@ -251,7 +271,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.494,
 0.176,
@@ -271,7 +291,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.337,
 0.189,
@@ -291,7 +311,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.283,
 0.184,
@@ -311,7 +331,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.37,
 0.158,
@@ -331,7 +351,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.315,
 0.139,
@@ -351,7 +371,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.337,
 0.215,
@@ -371,7 +391,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.429,
 0.084,
@@ -391,7 +411,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.446,
 0.202,
@@ -411,7 +431,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.325,
 0.197,
@@ -431,7 +451,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.416,
 0.164,
@@ -451,7 +471,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.415,
 0.106,
@@ -471,7 +491,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.275,
 0.162,
@@ -491,7 +511,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.241,
 0.165,
@@ -511,7 +531,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.486,
 0.13,
@@ -531,7 +551,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.497,
 0.129,
@@ -551,7 +571,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.372,
 0.075,
@@ -571,7 +591,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.314,
 0.099,
@@ -591,7 +611,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.371,
 0.104,
@@ -611,7 +631,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.188,
 0.112,
@@ -631,7 +651,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.424,
 0.137,
@@ -651,7 +671,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.518,
 0.094,
@@ -671,7 +691,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -686,7 +706,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.384,
 0.163,
@@ -706,7 +726,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.356,
 0.159,
@@ -726,7 +746,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.231,
 0.139,
@@ -746,7 +766,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.323,
 0.142,
@@ -766,7 +786,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.38,
 0.205,
@@ -786,7 +806,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.409,
 0.185,
@@ -806,7 +826,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0033307.webp"
@@ -821,7 +841,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.569,
 0.077,
@@ -841,7 +861,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.491,
 0.092,
@@ -861,7 +881,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.309,
 0.091,
@@ -881,7 +901,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.404,
 0.193,
@@ -901,7 +921,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.323,
 0.094,
@@ -921,7 +941,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.26,
 0.235,
@@ -941,7 +961,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.234,
 0.099,
@@ -961,7 +981,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.359,
 0.215,
@@ -981,7 +1001,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.152,
 0.101,
@@ -1001,7 +1021,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0033662.webp"
@@ -1016,7 +1036,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.197,
 0.143,
@@ -1036,7 +1056,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.448,
 0.08,
@@ -1056,7 +1076,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.333,
 0.045,
@@ -1076,7 +1096,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.352,
 0.225,
@@ -1096,7 +1116,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.26,
 0.164,
@@ -1116,7 +1136,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.418,
 0.104,
@@ -1136,7 +1156,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.237,
 0.146,
@@ -1156,7 +1176,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.388,
 0.192,
@@ -1176,7 +1196,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "category",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.584,
 0.078,
@@ -1196,7 +1216,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.419,
 0.157,
@@ -1216,7 +1236,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.428,
 0.088,
@@ -1236,7 +1256,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.481,
 0.175,
@@ -1256,7 +1276,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.34,
 0.228,
@@ -1276,7 +1296,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.489,
 0.202,
@@ -1296,7 +1316,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0034365.webp"
@@ -1311,7 +1331,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.587,
 0.21,
@@ -1331,7 +1351,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.305,
 0.192,
@@ -1351,7 +1371,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.324,
 0.118,
@@ -1371,7 +1391,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.411,
 0.103,
@@ -1391,7 +1411,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.397,
 0.153,
@@ -1411,7 +1431,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.382,
 0.207,
@@ -1431,7 +1451,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.356,
 0.148,
@@ -1451,7 +1471,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.216,
 0.158,
@@ -1471,7 +1491,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "category",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.537,
 0.145,
@@ -1491,7 +1511,7 @@
 "m": "cropped and resized",
 "via": "category",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.451,
 0.268,
@@ -1511,7 +1531,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.287,
 0.114,
@@ -1531,7 +1551,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.234,
 0.232,
@@ -1540,6 +1560,26 @@
 ],
 "sv": 2,
 "cut": "cut/00-0034844.webp"
+},
+"00-0034854": {
+"f": "00-0034854.webp",
+"a": "Erik Drost",
+"lic": "CC BY 2.0",
+"lu": "https://creativecommons.org/licenses/by/2.0",
+"src": "https://commons.wikimedia.org/wiki/File:KhaDarel_Hodge_(2021).jpg",
+"ts": "2021-08-18 06:06:40",
+"m": "cropped and resized",
+"via": "wikidata",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": [
+0.397,
+0.107,
+0.237,
+0.256
+],
+"sv": 2,
+"cut": "cut/00-0034854.webp"
 },
 "00-0034855": {
 "f": "00-0034855.webp",
@@ -1551,7 +1591,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.373,
 0.116,
@@ -1571,7 +1611,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.365,
 0.171,
@@ -1591,7 +1631,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.541,
 0.141,
@@ -1611,7 +1651,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.248,
 0.149,
@@ -1631,7 +1671,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.344,
 0.153,
@@ -1651,7 +1691,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.384,
 0.132,
@@ -1671,7 +1711,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -1686,7 +1726,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.333,
 0.175,
@@ -1706,7 +1746,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.381,
 0.148,
@@ -1726,7 +1766,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.333,
 0.206,
@@ -1746,7 +1786,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.173,
 0.174,
@@ -1766,7 +1806,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.361,
 0.08,
@@ -1786,7 +1826,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.347,
 0.12,
@@ -1806,7 +1846,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.379,
 0.059,
@@ -1826,7 +1866,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.154,
 0.097,
@@ -1846,7 +1886,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.333,
 0.108,
@@ -1866,7 +1906,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0035406.webp"
@@ -1881,7 +1921,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.447,
 0.122,
@@ -1901,7 +1941,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.23,
 0.11,
@@ -1921,7 +1961,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.541,
 0.116,
@@ -1941,7 +1981,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -1956,7 +1996,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.549,
 0.116,
@@ -1976,7 +2016,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.18,
 0.252,
@@ -1996,7 +2036,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.31,
 0.109,
@@ -2016,7 +2056,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0035662.webp"
@@ -2031,7 +2071,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.234,
 0.187,
@@ -2051,7 +2091,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.315,
 0.14,
@@ -2071,7 +2111,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.197,
 0.15,
@@ -2091,7 +2131,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.346,
 0.263,
@@ -2111,7 +2151,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.381,
 0.134,
@@ -2131,7 +2171,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.308,
 0.165,
@@ -2151,7 +2191,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.512,
 0.086,
@@ -2171,7 +2211,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.269,
 0.173,
@@ -2191,7 +2231,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.372,
 0.081,
@@ -2211,7 +2251,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.384,
 0.097,
@@ -2231,7 +2271,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.294,
 0.185,
@@ -2251,7 +2291,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.351,
 0.139,
@@ -2271,7 +2311,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.389,
 0.184,
@@ -2291,7 +2331,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.347,
 0.14,
@@ -2311,7 +2351,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.333,
 0.142,
@@ -2331,7 +2371,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.376,
 0.199,
@@ -2351,7 +2391,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.457,
 0.124,
@@ -2371,7 +2411,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -2386,7 +2426,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.42,
 0.11,
@@ -2406,7 +2446,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.211,
 0.196,
@@ -2426,7 +2466,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.568,
 0.187,
@@ -2446,7 +2486,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.412,
 0.064,
@@ -2466,7 +2506,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.275,
 0.254,
@@ -2486,7 +2526,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.227,
 0.182,
@@ -2506,7 +2546,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.455,
 0.074,
@@ -2526,7 +2566,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.502,
 0.062,
@@ -2546,7 +2586,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.481,
 0.09,
@@ -2566,7 +2606,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.385,
 0.128,
@@ -2586,7 +2626,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.27,
 0.195,
@@ -2606,7 +2646,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.254,
 0.142,
@@ -2626,7 +2666,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0036429.webp"
@@ -2641,7 +2681,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.349,
 0.129,
@@ -2661,7 +2701,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0036550.webp"
@@ -2676,7 +2716,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.311,
 0.12,
@@ -2696,7 +2736,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.142,
 0.18,
@@ -2716,7 +2756,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.323,
 0.161,
@@ -2736,7 +2776,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.474,
 0.158,
@@ -2756,7 +2796,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.337,
 0.13,
@@ -2776,7 +2816,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.371,
 0.103,
@@ -2796,7 +2836,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -2811,7 +2851,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0036637.webp"
@@ -2826,7 +2866,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.242,
 0.225,
@@ -2846,7 +2886,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.36,
 0.228,
@@ -2866,7 +2906,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.301,
 0.18,
@@ -2886,7 +2926,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.396,
 0.178,
@@ -2906,7 +2946,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.341,
 0.106,
@@ -2926,7 +2966,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -2941,7 +2981,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.538,
 0.156,
@@ -2961,7 +3001,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.302,
 0.163,
@@ -2981,7 +3021,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.442,
 0.237,
@@ -3001,7 +3041,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.424,
 0.053,
@@ -3021,7 +3061,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.35,
 0.115,
@@ -3041,7 +3081,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.318,
 0.147,
@@ -3061,7 +3101,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.332,
 0.126,
@@ -3081,7 +3121,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.316,
 0.15,
@@ -3101,7 +3141,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.354,
 0.085,
@@ -3121,7 +3161,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.281,
 0.069,
@@ -3141,7 +3181,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.455,
 0.088,
@@ -3161,7 +3201,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.248,
 0.152,
@@ -3181,7 +3221,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.347,
 0.108,
@@ -3221,7 +3261,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0036988.webp"
@@ -3236,7 +3276,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.576,
 0.136,
@@ -3256,7 +3296,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.496,
 0.168,
@@ -3276,7 +3316,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.316,
 0.15,
@@ -3296,7 +3336,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.474,
 0.066,
@@ -3316,10 +3356,25 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0037085.webp"
+},
+"00-0037086": {
+"f": "00-0037086.webp",
+"a": "All-Pro Reels",
+"lic": "CC BY-SA 2.0",
+"lu": "https://creativecommons.org/licenses/by-sa/2.0",
+"src": "https://commons.wikimedia.org/wiki/File:Grant_Calcaterra_(cropped).jpg",
+"ts": "2022-10-01 16:44:20",
+"m": "cropped and resized, CC BY-SA",
+"via": "wikidata",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": null,
+"sv": 2,
+"cut": "cut/00-0037086.webp"
 },
 "00-0037093": {
 "f": "00-0037093.webp",
@@ -3331,7 +3386,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.262,
 0.216,
@@ -3351,7 +3406,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -3366,7 +3421,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.504,
 0.14,
@@ -3386,7 +3441,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.298,
 0.098,
@@ -3406,7 +3461,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -3421,7 +3476,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.295,
 0.162,
@@ -3441,7 +3496,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.379,
 0.111,
@@ -3461,7 +3516,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.162,
 0.103,
@@ -3481,7 +3536,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.506,
 0.175,
@@ -3501,7 +3556,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0037247.webp"
@@ -3516,7 +3571,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.37,
 0.051,
@@ -3536,7 +3591,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0037252.webp"
@@ -3551,7 +3606,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.347,
 0.141,
@@ -3571,7 +3626,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.262,
 0.127,
@@ -3591,7 +3646,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.205,
 0.121,
@@ -3611,7 +3666,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.444,
 0.221,
@@ -3631,7 +3686,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.547,
 0.095,
@@ -3651,7 +3706,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.368,
 0.14,
@@ -3671,7 +3726,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.304,
 0.192,
@@ -3691,7 +3746,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.38,
 0.161,
@@ -3711,7 +3766,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.473,
 0.17,
@@ -3731,7 +3786,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.223,
 0.131,
@@ -3751,7 +3806,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0037614.webp"
@@ -3766,7 +3821,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.507,
 0.081,
@@ -3786,7 +3841,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.358,
 0.155,
@@ -3806,7 +3861,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.468,
 0.079,
@@ -3826,7 +3881,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.276,
 0.224,
@@ -3846,7 +3901,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.263,
 0.163,
@@ -3866,7 +3921,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.316,
 0.18,
@@ -3886,7 +3941,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.379,
 0.103,
@@ -3906,7 +3961,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.408,
 0.129,
@@ -3926,7 +3981,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.081,
 0.062,
@@ -3946,7 +4001,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.251,
 0.263,
@@ -3966,7 +4021,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.404,
 0.16,
@@ -3986,7 +4041,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.289,
 0.078,
@@ -4006,7 +4061,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.26,
 0.297,
@@ -4026,7 +4081,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.231,
 0.203,
@@ -4046,7 +4101,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.652,
 0.076,
@@ -4066,7 +4121,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.341,
 0.168,
@@ -4086,7 +4141,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.214,
 0.2,
@@ -4106,7 +4161,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.378,
 0.386,
@@ -4126,7 +4181,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.295,
 0.177,
@@ -4146,7 +4201,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.356,
 0.136,
@@ -4166,7 +4221,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.307,
 0.164,
@@ -4186,7 +4241,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.276,
 0.206,
@@ -4206,7 +4261,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0038129.webp"
@@ -4221,7 +4276,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.337,
 0.224,
@@ -4241,7 +4296,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.485,
 0.144,
@@ -4250,6 +4305,26 @@
 ],
 "sv": 2,
 "cut": ""
+},
+"00-0038397": {
+"f": "00-0038397.webp",
+"a": "Cramerwiki",
+"lic": "CC0",
+"lu": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+"src": "https://commons.wikimedia.org/wiki/File:EvanHullSteelers.jpg",
+"ts": "2025-07-25 20:07:27",
+"m": "cropped and resized",
+"via": "wikidata",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": [
+0.424,
+0.113,
+0.221,
+0.209
+],
+"sv": 2,
+"cut": "cut/00-0038397.webp"
 },
 "00-0038400": {
 "f": "00-0038400.webp",
@@ -4261,7 +4336,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.405,
 0.099,
@@ -4281,7 +4356,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.332,
 0.099,
@@ -4301,7 +4376,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.566,
 0.071,
@@ -4321,7 +4396,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.297,
 0.328,
@@ -4341,7 +4416,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.273,
 0.181,
@@ -4361,7 +4436,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0038488.webp"
@@ -4376,7 +4451,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.23,
 0.296,
@@ -4396,7 +4471,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.451,
 0.157,
@@ -4416,7 +4491,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.308,
 0.237,
@@ -4436,7 +4511,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.257,
 0.255,
@@ -4456,7 +4531,7 @@
 "m": "cropped and resized",
 "via": "category",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.325,
 0.115,
@@ -4476,7 +4551,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.233,
 0.198,
@@ -4511,7 +4586,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.214,
 0.13,
@@ -4531,7 +4606,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.371,
 0.206,
@@ -4551,7 +4626,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.434,
 0.114,
@@ -4571,7 +4646,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -4586,7 +4661,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.309,
 0.116,
@@ -4606,7 +4681,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.394,
 0.11,
@@ -4626,7 +4701,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.164,
 0.087,
@@ -4646,7 +4721,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.264,
 0.245,
@@ -4666,7 +4741,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.374,
 0.366,
@@ -4686,7 +4761,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.464,
 0.181,
@@ -4706,7 +4781,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.213,
 0.092,
@@ -4726,7 +4801,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.271,
 0.17,
@@ -4746,7 +4821,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.394,
 0.13,
@@ -4766,7 +4841,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -4781,12 +4856,32 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.64,
 0.119,
 0.105,
 0.089
+],
+"sv": 2,
+"cut": ""
+},
+"00-0038705": {
+"f": "00-0038705.webp",
+"a": "Pokepower70",
+"lic": "CC BY 4.0",
+"lu": "https://creativecommons.org/licenses/by/4.0",
+"src": "https://commons.wikimedia.org/wiki/File:Emari_Demercado_in_2026.jpg",
+"ts": "2026-11-10 05:48:12",
+"m": "cropped and resized",
+"via": "wikipedia",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": [
+0.448,
+0.177,
+0.102,
+0.083
 ],
 "sv": 2,
 "cut": ""
@@ -4801,7 +4896,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0038710.webp"
@@ -4816,7 +4911,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.372,
 0.073,
@@ -4836,7 +4931,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.137,
 0.17,
@@ -4856,7 +4951,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.401,
 0.127,
@@ -4876,7 +4971,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.237,
 0.202,
@@ -4896,7 +4991,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.316,
 0.14,
@@ -4916,7 +5011,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.439,
 0.13,
@@ -4925,6 +5020,21 @@
 ],
 "sv": 2,
 "cut": "cut/00-0038933.webp"
+},
+"00-0038938": {
+"f": "00-0038938.webp",
+"a": "All-Pro Reels",
+"lic": "CC BY-SA 4.0",
+"lu": "https://creativecommons.org/licenses/by-sa/4.0",
+"src": "https://commons.wikimedia.org/wiki/File:Jalin_Hyatt.jpg",
+"ts": "2025-10-19 22:57:47",
+"m": "cropped and resized, CC BY-SA",
+"via": "wikipedia",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": null,
+"sv": 2,
+"cut": "cut/00-0038938.webp"
 },
 "00-0038951": {
 "f": "00-0038951.webp",
@@ -4936,7 +5046,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.393,
 0.071,
@@ -4956,7 +5066,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.143,
 0.177,
@@ -4976,7 +5086,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.485,
 0.186,
@@ -4996,7 +5106,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.357,
 0.159,
@@ -5031,7 +5141,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.325,
 0.139,
@@ -5051,7 +5161,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.23,
 0.167,
@@ -5071,7 +5181,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.285,
 0.078,
@@ -5091,7 +5201,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.477,
 0.117,
@@ -5111,7 +5221,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.307,
 0.096,
@@ -5131,7 +5241,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.417,
 0.12,
@@ -5151,7 +5261,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.233,
 0.129,
@@ -5171,7 +5281,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.324,
 0.223,
@@ -5191,7 +5301,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.287,
 0.133,
@@ -5211,7 +5321,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.297,
 0.129,
@@ -5231,7 +5341,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.373,
 0.185,
@@ -5251,7 +5361,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.297,
 0.096,
@@ -5271,7 +5381,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.364,
 0.209,
@@ -5291,7 +5401,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.311,
 0.21,
@@ -5311,7 +5421,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.293,
 0.146,
@@ -5331,7 +5441,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.343,
 0.236,
@@ -5351,7 +5461,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.264,
 0.208,
@@ -5371,7 +5481,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.477,
 0.124,
@@ -5391,7 +5501,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.502,
 0.12,
@@ -5411,7 +5521,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.357,
 0.27,
@@ -5431,7 +5541,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.371,
 0.249,
@@ -5451,7 +5561,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.4,
 0.07,
@@ -5471,7 +5581,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -5486,7 +5596,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.29,
 0.192,
@@ -5506,7 +5616,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.393,
 0.181,
@@ -5526,7 +5636,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.323,
 0.394,
@@ -5546,7 +5656,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.399,
 0.146,
@@ -5566,7 +5676,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -5581,7 +5691,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.403,
 0.131,
@@ -5601,7 +5711,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -5616,7 +5726,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.178,
 0.203,
@@ -5636,7 +5746,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.4,
 0.112,
@@ -5656,7 +5766,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.442,
 0.187,
@@ -5676,7 +5786,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.307,
 0.302,
@@ -5696,7 +5806,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.211,
 0.138,
@@ -5716,7 +5826,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.343,
 0.116,
@@ -5736,7 +5846,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.331,
 0.18,
@@ -5756,7 +5866,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.399,
 0.133,
@@ -5776,7 +5886,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.361,
 0.106,
@@ -5796,7 +5906,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.224,
 0.24,
@@ -5816,7 +5926,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.414,
 0.087,
@@ -5836,7 +5946,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -5851,7 +5961,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.5,
 0.11,
@@ -5871,7 +5981,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.202,
 0.135,
@@ -5891,7 +6001,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.274,
 0.127,
@@ -5911,7 +6021,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -5926,7 +6036,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.263,
 0.221,
@@ -5946,7 +6056,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.313,
 0.121,
@@ -5966,7 +6076,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.341,
 0.085,
@@ -5986,7 +6096,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0039893.webp"
@@ -6001,7 +6111,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.297,
 0.206,
@@ -6021,7 +6131,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.336,
 0.144,
@@ -6041,7 +6151,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.426,
 0.225,
@@ -6061,7 +6171,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.384,
 0.15,
@@ -6081,7 +6191,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.436,
 0.161,
@@ -6101,7 +6211,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.376,
 0.122,
@@ -6121,7 +6231,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.362,
 0.12,
@@ -6141,7 +6251,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.309,
 0.072,
@@ -6161,7 +6271,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.366,
 0.15,
@@ -6181,7 +6291,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.391,
 0.11,
@@ -6201,7 +6311,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.319,
 0.116,
@@ -6221,7 +6331,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.434,
 0.193,
@@ -6241,7 +6351,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.263,
 0.205,
@@ -6261,7 +6371,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.445,
 0.141,
@@ -6281,7 +6391,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.248,
 0.142,
@@ -6301,7 +6411,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.485,
 0.159,
@@ -6321,7 +6431,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.588,
 0.127,
@@ -6341,7 +6451,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.339,
 0.197,
@@ -6361,7 +6471,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.406,
 0.156,
@@ -6381,7 +6491,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.416,
 0.13,
@@ -6401,7 +6511,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -6416,7 +6526,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.418,
 0.129,
@@ -6436,7 +6546,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0040154.webp"
@@ -6451,7 +6561,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0040162.webp"
@@ -6466,7 +6576,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.448,
 0.086,
@@ -6486,7 +6596,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.273,
 0.218,
@@ -6506,7 +6616,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -6521,7 +6631,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.436,
 0.121,
@@ -6541,7 +6651,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.348,
 0.17,
@@ -6561,7 +6671,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.392,
 0.226,
@@ -6581,7 +6691,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0040194.webp"
@@ -6596,7 +6706,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.35,
 0.197,
@@ -6616,7 +6726,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.437,
 0.088,
@@ -6636,7 +6746,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.337,
 0.128,
@@ -6656,7 +6766,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0040208.webp"
@@ -6671,7 +6781,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.471,
 0.141,
@@ -6691,7 +6801,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.357,
 0.397,
@@ -6711,7 +6821,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.435,
 0.176,
@@ -6731,7 +6841,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.229,
 0.092,
@@ -6751,7 +6861,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0040236.webp"
@@ -6766,7 +6876,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -6781,7 +6891,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.346,
 0.186,
@@ -6801,7 +6911,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.444,
 0.147,
@@ -6841,7 +6951,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.591,
 0.151,
@@ -6861,7 +6971,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.273,
 0.135,
@@ -6881,7 +6991,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.406,
 0.136,
@@ -6901,7 +7011,7 @@
 "m": "cropped and resized",
 "via": "search",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.37,
 0.131,
@@ -6921,7 +7031,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.283,
 0.146,
@@ -6941,7 +7051,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -6956,7 +7066,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -6971,7 +7081,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0040644.webp"
@@ -6986,7 +7096,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.291,
 0.13,
@@ -7006,7 +7116,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.26,
 0.115,
@@ -7026,7 +7136,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.303,
 0.191,
@@ -7046,7 +7156,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -7061,7 +7171,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.396,
 0.089,
@@ -7081,7 +7191,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.201,
 0.221,
@@ -7101,7 +7211,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.372,
 0.114,
@@ -7121,7 +7231,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.173,
 0.224,
@@ -7141,7 +7251,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.389,
 0.095,
@@ -7161,7 +7271,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.463,
 0.118,
@@ -7181,7 +7291,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.543,
 0.203,
@@ -7201,7 +7311,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.303,
 0.114,
@@ -7221,7 +7331,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -7236,7 +7346,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.375,
 0.15,
@@ -7256,7 +7366,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.408,
 0.146,
@@ -7276,7 +7386,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.376,
 0.077,
@@ -7296,7 +7406,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.2,
 0.165,
@@ -7316,7 +7426,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.399,
 0.167,
@@ -7336,7 +7446,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.279,
 0.169,
@@ -7356,7 +7466,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.422,
 0.224,
@@ -7376,7 +7486,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.315,
 0.125,
@@ -7396,7 +7506,7 @@
 "m": "cropped and resized",
 "via": "search",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.382,
 0.177,
@@ -7416,7 +7526,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.511,
 0.102,
@@ -7436,7 +7546,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -7451,7 +7561,7 @@
 "m": "cropped and resized",
 "via": "search",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.341,
 0.187,
@@ -7460,6 +7570,26 @@
 ],
 "sv": 2,
 "cut": "cut/00-0040906.webp"
+},
+"00-0040981": {
+"f": "00-0040981.webp",
+"a": "Rick Munroe",
+"lic": "CC BY-SA 4.0",
+"lu": "https://creativecommons.org/licenses/by-sa/4.0",
+"src": "https://commons.wikimedia.org/wiki/File:Joe_Fagnano.jpg",
+"ts": "2025-11-24 05:32:18",
+"m": "cropped and resized, CC BY-SA",
+"via": "wikidata",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": [
+0.502,
+0.125,
+0.165,
+0.139
+],
+"sv": 2,
+"cut": ""
 },
 "00-0041027": {
 "f": "00-0041027.webp",
@@ -7471,7 +7601,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.351,
 0.152,
@@ -7491,7 +7621,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.335,
 0.169,
@@ -7511,7 +7641,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.583,
 0.216,
@@ -7531,7 +7661,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.24,
 0.174,
@@ -7551,7 +7681,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -7566,7 +7696,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.365,
 0.14,
@@ -7586,7 +7716,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.359,
 0.157,
@@ -7606,7 +7736,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.1,
 0.116,
@@ -7626,7 +7756,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.303,
 0.154,
@@ -7646,7 +7776,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.438,
 0.177,
@@ -7666,7 +7796,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.406,
 0.193,
@@ -7686,7 +7816,7 @@
 "m": "cropped and resized",
 "via": "search",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.372,
 0.085,
@@ -7706,7 +7836,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": "cut/00-0041132.webp"
@@ -7721,7 +7851,7 @@
 "m": "cropped and resized",
 "via": "search",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.307,
 0.17,
@@ -7730,6 +7860,26 @@
 ],
 "sv": 2,
 "cut": "cut/00-0041149.webp"
+},
+"00-0041178": {
+"f": "00-0041178.webp",
+"a": "Arlington National Cemetery",
+"lic": "Public domain",
+"lu": "",
+"src": "https://commons.wikimedia.org/wiki/File:Robert_Henry_Jr.jpg",
+"ts": "2026-08-03 17:28:28",
+"m": "cropped and resized",
+"via": "wikidata",
+"cv": 6,
+"seen": "2026-11-10",
+"fb": [
+0.279,
+0.159,
+0.47,
+0.457
+],
+"sv": 2,
+"cut": "cut/00-0041178.webp"
 },
 "00-0041251": {
 "f": "00-0041251.webp",
@@ -7741,7 +7891,7 @@
 "m": "cropped and resized, CC BY-SA",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.464,
 0.106,
@@ -7761,7 +7911,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.301,
 0.193,
@@ -7781,7 +7931,7 @@
 "m": "cropped and resized",
 "via": "search",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.361,
 0.145,
@@ -7801,7 +7951,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.349,
 0.107,
@@ -7821,7 +7971,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.395,
 0.171,
@@ -7841,7 +7991,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.287,
 0.194,
@@ -7861,7 +8011,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.324,
 0.082,
@@ -7881,7 +8031,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": null,
 "sv": 2,
 "cut": ""
@@ -7896,7 +8046,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.508,
 0.083,
@@ -7916,7 +8066,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.34,
 0.13,
@@ -7936,7 +8086,7 @@
 "m": "cropped and resized",
 "via": "wikidata",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.369,
 0.162,
@@ -7956,7 +8106,7 @@
 "m": "cropped and resized",
 "via": "wikipedia",
 "cv": 6,
-"seen": "2026-11-04",
+"seen": "2026-11-10",
 "fb": [
 0.503,
 0.181,
