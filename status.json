@@ -1,10 +1,10 @@
 {
- "date": "2026-11-12",
+ "date": "2026-11-13",
  "failing_since": null,
- "last_good": "2026-11-12",
+ "last_good": "2026-11-13",
  "ok": true,
  "season": {
-  "asof": "2026-11-12",
+  "asof": "2026-11-13",
   "phase": "season",
   "schedule": true,
   "season": 2026
